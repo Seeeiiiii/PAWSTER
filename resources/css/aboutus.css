@@ -1,0 +1,17 @@
+.first-container {
+    padding: 8rem;
+    border-radius: 1.7rem;
+    background-color: #7B4F2E;
+}
+
+.our-team {
+    background-color: #C4956A;
+    min-height: 300px;
+    border-radius: 1.7rem;
+}
+
+.dashboard {
+    background-color: #C4956A;
+    min-height: 300px;
+    border-radius: 1.7rem;
+}
