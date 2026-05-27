@@ -53,6 +53,12 @@
     border-radius: 1.7rem;
 }
 
+.our-team h4, .dashboard h4 {
+    font-size: 1.8rem;
+    font-family: 'Convergence';
+    color: #F5E6D3;
+}
+
 .team1-box, .team2-box {
     display: flex;
     flex-direction: column;
@@ -96,20 +102,62 @@
     min-height: 150px;
 }
 
+.dashboard-box p,h3 {
+    color: #1D1D1D;
+    font-family: 'Convergence';
+}
+
+.dashboard-box i {
+    color: #56AA43;
+    font-family: 'Convergence';
+}
+
+.dashboard-box span i{
+    color: #E5D462;
+    font-family: 'Convergence';
+}
 .our-commitment {
-    background-color: #C4956A;
     min-height: 300px;
     border-radius: 1.7rem;
 }
 
 .our-photo {
     background-color: #C4956A;
-    min-height: 300px;
     border-radius: 1.7rem;
 }
 
 .our-photo-box {
     background-color: #F5E6D3;
+    display: flex;             
+    align-items: center;        
+    justify-content: center;
     border-radius: 1.2rem;
-    min-height: 220px;
+}
+
+.commitment-box  {
+    border-radius: 1.5rem;
+    min-height:100px;
+}
+
+.our-commitment h4 {
+    font-family: 'Convergence';
+    font-size: 2.7rem;
+}
+
+.commitment-box p {
+    font-family: 'Convergence';
+    font-size: 1rem;
+}
+
+.dog-box {
+    display: flex;             
+    align-items: center;        
+    justify-content: center;
+}
+
+.dog-box img {
+    height: 2.7rem;
+    display: flex;             
+    align-items: center;        
+    justify-content: center;
 }

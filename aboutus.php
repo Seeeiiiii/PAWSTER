@@ -47,7 +47,7 @@
         <div class="row g-4">
             <div class="col-md-7">
                 <div class="our-team px-5 py-4">
-                    <h5 class="text-white mb-3">Our Team</h5>
+                    <h4 class="fw-bold mb-3">Our Team : </h4>
                     <div class="row">
                         <div class="col-3">
                             <div class="team1-box h-100">
@@ -119,15 +119,21 @@
             </div>
 
             <div class="col-md-5">
-                <div class="dashboard p-3">
-                    <h5 class="text-white mb-3">Dashboard</h5>
+                <div class="dashboard px-5 py-4">
+                    <h4 class="fw-bold mb-3">Dashboard</h4>
                     <div class="row g-3">
                         <div class="col-6">
                             <div class="dashboard-box p-3 text-center">
+                                <p>Total adoption for this month</p>
+                                <h3 class="fw-bold">380</h3>
+                                <i class="bi bi-arrow-up">18% vs last month</i>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="dashboard-box p-3 text-center">
+                                <p>Customer trust ratings</p>
+                                <h3 class="fw-bold">4.9 <span><i class="bi bi-star"></i></span></h3>
+                                <i class="bi bi-arrow-up">20% vs last month</i>
                             </div>
                         </div>
                     </div>
@@ -139,21 +145,50 @@
     <div class="container my-4 third-container">
         <div class="row g-4">
             <div class="col-md-7">
-                <div class="our-commitment">
+                <div class="our-commitment px-5 py-4">
+                    <h4 class="fw-bold">Our Commitment</h4>
+                    <h5 class="mb-3">Pawster commits to being more than a platform. We promise to :</h5>
+                    <div class="row gx-5">
+                        <div class="col-5 commitment-box text-allign-center">
+                            <p>Provide honest, complete health and legal records for every adoptable pet.</p>
+                        </div>
+                        <div class="col-5 offset-2 commitment-box text-allign-center">
+                            <p>Verify every seller so you shop with confidence.</p>
+                        </div>
+                    </div>
+                    <div class="row g-5">
+                        <div class="col-5 commitment-box text-allign-center">
+                            <p>Make meet-and-greet scheduling simple and stress-free.</p>
+                        </div>
+                        <div class="col-5 offset-2 commitment-box text-allign-center">
+                            <p>And never stop working toward a world where no pet is left behind.</p>
+                        </div>
+                    </div>
+                    <h5 class="mb-3">Whether you're adopting, fostering, or buying supplies we've got your back. And their paws.</h5>
                 </div>
             </div>
 
             <div class="col-md-5">
-                <div class="our-photo p-3">
+                <div class="our-photo p-4">
                     <div class="row g-3">
                         <div class="col-12">
-                            <div class="our-photo-box p-3 text-center">
+                            <div class="our-photo-box p-3 mb-3 text-center">
+                                <img src="resources/images/kasama.png" alt="cat" class="img-fluid">
+                            </div>
+                        </div>
+                        <div class="row mt-3 p-3">
+                            <div class="col-5">
+                                <div class="dog-box"> <img src="resources/images/Vector.png" alt="cat" class="img-fluid"></div>
+                            </div>
+                            <div class="col-5 offset-2">
+                                <div class="dog-box"> <img src="resources/images/Food Bowl.png" alt="cat" class="img-fluid"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
 
