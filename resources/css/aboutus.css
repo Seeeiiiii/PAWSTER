@@ -1,13 +1,87 @@
 .first-container {
-    padding: 8rem;
     border-radius: 1.7rem;
     background-color: #7B4F2E;
+}
+
+.first-container h4 {
+    font-size: 2rem;
+    font-family: 'Convergence';
+    color: #F5E6D3;
+}
+
+.aboutus-box {
+    font-family: 'Convergence'; 
+    background-color: transparent;
+    border-radius: 1.2rem;
+    min-height: 100px;
+}
+
+.aboutus-box p{
+    color: #F5E6D3;
+    border-radius: 1.2rem;
+}
+
+.stats1-box {
+    border-radius: 1.2rem;
+    min-height: 100px;
+}
+
+.first-container-contents h4 {
+    font-size: 2rem;
+    color: #F5E6D3;
+    font-family: 'Convergence';
+}
+
+.first-container-contents p {
+    color: #F5E6D3;
+    font-family: 'Convergence';
+}
+
+.stats2-box {
+    border-radius: 1.2rem;
+    min-height: 100px;
+}
+
+.stats3-box {
+    border-radius: 1.2rem;
+    min-height: 100px;
 }
 
 .our-team {
     background-color: #C4956A;
     min-height: 300px;
     border-radius: 1.7rem;
+}
+
+.team1-box, .team2-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 350px;
+}
+
+.sei-box, .ivan-box, .chaste-box, .denzel-box {
+    border-radius: 1.2rem;
+    min-height: 150px;
+}
+
+.card {
+    background-color: transparent;
+    border : none;
+    color : #F5E6D3;
+    font-family: 'Convergence';
+}
+
+.card p {
+    font-size : 0.9rem;
+}
+
+.cat-box {
+    display: flex;             
+    align-items: center;        
+    justify-content: center;
+    border-radius: 1.2rem;
+    min-height: 350px;
 }
 
 .dashboard {
@@ -20,4 +94,22 @@
     background-color: #F5E6D3;
     border-radius: 1.2rem;
     min-height: 150px;
+}
+
+.our-commitment {
+    background-color: #C4956A;
+    min-height: 300px;
+    border-radius: 1.7rem;
+}
+
+.our-photo {
+    background-color: #C4956A;
+    min-height: 300px;
+    border-radius: 1.7rem;
+}
+
+.our-photo-box {
+    background-color: #F5E6D3;
+    border-radius: 1.2rem;
+    min-height: 220px;
 }

@@ -49,7 +49,7 @@
     ?>
 
     <div class="position fixed w-100 ">
-        <nav class="navbar navbar-expand-lg mx-2 my-2">
+        <nav class="navbar navbar-expand-lg mx-2">
             <div class="container-fluid ms-2">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
                     <img src="resources/images/Logo.png" alt="Logo" style="height: 4rem;" class="ms-4 me-2">
