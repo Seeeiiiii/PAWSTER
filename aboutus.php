@@ -119,21 +119,19 @@
             </div>
 
             <div class="col-md-5">
-                <div class="dashboard px-5 py-4">
-                    <h4 class="fw-bold mb-3">Dashboard</h4>
+                <div class="our-photo p-4">
                     <div class="row g-3">
-                        <div class="col-6">
-                            <div class="dashboard-box p-3 text-center">
-                                <p>Total adoption for this month</p>
-                                <h3 class="fw-bold">380</h3>
-                                <i class="bi bi-arrow-up">18% vs last month</i>
+                        <div class="col-12">
+                            <div class="our-photo-box p-3 mb-3 text-center">
+                                <img src="resources/images/kasama.png" alt="cat" class="img-fluid">
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="dashboard-box p-3 text-center">
-                                <p>Customer trust ratings</p>
-                                <h3 class="fw-bold">4.9 <span><i class="bi bi-star"></i></span></h3>
-                                <i class="bi bi-arrow-up">20% vs last month</i>
+                        <div class="row mt-3 p-1">
+                            <div class="col-5">
+                                <div class="dog-box"> <img src="resources/images/Vector.png" alt="cat" class="img-fluid"></div>
+                            </div>
+                            <div class="col-5 offset-2">
+                                <div class="dog-box"> <img src="resources/images/Food Bowl.png" alt="cat" class="img-fluid"></div>
                             </div>
                         </div>
                     </div>
@@ -169,19 +167,21 @@
             </div>
 
             <div class="col-md-5">
-                <div class="our-photo p-4">
+                <div class="dashboard px-5 py-4">
+                    <h4 class="fw-bold mb-3">Dashboard</h4>
                     <div class="row g-3">
-                        <div class="col-12">
-                            <div class="our-photo-box p-3 mb-3 text-center">
-                                <img src="resources/images/kasama.png" alt="cat" class="img-fluid">
+                        <div class="col-6">
+                            <div class="dashboard-box p-3 text-center">
+                                <p>Total adoption for this month</p>
+                                <h3 class="fw-bold">380</h3>
+                                <i class="bi bi-arrow-up">18% vs last month</i>
                             </div>
                         </div>
-                        <div class="row mt-3 p-3">
-                            <div class="col-5">
-                                <div class="dog-box"> <img src="resources/images/Vector.png" alt="cat" class="img-fluid"></div>
-                            </div>
-                            <div class="col-5 offset-2">
-                                <div class="dog-box"> <img src="resources/images/Food Bowl.png" alt="cat" class="img-fluid"></div>
+                        <div class="col-6">
+                            <div class="dashboard-box p-3 text-center">
+                                <p>Customer trust ratings</p>
+                                <h3 class="fw-bold">4.9 <span><i class="bi bi-star"></i></span></h3>
+                                <i class="bi bi-arrow-up">20% vs last month</i>
                             </div>
                         </div>
                     </div>
