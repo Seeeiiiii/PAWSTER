@@ -23,7 +23,18 @@
 
 
             <div class="col-md-5">
-                <div class="dashboard">
+                <div class="dashboard p-3">
+                    <h5 class="text-white mb-3">Dashboard</h5>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="dashboard-box p-3 text-center">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="dashboard-box p-3 text-center">
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
