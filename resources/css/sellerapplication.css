@@ -1,0 +1,28 @@
+.market-logo i {
+    font-size: 4rem;
+    background-color: #AB8154;
+    color: #F5E6D3;
+    padding : 1.3rem;
+    border-radius: 20%;
+}
+
+.market-box h3, .market-box h6 {
+    font-family: 'Convergence';
+    color: #AB8154;
+}
+
+.fillout {
+    font-family: 'Convergence';
+    background-color: #FAF0E8;
+}
+
+.form-select, .form-control {
+    background-color: #FAF0E8;
+    border: 1px solid #1d1d1d;
+}
+
+.section-divider {
+    border: none;
+    border-top: 1.5px solid #7B4F2E;
+    opacity: 1;
+}

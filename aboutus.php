@@ -5,6 +5,7 @@
 <head>
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
     <link rel="stylesheet" href="resources/css/aboutus.css">
+    <link rel="stylesheet" href="resources/css/global.css">
 </head>
 
 <body>
