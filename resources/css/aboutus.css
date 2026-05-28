@@ -10,13 +10,13 @@
 }
 
 .aboutus-box {
-    font-family: 'Convergence'; 
+    font-family: 'Convergence';
     background-color: transparent;
     border-radius: 1.2rem;
     min-height: 100px;
 }
 
-.aboutus-box p{
+.aboutus-box p {
     color: #F5E6D3;
     border-radius: 1.2rem;
 }
@@ -53,38 +53,43 @@
     border-radius: 1.7rem;
 }
 
-.our-team h4, .dashboard h4 {
+.our-team h4,
+.dashboard h4 {
     font-size: 1.8rem;
     font-family: 'Convergence';
     color: #F5E6D3;
 }
 
-.team1-box, .team2-box {
+.team1-box,
+.team2-box {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: 350px;
 }
 
-.sei-box, .ivan-box, .chaste-box, .denzel-box {
+.sei-box,
+.ivan-box,
+.chaste-box,
+.denzel-box {
     border-radius: 1.2rem;
     min-height: 150px;
 }
 
 .card {
     background-color: transparent;
-    border : none;
-    color : #F5E6D3;
+    border: none;
+    color: #F5E6D3;
     font-family: 'Convergence';
 }
 
 .card p {
-    font-size : 0.9rem;
+    font-size: 0.9rem;
 }
 
 .cat-box {
-    display: flex;             
-    align-items: center;        
+    display: flex;
+    align-items: center;
     justify-content: center;
     border-radius: 1.2rem;
     min-height: 350px;
@@ -102,7 +107,8 @@
     min-height: 150px;
 }
 
-.dashboard-box p,h3 {
+.dashboard-box p,
+h3 {
     color: #1D1D1D;
     font-family: 'Convergence';
 }
@@ -112,10 +118,11 @@
     font-family: 'Convergence';
 }
 
-.dashboard-box span i{
+.dashboard-box span i {
     color: #E5D462;
     font-family: 'Convergence';
 }
+
 .our-commitment {
     min-height: 300px;
     border-radius: 1.7rem;
@@ -128,15 +135,15 @@
 
 .our-photo-box {
     background-color: #F5E6D3;
-    display: flex;             
-    align-items: center;        
+    display: flex;
+    align-items: center;
     justify-content: center;
     border-radius: 1.2rem;
 }
 
-.commitment-box  {
+.commitment-box {
     border-radius: 1.5rem;
-    min-height:100px;
+    min-height: 100px;
 }
 
 .our-commitment h4 {
@@ -150,14 +157,15 @@
 }
 
 .dog-box {
-    display: flex;             
-    align-items: center;        
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
 .dog-box img {
     height: 2.7rem;
-    display: flex;             
-    align-items: center;        
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
+
