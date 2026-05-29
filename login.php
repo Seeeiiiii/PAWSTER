@@ -139,7 +139,7 @@
                             </div>
 
                             <p class="text-center small pt-2 text-muted">
-                                Don't have an account? <a href="#" class="sign-up fw-semibold">Signup</a>
+                                Don't have an account? <a href="signup.php" class="sign-up fw-semibold">Signup</a>
                             </p>
                         </div>
                     </form>

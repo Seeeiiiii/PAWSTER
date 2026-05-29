@@ -56,6 +56,8 @@ body {
     padding: 0.25rem; 
     border-radius: 1rem; 
     max-width: 18.75rem; 
+    cursor: default;
+    pointer-events: none;
 }
 
 .btn-toggle {
@@ -63,6 +65,7 @@ body {
     border-radius: 1rem; 
     padding: 0.375rem 1rem; 
     color: #AB8154;
+    cursor: none;
 }
 
 .btn-toggle.active {
@@ -154,8 +157,8 @@ body {
     display: inline-block;
 }
 
-/* Active Highlighted Oval */
+
 .oval.active {
-    background-color: #f5eae0; /* Light cream highlight fill */
+    background-color: #f5eae0; 
     border-color: #f5eae0;
 }
