@@ -1,0 +1,64 @@
+body {
+    font-family: 'Convergence', sans-serif;
+}
+
+.first-container{
+    background-color: #F5E6D3;
+}
+
+.custom-card {
+    max-width: 59.375rem;
+    width: 100%;
+    border-radius: 1rem;
+}
+
+.left-panel {
+    background-color: #AB8154;
+}
+
+.left-panel h2 {
+    color: #F5E6D3;
+}
+
+.left-panel h3 {
+    color: #F5E6D3;
+}
+
+.second-container {
+    background-color: #9B6240;
+    border-radius: 1rem;
+}
+
+.second-container p{
+    color: #F5E6D3;
+}
+
+.right-panel{
+    background-color: #FAF0E8;
+}
+
+.btn-login {
+    background-color: #AB8154;
+    color: #F5E6D3;
+    border-radius: 1rem; 
+}
+
+.toggle-container {
+    margin-top: -.4rem;
+    background-color: #F0E2D1;
+    padding: 0.25rem; 
+    border-radius: 1rem; 
+    max-width: 18.75rem; 
+}
+
+.btn-toggle {
+    border: none;
+    border-radius: 1rem; 
+    padding: 0.375rem 1rem; 
+    color: #AB8154;
+}
+
+.btn-toggle.active {
+    background-color: #A67C52;
+    color: white;
+}
