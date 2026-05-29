@@ -5,7 +5,6 @@
 <head>
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
     <link rel="stylesheet" href="resources/css/aboutus.css">
-    <link rel="stylesheet" href="resources/css/global.css">
 </head>
 
 <body>
@@ -144,7 +143,7 @@
     <div class="container my-4 third-container">
         <div class="row g-4">
             <div class="col-md-7">
-                <div class="our-commitment px-5 ">
+                <div class="our-commitment px-5 py-4">
                     <h4 class="fw-bold">Our Commitment</h4>
                     <h5 class="mb-3">Pawster commits to being more than a platform. We promise to :</h5>
                     <div class="row gx-5">
@@ -192,9 +191,6 @@
     </div>
     </div>
 
-    <footer>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/footer.php'); ?>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>

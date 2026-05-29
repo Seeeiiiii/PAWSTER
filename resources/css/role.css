@@ -17,7 +17,6 @@
     right: 0;
     height: 1px;
     background-color: #D6C5B3;
-    z-index: 0;
 }
 
 .role-card {
@@ -26,7 +25,7 @@
     border-radius: 1.5rem !important; 
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: 25rem;
+    min-height: 25rem;
 }
 
 .role-card:hover {
