@@ -5,6 +5,7 @@
 <head>
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
     <link rel="stylesheet" href="resources/css/role.css">
+    <link rel="stylesheet" href="resources/css/global.css">
 </head>
 
 <body>
@@ -64,7 +65,7 @@
         </div>
     </div>
 
-     <footer>
+    <footer>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/footer.php'); ?>
     </footer>
 </body>

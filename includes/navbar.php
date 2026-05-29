@@ -6,7 +6,7 @@
 
     .navbar-brand span {
         font-size: 1.7rem;
-        font-family: 'Convergence', sans-serif;
+        font-family: 'Caprasimo';
         color: #AB8154;
     }
 
@@ -44,7 +44,7 @@
         "product" => "/ecommerce/products.php",
         "login" => "/ecommerce/login.php",
         "userprof" => "/ecommerce/userprof.php"
-    )
+    );
 
     ?>
 
