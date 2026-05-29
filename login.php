@@ -31,8 +31,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <h3 class="text-start py-5 px-2">Adopt, shop & care - All in one place. </h3>
+                    
+                    <h3 class="text-start px-2">Adopt, shop & care - All in one place. </h3>
                 </div>
 
                 <div class="col-md-6 right-panel p-5">
@@ -43,11 +43,60 @@
 
                     <h2 class="medium text-start">Welcome back!</h2>
                     <h3 class="small text-start mb-4">Login to your Pawster account</h3>
+
+                    <form>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email address:</label>
+                            <input type="email" class="form-control custom-input" placeholder="example@gmail.com">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password:</label>
+                            <div class="position-relative">
+                                <input type="password" class="form-control custom-input" placeholder=".........">
+                                <span class="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer">
+                                    <img src="resources/images/eye icon.png" alt="Show Password" style="height: 1.5rem;">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between small mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="keepSigned">
+                                <label class="form-check-label text-muted" for="keepSigned">Keep me signed in</label>
+                            </div>
+                            <a href="#" class="forgot-link">Forgot your password?</a>
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <button type="submit" class="btn btn-login w-50 mb-4 py-2">Login</button>
+                        </div>
+
+                        <div class="divider-line text-center position-relative my-3">
+                            <span class="px-2 text-muted small position-relative z-1">or continue with</span>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center py-2">
+                                    <img src="resources/images/google.png" alt="Google" style="height: 1.5rem;">
+                                    Google
+                                </button>
+                            </div>
+
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center py-2">
+                                    <img src="resources/images/facebook.png" alt="Facebook" style="height: 1.5rem;" class="me-2">
+                                    Facebook
+                                </button>
+                            </div>
+
+                            <p class="text-center small pt-2 text-muted">
+                                Don't have an account? <a href="#" class="sign-up fw-semibold">Signup</a>
+                            </p>
+                        </div>
+                    </form>
                 </div>
-
-                <form>
-                    
-                </form>
-
             </div>
     </body>

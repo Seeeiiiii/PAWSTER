@@ -10,6 +10,7 @@ body {
     max-width: 59.375rem;
     width: 100%;
     border-radius: 1rem;
+    max-height: 40rem;
 }
 
 .left-panel {
@@ -40,7 +41,12 @@ body {
 .btn-login {
     background-color: #AB8154;
     color: #F5E6D3;
-    border-radius: 1rem; 
+    border-radius: 1rem;
+}
+
+.btn-login:hover {
+    background-color: #AB8154; 
+    color: #F5E6D3;
 }
 
 .toggle-container {
@@ -60,5 +66,39 @@ body {
 
 .btn-toggle.active {
     background-color: #A67C52;
-    color: white;
+    color: #F5E6D3;
+}
+
+.custom-input {
+    background-color: #F9F3EB !important; 
+    border: 1px solid #D6C5B3;
+    border-radius: 12px;
+    padding: 10px 15px;
+}
+.custom-input:focus {
+    border-color: #A67C52;
+    box-shadow: 0 0 0 0.25rem rgba(166, 124, 82, 0.25);
+}
+
+.forgot-link{
+    color: #AB8154;
+}
+
+.divider-line span {
+    background-color: #FAF0E8;
+}
+
+.divider-line::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #D6C5B3;
+    z-index: 0;
+}
+
+.sign-up{
+    color: #AB8154;
 }
