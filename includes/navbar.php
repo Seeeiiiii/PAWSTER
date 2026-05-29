@@ -6,7 +6,7 @@
 
     .navbar-brand span {
         font-size: 1.7rem;
-        font-family: 'Caprasimo';
+        font-family: 'Convergence', sans-serif;
         color: #AB8154;
     }
 
@@ -32,7 +32,7 @@
     }
 
     .dropdown-item {
-        font-family: 'Caprasimo', cursive !important;
+        font-family: 'Convergence', sans-serif !important;
     }
 </style>
 

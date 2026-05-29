@@ -1,0 +1,64 @@
+.header {
+    color: #AB8154;
+    font-size: 2.5rem;
+}
+
+.divider-line span {
+    background-color: #F5E6D3;
+    color: #AB8154 !important;
+    font-size: 1.75rem;
+}
+
+.divider-line::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #D6C5B3;
+    z-index: 0;
+}
+
+.role-card {
+    background-color: #FAF0E8; 
+    border: 1px solid #D6C5B3 !important; 
+    border-radius: 1.5rem !important; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 25rem;
+}
+
+.role-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(171, 129, 84, 0.1);
+}
+
+.card-title {
+    color: #AB8154; 
+    font-size: 2rem;
+}
+
+.card-text {
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: #AB8154 !important;
+    padding-top: 1rem;
+}
+
+
+.btn-card-action {
+    background-color: #AB8154;
+    color: #F5E6D3;
+    border-radius: 1rem;
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    border: none;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-card-action:hover, 
+.btn-card-action:focus {
+    background-color: #9B6240; 
+    color: #FAF0E8;
+}
