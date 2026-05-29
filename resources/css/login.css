@@ -120,11 +120,10 @@ body {
     color: #AB8154;
 }
 
-/* Carousel Animation Setup */
 .custom-carousel {
     position: relative;
     width: 100%;
-    height: 12rem; /* Matches your image height to prevent layout shifts */
+    height: 12rem; 
 }
 
 .custom-slide {
@@ -137,18 +136,18 @@ body {
     transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
 }
 
-/* Show the active slide */
+
 .custom-slide.active {
     opacity: 1;
     visibility: visible;
-    position: relative; /* Keeps container height dynamic if needed */
+    position: relative;
 }
 
-/* Custom Pagination Ovals */
+
 .oval {
     width: 32px;
     height: 12px;
-    border: 1.5px solid #5c3d2e; /* Match your layout's darker text/accent color */
+    border: 1.5px solid #AB8154; 
     border-radius: 6px;
     background-color: transparent;
     transition: background-color 0.3s ease, border-color 0.3s ease;
