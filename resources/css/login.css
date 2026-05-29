@@ -11,6 +11,7 @@ body {
     width: 100%;
     border-radius: 1rem;
     max-height: 40rem;
+
 }
 
 .left-panel {
@@ -65,7 +66,7 @@ body {
 }
 
 .btn-toggle.active {
-    background-color: #A67C52;
+    background-color: #AB8154;
     color: #F5E6D3;
 }
 
@@ -99,6 +100,63 @@ body {
     z-index: 0;
 }
 
+.divider-line2 span {
+    background-color: #AB8154;
+    color: #FFFFFF !important;
+}
+
+.divider-line2::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: #D6C5B3;
+    z-index: 0;
+}
+
 .sign-up{
     color: #AB8154;
+}
+
+/* Carousel Animation Setup */
+.custom-carousel {
+    position: relative;
+    width: 100%;
+    height: 12rem; /* Matches your image height to prevent layout shifts */
+}
+
+.custom-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
+}
+
+/* Show the active slide */
+.custom-slide.active {
+    opacity: 1;
+    visibility: visible;
+    position: relative; /* Keeps container height dynamic if needed */
+}
+
+/* Custom Pagination Ovals */
+.oval {
+    width: 32px;
+    height: 12px;
+    border: 1.5px solid #5c3d2e; /* Match your layout's darker text/accent color */
+    border-radius: 6px;
+    background-color: transparent;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    display: inline-block;
+}
+
+/* Active Highlighted Oval */
+.oval.active {
+    background-color: #f5eae0; /* Light cream highlight fill */
+    border-color: #f5eae0;
 }
