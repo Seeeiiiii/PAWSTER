@@ -26,3 +26,44 @@
     border-top: 1.5px solid #7B4F2E;
     opacity: 1;
 }
+
+.business-permit, .gov-id {
+    background-color: #FAF0E8;
+    border: 1px dashed #1d1d1d;
+    height: 200px;
+    font-family: 'Convergence';
+}
+
+.business-permit i, .gov-id i {
+    font-size: 2.5rem;
+    color : #1d1d1d;
+}
+
+.form-check-input {
+    width: 1.3em;        
+    height: 1.3em;       
+    border-color: #8B6343;   
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: #8B6343; 
+    border-color: #8B6343;   
+}
+
+.btn-cancel, .btn-submit {
+    background-color: #E0CAB3;
+    color: #1d1d1d;
+    border: none;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-cancel:hover, .btn-submit:hover {
+    background-color : #C4956A;
+}
+
+.btn-cancel:active, .btn-submit:active {
+    background-color: #C4956A;
+    color: #fff;
+    transform: scale(0.97);  
+}
