@@ -1,0 +1,33 @@
+.main-page img {
+    height: 500px;
+    object-fit: cover;
+}
+
+.h1 {
+    top: 45%;
+    margin-left: 1%;
+    font-family: 'Convergence';
+    color: #5C3D1E;
+}
+
+.h4 {
+    top: 65%;
+    margin-left: 1%;
+    font-family: 'Convergence';
+    color: #5C3D1E;
+}
+
+.descript {
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.card i {
+    color: #5C3D1E;
+    font-size: 3rem;
+}
+
+.second-container {
+    min-height : 400px;
+}
