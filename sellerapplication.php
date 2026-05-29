@@ -82,7 +82,7 @@
         <div class="d-flex flex-column align-items-center p-4">
             <div class="form-check d-flex align-items-center">
                 <input class="form-check-input me-2" type="checkbox" id="confirm1">
-                <label class="form-check-label" for="confirm1">
+                <label class="form-check-label mt-4" for="confirm1">
                     I confirm that all information provided is accurate and complete, and I agree to Pawster's seller
                     terms and conditions.
                 </label>
@@ -90,7 +90,7 @@
 
             <div class="form-check d-flex align-items-center">
                 <input class="form-check-input me-2" type="checkbox" id="confirm2">
-                <label class="form-check-label" for="confirm2">
+                <label class="form-check-label mt-2" for="confirm2">
                     I understand that my application may be rejected if documents are incomplete or invalid.
                 </label>
             </div>
