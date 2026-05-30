@@ -29,5 +29,56 @@
 }
 
 .second-container {
-    min-height : 400px;
+    background-color: #FFFF;
+}
+
+.dog-image, .dog-text {
+    height: 680px;
+}
+
+.dog-image img {
+    height: 100%; 
+    width: 100%; 
+    object-fit: cover;
+}
+
+.p4 {
+    text-align: justify; 
+}
+
+.text-group {
+    margin-top: 7rem; 
+    font-family: 'Convergence';  
+}
+
+.h3 {
+    color : #f2bc85;
+}
+
+.third-container {
+    background-color: #FDFAF5;
+}
+
+.card-third {
+    width : 400px;
+    height: 350px;
+}
+
+.card-third img {
+    width : 360px;
+    height: 250px;
+    object-fit: cover;
+}
+
+.p5 {
+    font-family : 'Convergence';
+}
+
+.card-third {
+    background-color: #FDFAF5;
+}
+
+h3 {
+    font-family: 'Convergence';
+    color: #5C3D1E;
 }

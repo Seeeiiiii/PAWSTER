@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pawster</title>
 
-<link rel="icon" href="/PAWSTER/resources/images/logo white.png">
+<link rel="icon"  href="/PAWSTER/resources/images/logo white.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
