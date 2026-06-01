@@ -1,0 +1,469 @@
+/* PAWSTER - Pet Shop E-commerce Website */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --cream: #f5f1ed;
+    --beige: #e8dfd7;
+    --tan: #d4c4b8;
+    --light-brown: #c9b5a0;
+    --brown: #7d5c4a;
+    --dark-brown: #5a3d2a;
+    --white: #ffffff;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
+    --transition: all 0.3s ease;
+}
+
+html {
+    background-color: var(--cream);
+}
+
+body {
+    font-family: 'Fredoka', sans-serif;
+    background-color: var(--cream);
+    color: var(--dark-brown);
+    line-height: 1.6;
+}
+
+/* NAVBAR */
+.navbar {
+    background-color: var(--cream);
+    border-bottom: 1px solid var(--beige);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 16px 24px;
+}
+
+.navbar-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    background-color: var(--tan);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--dark-brown);
+    transition: var(--transition);
+}
+
+.logo:hover {
+    background-color: var(--light-brown);
+    transform: scale(1.05);
+}
+
+.brand {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--brown);
+    letter-spacing: 1px;
+}
+
+.navbar-center {
+    flex: 1;
+    max-width: 500px;
+}
+
+.search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--tan);
+    border-radius: 32px;
+    padding: 12px 20px;
+    border: none;
+}
+
+.search-bar i {
+    color: var(--brown);
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--dark-brown);
+}
+
+.search-bar input::placeholder {
+    color: var(--brown);
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.user-profile:hover {
+    background-color: var(--beige);
+    border-radius: 8px;
+}
+
+.user-profile i {
+    color: var(--brown);
+}
+
+/* CATEGORY NAVIGATION */
+.category-nav {
+    background-color: var(--beige);
+    border-bottom: 1px solid var(--tan);
+    padding: 12px 24px;
+    overflow-x: auto;
+}
+
+.category-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 8px 16px;
+    background-color: var(--tan);
+    color: var(--dark-brown);
+    border: 1px solid var(--light-brown);
+    border-radius: 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.category-btn:hover,
+.category-btn.active {
+    background-color: var(--brown);
+    color: var(--white);
+    border-color: var(--brown);
+}
+
+/* MAIN CONTAINER */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    background-color: var(--white);
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.search-section {
+    margin-bottom: 32px;
+}
+
+.search-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--brown);
+    margin-bottom: 16px;
+}
+
+.search-bar-main {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--beige);
+    border-radius: 32px;
+    padding: 12px 20px;
+    border: none;
+}
+
+.search-bar-main i {
+    color: var(--brown);
+    margin-right: 12px;
+    font-size: 16px;
+}
+
+.search-bar-main input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--dark-brown);
+}
+
+.search-bar-main input::placeholder {
+    color: var(--brown);
+}
+
+/* PRODUCTS GRID */
+.products-section {
+    margin-bottom: 32px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+
+.product-card {
+    background-color: var(--beige);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 450px;
+}
+
+.product-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-8px);
+}
+
+.product-image {
+    width: 100%;
+    height: 220px;
+    background-color: var(--tan);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background-color: #e74c3c;
+    color: var(--white);
+    padding: 6px 14px;
+    border-radius: 24px;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 10;
+}
+
+.badge-sale {
+    background-color: #e74c3c;
+}
+
+.badge-new {
+    background-color: #3498db;
+}
+
+.product-info {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.product-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark-brown);
+    margin-bottom: 6px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.product-brand {
+    font-size: 13px;
+    color: var(--brown);
+    margin-bottom: 8px;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.rating i {
+    color: #d4a574;
+    font-size: 13px;
+}
+
+.rating-count {
+    font-size: 12px;
+    color: var(--brown);
+    margin-left: 4px;
+}
+
+.price-section {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.price {
+    color: var(--dark-brown);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.old-price {
+    text-decoration: line-through;
+    color: var(--light-brown);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.add-to-cart-btn {
+    background-color: var(--brown);
+    color: var(--white);
+    border: none;
+    padding: 11px 16px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.add-to-cart-btn:hover {
+    background-color: var(--dark-brown);
+    transform: scale(1.02);
+}
+
+/* PAGINATION */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--beige);
+}
+
+.pagination-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--tan);
+    background-color: var(--white);
+    color: var(--dark-brown);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pagination-btn:hover,
+.pagination-btn.active {
+    background-color: var(--brown);
+    color: var(--white);
+    border-color: var(--brown);
+}
+
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 992px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .navbar-container {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .navbar-center {
+        max-width: 100%;
+        order: 3;
+    }
+
+    .main-content {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .product-card {
+        min-height: auto;
+    }
+
+    .brand {
+        font-size: 18px;
+    }
+
+    .search-title {
+        font-size: 16px;
+    }
+}
