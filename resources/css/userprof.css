@@ -1,0 +1,274 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Convergence', sans-serif;
+  background-color: #F5E6D3;
+  min-height: 100vh;
+}
+
+/* ── PAGE: full width, no max-width cap ── */
+.profile-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #FAF0E8;
+}
+
+/* ── COVER ── */
+.cover-bar {
+  width: 100%;
+  height: 90px;
+  background-color: #AB8154;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 0.8rem 1.5rem;
+}
+
+.cover-menu {
+  background: none; border: none;
+  color: #FAF0E8; font-size: 1.3rem;
+  cursor: pointer; opacity: 0.75;
+}
+.cover-menu:hover { opacity: 1; }
+
+/* ── PROFILE HEADER ── */
+.prof-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.1rem;
+  padding: 0 2rem 1.1rem;
+  margin-top: -2.4rem;
+  flex-wrap: wrap;
+}
+
+.prof-avatar {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background-color: #E8A0A0;
+  color: #FAF0E8;
+  font-family: 'Caprasimo', cursive;
+  font-size: 1.4rem; font-weight: 400;
+  display: flex; align-items: center; justify-content: center;
+  border: 3px solid #FAF0E8;
+  flex-shrink: 0;
+  position: relative; z-index: 1;
+}
+
+.prof-details {
+  flex: 1; min-width: 0;
+  padding-top: 2.5rem;
+}
+
+.prof-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.prof-name {
+  font-family: 'Caprasimo', cursive;
+  font-size: 1.2rem; color: #3D1F08; font-weight: 400;
+  margin-bottom: 0.1rem;
+}
+
+.prof-meta {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.8rem; color: #9B7050; margin: 0;
+}
+
+.btn-edit-prof {
+  background-color: #FAF0E8;
+  border: 1.5px solid #D6C0A5;
+  color: #5C3D1E;
+  border-radius: 0.55rem;
+  padding: 0.32rem 0.85rem;
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: background 0.13s;
+}
+.btn-edit-prof:hover { background-color: #EAD9C6; }
+
+.prof-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.ptag {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.69rem; font-weight: 700;
+  padding: 0.22rem 0.65rem; border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+}
+.ptag-adopter { background-color: #F5D0D0; color: #7A2535; }
+.ptag-buyer   { background-color: #EAD9C6; color: #5C3D1E; }
+.ptag-member  { background-color: #EAD9C6; color: #5C3D1E; }
+
+/* ── TABS ── */
+.tabs-row {
+  display: flex;
+  border-bottom: 2px solid #E3D0BC;
+  padding: 0 2rem;
+  overflow-x: auto;
+}
+
+.tab-btn {
+  background: none; border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  padding: 0.65rem 1.2rem;
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.87rem; font-weight: 600;
+  color: #9B7050; cursor: pointer; white-space: nowrap;
+  transition: color 0.13s, border-color 0.13s;
+}
+.tab-btn:hover { color: #5C3D1E; }
+.tab-btn.active { color: #3D1F08; border-bottom-color: #AB8154; }
+
+/* ── TAB AREA ── */
+.tab-area {
+  padding: 1.25rem 2rem 2.5rem;
+}
+
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* ── NOTIFICATION BANNER ── */
+.notif-banner {
+  background-color: #FAEAEA;
+  border: 1px solid #EFC8C8;
+  border-radius: 0.7rem;
+  padding: 0.8rem 1.1rem;
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.82rem; color: #7A2535;
+  margin-bottom: 1rem; line-height: 1.55;
+}
+
+/* ── TWO-COL ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ── INFO CARD ── */
+.info-card {
+  background-color: #F0E2D0;
+  border-radius: 0.9rem;
+  padding: 1rem 1.15rem;
+}
+
+.mt-row { margin-top: 0; }
+
+.icard-head {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 0.8rem;
+}
+
+.icard-title {
+  font-family: 'Caprasimo', cursive;
+  font-size: 0.92rem; color: #3D1F08; font-weight: 400;
+}
+
+.view-all-lnk {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.74rem; font-weight: 700; color: #AB8154; text-decoration: none;
+}
+.view-all-lnk:hover { color: #7B4F2E; }
+
+/* ── ORDER ROWS ── */
+.order-row, .appt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: #FAF0E8;
+  border-radius: 0.65rem;
+  padding: 0.52rem 0.7rem;
+  margin-bottom: 0.45rem;
+}
+.order-row:last-child, .appt-row:last-child { margin-bottom: 0; }
+
+.thumb-sq {
+  width: 38px; height: 38px;
+  border-radius: 0.45rem;
+  background-color: #D9C7B0;
+  flex-shrink: 0;
+}
+
+.row-info { flex: 1; min-width: 0; }
+
+.row-name {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.78rem; font-weight: 700;
+  color: #3D1F08; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.row-meta {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.68rem; color: #9B7050; margin: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.order-right {
+  flex-shrink: 0; text-align: right;
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 0.18rem;
+}
+
+.order-price {
+  font-family: 'Caprasimo', cursive;
+  font-size: 0.88rem; color: #3D1F08; margin: 0; font-weight: 400;
+}
+
+/* ── PILL BADGES ── */
+.pill {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.65rem; font-weight: 700;
+  padding: 0.18rem 0.58rem; border-radius: 999px;
+  white-space: nowrap; flex-shrink: 0;
+}
+.pill-green  { background-color: #D0ECDA; color: #185C30; }
+.pill-blue   { background-color: #D0E8F3; color: #0C4A6E; }
+.pill-orange { background-color: #FDE8CC; color: #7A4A10; }
+.pill-tan    { background-color: #EAD9C6; color: #5C3D1E; }
+
+/* ── ACCOUNT DETAILS ── */
+.acct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #E3D0BC;
+  gap: 0.5rem;
+}
+.acct-last { border-bottom: none; }
+
+.acct-key {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.82rem; color: #C4956A; font-weight: 600; flex-shrink: 0;
+}
+.acct-key i { font-size: 0.9rem; }
+
+.acct-val {
+  font-family: 'Convergence', sans-serif;
+  font-size: 0.82rem; color: #3D1F08; text-align: right;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 720px) {
+  .two-col { grid-template-columns: 1fr; }
+  .prof-header { padding: 0 1rem 1rem; }
+  .tabs-row { padding: 0 1rem; }
+  .tab-area { padding: 1rem 1rem 2rem; }
+  .tab-btn { padding: 0.55rem 0.85rem; font-size: 0.8rem; }
+}
+
+@media (max-width: 420px) {
+  .prof-avatar { width: 60px; height: 60px; font-size: 1.1rem; }
+  .prof-name { font-size: 1rem; }
+  .prof-top-row { flex-direction: column; }
+  .btn-edit-prof { align-self: flex-start; }
+}

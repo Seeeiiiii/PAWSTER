@@ -1,0 +1,182 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Convergence', sans-serif;
+  background-color: #F5E6D3;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ── */
+.adopt-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 1.5rem;
+  background-color: #F5E6D3;
+  border-bottom: 1px solid #D9C9B4;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-brand { display: flex; align-items: center; gap: 0.45rem; flex-shrink: 0; }
+.nav-logo  { height: 2.6rem; object-fit: contain; }
+.nav-brand-txt { font-family: 'Caprasimo', cursive; font-size: 1.2rem; color: #AB8154; }
+
+.nav-search-wrap {
+  display: flex; align-items: center; gap: 0.5rem;
+  background-color: #FAF0E8; border: 1.5px solid #D6C0A5;
+  border-radius: 999px; padding: 0.42rem 1rem; flex: 1; max-width: 420px;
+}
+.nav-search-wrap i { color: #AB8154; font-size: 0.9rem; }
+.nav-search-wrap input {
+  border: none; background: none; outline: none;
+  font-family: 'Convergence', sans-serif; font-size: 0.85rem;
+  color: #3D1F08; width: 100%;
+}
+.nav-search-wrap input::placeholder { color: #C4A882; }
+
+.nav-user-pill {
+  display: flex; align-items: center; gap: 0.3rem;
+  background-color: #FAF0E8; border: 1.5px solid #D6C0A5;
+  border-radius: 2rem; padding: 0.32rem 0.85rem;
+  font-size: 0.85rem; color: #7B5432; cursor: pointer; flex-shrink: 0;
+}
+.nav-user-pill .bi-person-circle { font-size: 1.15rem; }
+
+/* ── SPECIES BAR ── */
+.species-bar {
+  display: flex; gap: 1.75rem; flex-wrap: wrap;
+  padding: 0.65rem 1.5rem;
+  background-color: #F5E6D3;
+  border-bottom: 1px solid #D9C9B4;
+}
+
+.sp-lbl {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-family: 'Convergence', sans-serif; font-size: 0.85rem;
+  color: #9B7050; cursor: pointer; font-weight: 600; user-select: none;
+}
+.sp-dot {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: 2px solid #C4A882; display: inline-block;
+  transition: background 0.13s, border-color 0.13s; flex-shrink: 0;
+}
+.sp-lbl.active { color: #3D1F08; }
+.sp-lbl.active .sp-dot { background-color: #AB8154; border-color: #AB8154; }
+
+/* ── ADOPT BODY ── */
+.adopt-body {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 108px);
+  overflow: hidden;
+}
+
+/* ── PET GRID ── */
+.pet-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+  padding: 0.9rem 0.9rem 0.9rem 1.5rem;
+  overflow-y: auto;
+  align-content: start;
+}
+
+/* ── PET CARD ── */
+.pet-card {
+  background-color: #FAF0E8;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.13s, box-shadow 0.13s;
+}
+.pet-card:hover { box-shadow: 0 3px 14px rgba(100,60,20,.15); }
+.pet-card.selected { border-color: #AB8154; }
+
+.pc-img { height: 120px; position: relative; }
+
+.avail-tag {
+  position: absolute; top: 0.45rem; left: 0.45rem;
+  background-color: #D0ECDA; color: #185C30;
+  font-family: 'Convergence', sans-serif; font-size: 0.63rem;
+  font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px;
+}
+
+.pc-body { padding: 0.55rem 0.7rem 0.7rem; }
+.pc-name { font-family: 'Caprasimo', cursive; font-size: 0.92rem; color: #3D1F08; margin-bottom: 0.08rem; font-weight: 400; }
+.pc-breed { font-family: 'Convergence', sans-serif; font-size: 0.72rem; color: #9B7050; margin-bottom: 0.4rem; }
+.htags { display: flex; flex-wrap: wrap; gap: 0.28rem; }
+.htag {
+  font-family: 'Convergence', sans-serif; font-size: 0.62rem; font-weight: 700;
+  background-color: #EAD9C6; color: #6B4020;
+  padding: 0.14rem 0.48rem; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: 0.02em;
+}
+
+/* ── DETAIL PANEL ── */
+.detail-panel {
+  width: 272px;
+  flex-shrink: 0;
+  background-color: #FAF0E8;
+  border-left: 1px solid #D9C9B4;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+}
+
+.dp-img { width: 100%; height: 128px; border-radius: 0.7rem; flex-shrink: 0; }
+.dp-name { font-family: 'Caprasimo', cursive; font-size: 1.1rem; color: #3D1F08; font-weight: 400; margin: 0; }
+.dp-sub  { font-family: 'Convergence', sans-serif; font-size: 0.78rem; color: #9B7050; margin: 0; }
+
+.dp-table { width: 100%; border-collapse: collapse; font-family: 'Convergence', sans-serif; font-size: 0.78rem; }
+.dp-table tr { border-bottom: 1px solid #EAD9C6; }
+.dp-table tr:last-child { border-bottom: none; }
+.dp-k { color: #9B7050; padding: 0.32rem 0; font-weight: 600; width: 52%; }
+.dp-v { color: #3D1F08; text-align: right; padding: 0.32rem 0; }
+
+.dp-docs-title { font-family: 'Convergence', sans-serif; font-size: 0.71rem; font-weight: 700; color: #5C3D1E; text-transform: uppercase; letter-spacing: 0.04em; margin: 0; }
+
+.dp-docs { background-color: #F0E2D0; border-radius: 0.6rem; padding: 0.6rem 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.doc-row { display: flex; align-items: center; gap: 0.45rem; font-family: 'Convergence', sans-serif; font-size: 0.76rem; color: #3D1F08; }
+.doc-yes { color: #2D8A4E; font-size: 0.88rem; }
+.doc-no  { color: #C4A882; font-size: 0.88rem; }
+
+.btn-apply {
+  background-color: #AB8154; color: #FAF0E8; border: none;
+  border-radius: 0.7rem; padding: 0.65rem 1rem;
+  font-family: 'Convergence', sans-serif; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; width: 100%; transition: background 0.13s;
+}
+.btn-apply:hover { background-color: #9B6240; }
+
+.btn-wish {
+  background: transparent; color: #AB8154; border: 1.5px solid #D6C0A5;
+  border-radius: 0.7rem; padding: 0.55rem 1rem;
+  font-family: 'Convergence', sans-serif; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; width: 100%; transition: background 0.13s;
+}
+.btn-wish:hover { background-color: #EAD9C6; color: #5C3D1E; }
+
+.mob-modal-content { background-color: #FAF0E8; border: none; border-radius: 1rem; }
+.mob-modal-title { font-family: 'Caprasimo', cursive; color: #3D1F08; font-weight: 400; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .adopt-body { height: auto; overflow: visible; flex-direction: column; }
+  .detail-panel { display: none; }
+  .pet-grid { grid-template-columns: repeat(2, 1fr); padding: 0.75rem; }
+}
+@media (max-width: 520px) {
+  .pet-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .nav-brand-txt { display: none; }
+  .species-bar { gap: 0.75rem; font-size: 0.78rem; }
+}
