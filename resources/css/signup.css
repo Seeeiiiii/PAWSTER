@@ -15,7 +15,7 @@ body {
 
 .left-panel {
     background-color: #AB8154;
-    max-height: 53rem;
+    max-height: 55rem;
 }
 
 .left-panel h2 {
@@ -37,7 +37,7 @@ body {
 
 .right-panel {
     background-color: #FAF0E8;
-    max-height: 53rem;
+    max-height: 55rem;
 }
 
 .btn-login {
@@ -161,8 +161,19 @@ body {
     display: inline-block;
 }
 
-
 .oval.active {
     background-color: #f5eae0;
     border-color: #f5eae0;
+}
+
+.password-strength-bar {
+    height: 5px;
+    border-radius: 4px;
+    transition: width 0.3s, background-color 0.3s;
+    width: 0%;
+}
+
+.strength-label {
+    font-size: 0.78rem;
+    font-weight: 600;
 }

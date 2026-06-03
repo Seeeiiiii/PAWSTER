@@ -36,22 +36,26 @@
     }
 </style>
 
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$navbar = array(
+    "home"     => "/PAWSTER/index.php",
+    "login"    => "/PAWSTER/login.php",
+    "userprof" => "/PAWSTER/userprof.php"
+);
+
+$first_name = $_SESSION['auth_user']['first_name'] ?? 'Guest';
+$is_logged_in = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
+?>
+
 <header>
-    <?php
-
-    $navbar = array(
-        "home" => "/ecommerce/index.php",
-        "product" => "/ecommerce/products.php",
-        "login" => "/ecommerce/login.php",
-        "userprof" => "/ecommerce/userprof.php"
-    );
-
-    ?>
-
-    <div class="position fixed w-100 ">
+    <div class="position-fixed w-100" style="z-index: 1000;">
         <nav class="navbar navbar-expand-lg mx-2">
             <div class="container-fluid ms-2">
-                <a class="navbar-brand d-flex align-items-center fw-bold" href="#">
+                <a class="navbar-brand d-flex align-items-center fw-bold" href="<?= $navbar['home'] ?>">
                     <img src="resources/images/Logo.png" alt="Logo" style="height: 4rem;" class="ms-4 me-2">
                     <span class="fw-bold mb-1 mt-2">PAWSTER</span>
                 </a>
@@ -66,13 +70,24 @@
                     <ul class="navbar-nav ms-auto me-5">
                         <li class="nav-item">
                             <div class="dropdown">
-                                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <i class="bi bi-person-circle"><span> | User <span></i>
+                                <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="bi bi-person-circle">
+                                        <span> | <?= htmlspecialchars($first_name) ?></span>
+                                    </i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="<?php echo $navbar["userprof"] ?>">User Profile</a>
-                                    <a class="dropdown-item" href="#">Logout</a>
-                                    <a class="dropdown-item" href="<?php echo $navbar["login"] ?>">Login</a>
+
+                                    <?php if ($is_logged_in): ?>
+                                        <a class="dropdown-item" href="<?= $navbar['userprof'] ?>">User Profile</a>
+                                        <form method="POST" action="/PAWSTER/authentication/auth_login.php" class="d-inline">
+                                            <input type="hidden" name="logout_btn" value="1">
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    <?php else: ?>
+                                        <a class="dropdown-item" href="<?= $navbar['login'] ?>">Login</a>
+                                    <?php endif; ?>
+
                                 </div>
                             </div>
                         </li>
