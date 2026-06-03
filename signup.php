@@ -106,6 +106,18 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-semibold">Contact number:</label>
+                            <div class="input-group">
+                                <select class="form-select custom-input" style="max-width: 110px;">
+                                    <option value="+63">+63 (PH)</option>
+                                    <option value="+1">+1 (US)</option>
+                                    <option value="+44">+44 (UK)</option>
+                                </select>
+                                <input type="tel" class="form-control custom-input" placeholder="917-000-0000">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label fw-semibold">Password:</label>
                             <div class="position-relative">
                                 <input type="password" class="form-control custom-input" placeholder=".........">
@@ -124,9 +136,11 @@
                                 </span>
                             </div>
                         </div>
-
+                        
                         <div class="d-flex justify-content-center py-1">
-                            <button type="submit" class="btn btn-login w-50 mb-4 py-2">Sign Up</button>
+                            <a href="role.php" class="btn btn-login w-50 mb-4 py-2 text-decoration-none">
+                                Sign Up
+                            </a>
                         </div>
 
                         <div class="divider-line text-center position-relative my-3">

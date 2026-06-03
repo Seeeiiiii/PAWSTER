@@ -115,8 +115,10 @@
                             <a href="#" class="forgot-link">Forgot your password?</a>
                         </div>
 
-                        <div class="d-flex justify-content-center">
-                            <button type="submit" class="btn btn-login w-50 mb-4 py-2">Login</button>
+                        <div class="d-flex justify-content-center py-1">
+                            <a href="role.php" class="btn btn-login w-50 mb-4 py-2 text-decoration-none">
+                                Login
+                            </a>
                         </div>
 
                         <div class="divider-line text-center position-relative my-3">
