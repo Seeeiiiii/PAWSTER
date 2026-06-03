@@ -60,3 +60,8 @@
     background-color: #9B6240; 
     color: #FAF0E8;
 }
+
+.btn-card-action a {
+    color: inherit;
+    text-decoration: none;
+}

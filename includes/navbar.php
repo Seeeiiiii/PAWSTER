@@ -42,17 +42,21 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 $navbar = array(
-    "home"     => "/PAWSTER/index.php",
-    "login"    => "/PAWSTER/login.php",
-    "userprof" => "/PAWSTER/userprof.php"
+    "home"       => "/PAWSTER/index.php",
+    "login"      => "/PAWSTER/login.php",
+    "userprof"   => "/PAWSTER/userprof.php",
+    "sellerform" => "/PAWSTER/sellerapplication.php",
+    "sellerprof" => "/PAWSTER/sellerprofile.php"
 );
+
+$is_seller = isset($_SESSION['is_seller_applicant']) && $_SESSION['is_seller_applicant'] === true;
 
 $first_name = $_SESSION['auth_user']['first_name'] ?? 'Guest';
 $is_logged_in = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
 ?>
 
 <header>
-    <div class="position-fixed w-100" style="z-index: 1000;">
+        <div class=" w-100" style="z-index: 1000;">
         <nav class="navbar navbar-expand-lg mx-2">
             <div class="container-fluid ms-2">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="<?= $navbar['home'] ?>">
@@ -80,6 +84,10 @@ $is_logged_in = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] 
 
                                     <?php if ($is_logged_in): ?>
                                         <a class="dropdown-item" href="<?= $navbar['userprof'] ?>">User Profile</a>
+                                        <a class="dropdown-item" href="<?= $navbar['sellerform'] ?>">Become a seller!</a>
+                                        <?php if ($is_seller): ?>
+                                            <a class="dropdown-item" href="<?= $navbar['sellerprof'] ?>">Seller Profile</a>
+                                        <?php endif; ?>
                                         <form method="POST" action="/PAWSTER/authentication/auth_login.php" class="d-inline">
                                             <input type="hidden" name="logout_btn" value="1">
                                             <button type="submit" class="dropdown-item">Logout</button>

@@ -22,12 +22,12 @@
     <?php
 
     $navbar = array(
-        "home" => "/ecommerce/index.php",
-        "adopt" => "/ecommerce/products.php",
-        "shop" => "/ecommerce/login.php",
-        "groom" => "/ecommerce/groom.php",
-        "login" => "/ecommerce/login.php",
-        "userprof" => "/ecommerce/userprof.php"
+        "home" => "/PAWSTER/index.php",
+        "adopt" => "/PAWSTER/adoption.php",
+        "shop" => "/PAWSTER/shop.php",
+        "groom" => "/PAWSTER/grooming.php",
+        "signin" => "/PAWSTER/login.php",
+        "userprof" => "/PAWSTER/userprof.php"
     );
 
     ?>
@@ -61,7 +61,7 @@
                             <a class="nav-link" href="<?php echo $navbar['groom']; ?>">Groom</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?php echo $navbar['login']; ?>">Sign In</a>
+                            <a class="nav-link" href="<?php echo $navbar['signin']; ?>">Sign In</a>
                         </li>
             </div>
         </nav>

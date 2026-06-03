@@ -33,10 +33,12 @@ class LoginController
     {
         $_SESSION['authenticated'] = true;
         $_SESSION['auth_user'] = [
-            'userid'     => $data['userid'],  // FIX: was $data['id'], correct column is 'userid'
+            'userid'     => $data['userid'], 
             'first_name' => $data['first_name'],
             'last_name'  => $data['last_name'],
             'email'      => $data['email']
         ];
+
+        setcookie('user_login', session_id(), time() + (86400 * 30), '/', '', false, true);
     }
 }

@@ -46,7 +46,7 @@
                         <h3 class="card-title fw-semibold mb-3">Sell pet accessories</h3>
                         <p class="card-text text-muted px-2">Set up your seller account and list pet products for thousands of pet owners to discover.</p>
                     </div>
-                    <button class="btn btn-card-action mt-4 w-75">Become a seller</button>
+                    <button class="btn btn-card-action mt-4 w-75"><a href="/PAWSTER/sellerapplication.php">Become a seller</a></button>
                 </div>
             </div>
 

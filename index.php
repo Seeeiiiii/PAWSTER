@@ -10,7 +10,16 @@
 
 <body>
     <header>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/indexnavbar.php'); ?>
+        <?php
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
+            include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php');
+        } else {
+            include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/indexnavbar.php');
+        }
+        ?>
     </header>
 
     <div class="container-fluid main-page p-0 position-relative">
@@ -77,18 +86,21 @@
                 <img src="resources/images/card1.jpg" class="card-img-top" alt="...">
                 <div class="card-body">
                     <h3 class="card-text p-3">Adoption</h3>
+                    <a href="/PAWSTER/role.php" class="btn option btn-lg">Click for more details...</a>
                 </div>
-            </div>
+            </div >
             <div class="card-third shadow rounded-3 p-3">
-                <img src="resources/images/card2.jpg" class="card-img-top" >
+                <img src="resources/images/card2.jpg" class="card-img-top">
                 <div class="card-body">
                     <h3 class="card-text p-3">Vet services</h3>
+                    <a href="/PAWSTER/role.php" class="btn option btn-lg">Click for more details...</a>
                 </div>
             </div>
             <div class="card-third shadow rounded-3 p-3">
                 <img src="resources/images/card3.jpg" class="card-img-top">
                 <div class="card-body">
                     <h3 class="card-text p-3">Pet Supplies</h3>
+                    <a href="/PAWSTER/role.php" class="btn option btn-lg">Click for more details...</a>
                 </div>
             </div>
         </div>

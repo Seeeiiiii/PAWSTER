@@ -61,7 +61,7 @@
 
 .card-third {
     width : 400px;
-    height: 350px;
+    height: 410px;
 }
 
 .card-third img {
@@ -81,4 +81,14 @@
 h3 {
     font-family: 'Convergence';
     color: #5C3D1E;
+}
+
+.option {
+    background-color: #AB8154;
+    font-family: 'Convergence';
+    color: #F5E6D3;
+}
+
+.option:hover{
+    background-color: #E0CAB3;
 }
