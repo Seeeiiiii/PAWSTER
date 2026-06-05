@@ -1,0 +1,696 @@
+/* =============================================================
+   cart.css — Pawster Cart & Checkout Styles
+   Color palette:
+     --cream      : #F5EFE6  (page bg)
+     --brown      : #B68A5A  (primary)
+     --dark-brown : #8B5E34  (dark accent / header)
+     --beige-card : #E8D9C8  (card bg)
+     --white      : #FFFFFF
+============================================================= */
+
+/* ── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #F5EFE6;
+    color: #4A3728;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Visually hidden but accessible */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+/* ── Site Header ──────────────────────────────────────────── */
+.site-header {
+    background-color: #8B5E34;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.18);
+}
+
+.header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #F5EFE6;
+}
+
+.logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.15);
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+}
+
+.logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem;
+    letter-spacing: .12em;
+    color: #F5EFE6;
+}
+
+/* User dropdown (CSS-only using :focus-within) */
+.user-menu {
+    position: relative;
+}
+
+.user-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #F5EFE6;
+    background: rgba(255,255,255,.14);
+    border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 50px;
+    padding: 7px 14px 7px 10px;
+    font-size: .875rem;
+    font-weight: 600;
+    transition: background .2s;
+}
+
+.user-toggle:hover,
+.user-toggle:focus {
+    background: rgba(255,255,255,.22);
+    outline: none;
+}
+
+.user-icon {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,.2);
+    border-radius: 50%;
+    padding: 3px;
+}
+
+.chevron {
+    display: flex;
+    align-items: center;
+    opacity: .8;
+    transition: transform .2s;
+}
+
+.user-menu:focus-within .chevron {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background: #fff;
+    border-radius: 16px;
+    min-width: 170px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.14);
+    overflow: hidden;
+    padding: 8px 0;
+}
+
+.user-menu:focus-within .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 10px 20px;
+    font-size: .875rem;
+    font-weight: 600;
+    color: #4A3728;
+    transition: background .15s;
+}
+
+.dropdown-menu li a:hover {
+    background: #F5EFE6;
+    color: #8B5E34;
+}
+
+.dropdown-menu .divider {
+    height: 1px;
+    background: #E8D9C8;
+    margin: 6px 0;
+}
+
+/* ── Page Wrapper ─────────────────────────────────────────── */
+.page-wrapper {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 28px 24px 48px;
+    flex: 1;
+}
+
+/* Back link */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .82rem;
+    font-weight: 700;
+    color: #8B5E34;
+    margin-bottom: 16px;
+    transition: opacity .2s;
+}
+
+.back-link:hover {
+    opacity: .7;
+}
+
+/* Page title */
+.page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.9rem;
+    color: #4A3728;
+    margin-bottom: 4px;
+}
+
+.page-subtitle {
+    font-size: .88rem;
+    color: #7A6252;
+    margin-bottom: 24px;
+}
+
+/* ── Card Base ────────────────────────────────────────────── */
+.card {
+    background: #E8D9C8;
+    border-radius: 22px;
+    padding: 28px;
+    box-shadow: 0 3px 18px rgba(0,0,0,.07);
+}
+
+.card-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.15rem;
+    color: #4A3728;
+    margin-bottom: 4px;
+}
+
+.card-subheading {
+    font-size: .82rem;
+    color: #7A6252;
+    margin-bottom: 18px;
+}
+
+/* ── Checkout Grid ────────────────────────────────────────── */
+.checkout-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 22px;
+    margin-bottom: 22px;
+    align-items: start;
+}
+
+/* ── Cart Items ───────────────────────────────────────────── */
+.cart-card {
+    /* left col */
+}
+
+.cart-list {
+    margin-top: 18px;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 0 4px;
+}
+
+.cart-divider {
+    height: 1px;
+    background: #D4C0A8;
+    margin: 14px 0;
+}
+
+/* Thumb */
+.item-thumb {
+    width: 62px;
+    height: 62px;
+    background: #B68A5A;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Info */
+.item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #4A3728;
+    line-height: 1.3;
+    margin-bottom: 2px;
+}
+
+.item-base-price {
+    font-size: .8rem;
+    color: #7A6252;
+    margin-bottom: 8px;
+}
+
+/* Quantity control */
+.qty-form {
+    display: inline-block;
+}
+
+.qty-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #F5EFE6;
+    border-radius: 50px;
+    padding: 4px 8px;
+}
+
+.qty-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #B68A5A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
+    flex-shrink: 0;
+}
+
+.qty-btn:hover {
+    background: #8B5E34;
+}
+
+.qty-value {
+    font-size: .9rem;
+    font-weight: 700;
+    color: #4A3728;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Right side of cart item */
+.item-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.remove-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #F5EFE6;
+    color: #B68A5A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s, color .2s;
+}
+
+.remove-btn:hover {
+    background: #B68A5A;
+    color: #fff;
+}
+
+.item-line-price {
+    font-size: .9rem;
+    font-weight: 800;
+    color: #4A3728;
+}
+
+/* Promo code */
+.promo-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.promo-input {
+    flex: 1;
+    background: #F5EFE6;
+    border: 1.5px solid #D4C0A8;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: .875rem;
+    color: #4A3728;
+    outline: none;
+    transition: border-color .2s;
+}
+
+.promo-input:focus {
+    border-color: #B68A5A;
+}
+
+.promo-input::placeholder {
+    color: #A89080;
+}
+
+.promo-btn {
+    background: #B68A5A;
+    color: #fff;
+    border-radius: 12px;
+    padding: 10px 22px;
+    font-size: .875rem;
+    font-weight: 700;
+    transition: background .2s;
+}
+
+.promo-btn:hover {
+    background: #8B5E34;
+}
+
+/* ── Payment Card ─────────────────────────────────────────── */
+.payment-card {
+    /* right col */
+}
+
+/* Accepted cards badges */
+.accepted-cards {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.card-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .04em;
+}
+
+.card-badge.visa {
+    background: #1A1F71;
+    color: #fff;
+}
+
+.card-badge.mastercard {
+    background: #EB001B;
+    color: #fff;
+}
+
+.card-badge.amex {
+    background: #2E77BC;
+    color: #fff;
+}
+
+.card-badge.jcb {
+    background: #003087;
+    color: #fff;
+}
+
+/* Field group label */
+.field-group-label {
+    font-size: .8rem;
+    font-weight: 700;
+    color: #7A6252;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+/* Payment form */
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.field-group {
+    width: 100%;
+}
+
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.input-icon-wrap {
+    position: relative;
+}
+
+.form-input {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid #E0CFB8;
+    border-radius: 12px;
+    padding: 11px 40px 11px 14px;
+    font-family: inherit;
+    font-size: .875rem;
+    color: #4A3728;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.form-input:focus {
+    border-color: #B68A5A;
+    box-shadow: 0 0 0 3px rgba(182,138,90,.15);
+}
+
+.form-input::placeholder {
+    color: #B0947A;
+}
+
+/* For row inputs without icon */
+.field-row .field-group:first-child .form-input {
+    padding-right: 14px;
+}
+
+.input-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #B0947A;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+}
+
+/* Security notice */
+.security-notice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .78rem;
+    color: #7A6252;
+    margin-top: 2px;
+}
+
+/* ── Order Summary ────────────────────────────────────────── */
+.summary-card {
+    margin-top: 0;
+}
+
+.summary-heading {
+    margin-bottom: 20px;
+}
+
+.summary-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    flex-wrap: wrap;
+}
+
+.summary-lines {
+    flex: 1;
+    min-width: 220px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: .9rem;
+    color: #6A5242;
+    padding: 6px 0;
+    border-bottom: 1px solid #D4C0A8;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+}
+
+.summary-total {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #4A3728;
+    margin-top: 4px;
+    padding-top: 10px;
+}
+
+.summary-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 220px;
+}
+
+.pawpoints-notice {
+    font-size: .8rem;
+    color: #7A6252;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Pay button */
+.pay-btn {
+    width: 100%;
+    background: #8B5E34;
+    color: #F5EFE6;
+    border-radius: 16px;
+    padding: 15px 32px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: .02em;
+    text-align: center;
+    transition: background .2s, transform .15s, box-shadow .2s;
+    box-shadow: 0 4px 16px rgba(139,94,52,.3);
+}
+
+.pay-btn:hover {
+    background: #6D4826;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(139,94,52,.38);
+}
+
+.pay-btn:active {
+    transform: translateY(0);
+}
+
+.ssl-notice {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .76rem;
+    color: #7A6252;
+    font-weight: 600;
+}
+
+/* ── Site Footer ──────────────────────────────────────────── */
+.site-footer {
+    background: #8B5E34;
+    text-align: center;
+    padding: 16px 24px;
+    font-size: .78rem;
+    color: rgba(245,239,230,.7);
+    margin-top: auto;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 860px) {
+    .checkout-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .summary-cta {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 540px) {
+    .page-wrapper {
+        padding: 20px 16px 36px;
+    }
+
+    .card {
+        padding: 20px 16px;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .header-inner {
+        padding: 0 14px;
+    }
+
+    .field-row {
+        grid-template-columns: 1fr;
+    }
+
+    .item-thumb {
+        width: 50px;
+        height: 50px;
+    }
+}
+
+/* ── Focus visible accessibility ──────────────────────────── */
+:focus-visible {
+    outline: 2.5px solid #B68A5A;
+    outline-offset: 2px;
+    border-radius: 6px;
+}
