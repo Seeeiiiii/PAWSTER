@@ -1,3 +1,58 @@
+<?php
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
+
+// Initialize the session handler dynamically if not already active
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 1. MATCH YOUR NAVBAR: Dynamically read from the multi-dimensional auth arrays
+$current_userid   = $_SESSION['auth_user']['userid'] ?? 0;
+$current_fullname = $_SESSION['auth_user']['first_name'] . ' ' . $_SESSION['auth_user']['last_name'] ?? 'Guest User';
+$is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
+
+// ── BACKEND API ROUTER FOR SAVING APPOINTMENTS ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_appt') {
+    header('Content-Type: application/json');
+    
+    // Grab raw JSON payload from the request body
+    $inputData = file_get_contents('php://input');
+    $booking = json_decode($inputData, true);
+
+    if ($booking) {
+        $db = new DatabaseConnection();
+        $conn = $db->conn;
+
+        // Escape input strings and parse parameters dynamically
+        $userid  = intval($booking['userid']); 
+        $service = $conn->real_escape_string($booking['service']);
+        $pet     = $conn->real_escape_string($booking['pet']);
+        
+        // Handle conversion of human-readable dates if date_raw is unavailable
+        $date_raw = !empty($booking['date_raw']) ? $booking['date_raw'] : date("Y-m-d", strtotime($booking['date']));
+        $date    = $conn->real_escape_string($date_raw);
+        $time    = $conn->real_escape_string($booking['time']);
+        $status  = 'Pending'; 
+
+        // SQL Query utilizing dynamic parameters
+        $query = "INSERT INTO tblappointment (userid, service_type, date, select_pet, available_time, status) 
+                  VALUES (?, ?, ?, ?, ?, ?)";
+                  
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("isssss", $userid, $service, $date, $pet, $time, $status);
+
+        if ($stmt->execute()) {
+            echo json_encode(["status" => "success"]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Database execution failed: " . $conn->error]);
+        }
+        $stmt->close();
+    } else {
+        echo json_encode(["status" => "error", "message" => "Invalid or empty data received."]);
+    }
+    exit; // Stop executing to prevent HTML pollution inside the JSON pipeline response
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,12 +60,21 @@
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
     <link rel="stylesheet" href="resources/css/grooming.css">
     <link rel="stylesheet" href="resources/css/global.css">
+    
+    <!-- Safely pass dynamic global session details to your JavaScript file -->
+    <script>
+        const AUTH_USER_CONTEXT = {
+            id: <?= json_encode($current_userid) ?>,
+            name: <?= json_encode($current_fullname) ?>,
+            isLoggedIn: <?= json_encode($is_logged_in) ?>
+        };
+    </script>
     <script src="resources/js/grooming.js"></script>
 </head>
 
 <body>
 
-     <div class="curve">
+    <div class="curve">
         <header>
             <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbarlight.php'); ?>
         </header>
@@ -79,7 +143,6 @@
                     <div class="booking-card h-100">
                         <div class="d-flex align-items-center justify-content-between mb-3">
                             <p class="card-section-title mb-0">Select pet:</p>
-                            <button class="add-pet-btn" onclick="openAddPet()"><i class="bi bi-plus-lg me-1"></i>Add pet</button>
                         </div>
 
                         <div class="d-flex flex-wrap gap-2 mb-3" id="pet-list">
@@ -89,25 +152,9 @@
                             <button class="pet-pill" data-pet="Cat" onclick="selectPet(this)">
                                 <span class="pet-pill-icon">🐱</span> Cat
                             </button>
-                        </div>
-
-                        <div class="add-pet-form" id="add-pet-form">
-                            <p class="add-pet-form-title mb-2">What type of pet?</p>
-                            <div class="quick-pet-chips mb-2">
-                                <button class="chip" onclick="fillPetInput('Dog')">🐶 Dog</button>
-                                <button class="chip" onclick="fillPetInput('Cat')">🐱 Cat</button>
-                                <button class="chip" onclick="fillPetInput('Bird')">🐦 Bird</button>
-                                <button class="chip" onclick="fillPetInput('Rabbit')">🐰 Rabbit</button>
-                                <button class="chip" onclick="fillPetInput('Fish')">🐠 Fish</button>
-                                <button class="chip" onclick="fillPetInput('Hamster')">🐹 Hamster</button>
-                                <button class="chip" onclick="fillPetInput('Turtle')">🐢 Turtle</button>
-                                <button class="chip" onclick="fillPetInput('Other')">🐾 Other</button>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <input type="text" class="pet-type-input flex-grow-1" id="pet-type-input" placeholder="Or type your pet..." maxlength="30" oninput="onPetInputChange(this)">
-                                <button class="pet-add-confirm" id="pet-add-confirm" onclick="confirmAddPet()" disabled>Add</button>
-                            </div>
-                            <button class="pet-form-cancel mt-2" onclick="closeAddPet()">Cancel</button>
+                            <button class="pet-pill" data-pet="Bird" onclick="selectPet(this)">
+                                <span class="pet-pill-icon">🐦</span> Bird
+                            </button>
                         </div>
 
                         <textarea class="notes-area w-100 mt-2" placeholder="Additional notes" id="booking-notes" rows="3"></textarea>
@@ -131,6 +178,11 @@
                                 <span class="s-key">Service</span>
                                 <span class="s-val" id="s-service">Grooming</span>
                             </div>
+                            <!-- Displays the active logged-in user profile name dynamically -->
+                            <div class="summary-row">
+                                <span class="s-key">Booked by</span>
+                                <span class="s-val" id="s-booked-by"><?= htmlspecialchars($current_fullname) ?></span>
+                            </div>
                             <div class="summary-row">
                                 <span class="s-key">Date &amp; time</span>
                                 <span class="s-val" id="s-datetime">–</span>
@@ -148,7 +200,7 @@
                     <div class="col-md-6 d-flex flex-column justify-content-between">
                         <div class="summary-table">
                             <div class="summary-row">
-                                <span class="s-key">Service fee</span>
+                                <span class="s-kaey">Service fee</span>
                                 <span class="s-val" id="s-fee">PHP 450</span>
                             </div>
                         </div>
@@ -165,7 +217,6 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="resources/js/booking.js"></script>
 </body>
 
 </html>

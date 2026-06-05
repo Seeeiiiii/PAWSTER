@@ -90,6 +90,7 @@ function prevMonth() {
     updateSummary();
 }
 
+// Fixed missing code initialization error from original booking.js call
 function nextMonth() {
     if (state.month === 11) { state.month = 0; state.year++; }
     else state.month++;
@@ -205,6 +206,11 @@ function updateSummary() {
     document.getElementById('s-fee').textContent = 'PHP ' + state.fee;
     document.getElementById('s-pet').textContent = state.pet;
 
+    // Dynamically update the summary layout text
+    if (typeof AUTH_USER_CONTEXT !== 'undefined') {
+        document.getElementById('s-booked-by').textContent = AUTH_USER_CONTEXT.name;
+    }
+
     if (state.day) {
         const dn = DAY_NAMES[new Date(state.year, state.month, state.day).getDay()];
         document.getElementById('s-datetime').textContent =
@@ -217,8 +223,88 @@ function updateSummary() {
 function confirmBooking() {
     if (!state.day)  { alert('Please select a date.');      return; }
     if (!state.slot) { alert('Please select a time slot.'); return; }
-    const summary = `Service: ${state.service}\nDate: ${MONTHS[state.month]} ${state.day}, ${state.year}\nTime: ${state.slot}\nPet: ${state.pet}\nFee: PHP ${state.fee}`;
-    alert('Booking confirmed!\n\n' + summary);
+
+    // Read information dynamically from the system authentication configuration
+    const userId = (typeof AUTH_USER_CONTEXT !== 'undefined') ? AUTH_USER_CONTEXT.id : 0;
+    const userName = (typeof AUTH_USER_CONTEXT !== 'undefined') ? AUTH_USER_CONTEXT.name : 'Guest User';
+
+    // Format relational date attribute structured for standard MySQL operations
+    const formattedMonth = String(state.month + 1).padStart(2, '0');
+    const formattedDay = String(state.day).padStart(2, '0');
+    const computedDbDate = `${state.year}-${formattedMonth}-${formattedDay}`;
+
+    // Build functional payload object
+    const booking = {
+        id:       Date.now(),
+        userid:   userId,
+        user:     userName,
+        service:  state.service,
+        pet:      state.pet,
+        date:     MONTHS[state.month] + ' ' + state.day + ', ' + state.year,
+        date_raw: computedDbDate,
+        datetime: MONTHS[state.month] + ' ' + state.day + ' | ' + state.slot,
+        time:     state.slot,
+        fee:      state.fee,
+        location: 'PAWSTER',
+        notes:    document.getElementById('booking-notes').value.trim(),
+        status:   'Pending',
+        created:  new Date().toISOString()
+    };
+
+    // Save configuration references to client state instances
+    const existing = JSON.parse(localStorage.getItem('pawster_appointments') || '[]');
+    existing.unshift(booking);
+    localStorage.setItem('pawster_appointments', JSON.stringify(existing));
+
+    // Ship data payload to backend execution pipeline handlers
+    sendBookingToDatabase(booking);
+}
+
+function sendBookingToDatabase(bookingData) {
+    fetch('grooming.php?action=save_appt', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(bookingData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            showBookingModal(bookingData);
+        } else {
+            alert('Booking failed: ' + (data.message || 'Unknown infrastructure processing error.'));
+        }
+    })
+    .catch(error => {
+        console.error('Asynchronous transaction processing error:', error);
+    });
+}
+
+function showBookingModal(b) {
+    const old = document.getElementById('booking-confirm-modal');
+    if (old) old.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'booking-confirm-modal';
+    modal.innerHTML = `
+        <div style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;">
+          <div style="background:#fff;border-radius:1rem;padding:2rem 2.25rem;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+            <div style="font-size:2.5rem;margin-bottom:0.5rem;">🐾</div>
+            <h5 style="font-family:'Caprasimo',cursive;color:#3D1F08;margin-bottom:0.25rem;">Booking Confirmed!</h5>
+            <p style="font-size:0.82rem;color:#9B7050;margin-bottom:1.25rem;">Your appointment has been sent to admin for review.</p>
+            <table style="width:100%;font-size:0.83rem;text-align:left;border-collapse:collapse;margin-bottom:1.25rem;">
+              <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Booked by</td><td style="color:#3D1F08;font-weight:700;">${b.user}</td></tr>
+              <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Service</td><td style="color:#3D1F08;font-weight:700;">${b.service}</td></tr>
+              <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Date &amp; Time</td><td style="color:#3D1F08;font-weight:700;">${b.datetime}</td></tr>
+              <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Pet</td><td style="color:#3D1F08;font-weight:700;">${b.pet}</td></tr>
+              <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Fee</td><td style="color:#3D1F08;font-weight:700;">PHP ${b.fee}</td></tr>
+            </table>
+            <button onclick="document.getElementById('booking-confirm-modal').remove()"
+              style="background:#AB8154;color:#fff;border:none;border-radius:0.6rem;padding:0.55rem 1.5rem;font-family:'Convergence',sans-serif;font-weight:700;font-size:0.87rem;cursor:pointer;width:100%;">Done</button>
+          </div>
+        </div>`;
+    document.body.appendChild(modal);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
