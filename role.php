@@ -41,12 +41,12 @@
                 <div class="card role-card text-center p-4 border-0 w-100 d-flex flex-column align-items-center justify-content-between shadow">
                     <div class="card-content d-flex flex-column align-items-center">
                         <div class="icon-wrapper mb-4">
-                            <img src="resources/images/shop icon.png" alt="Sell pet accessories" class="img-fluid" style="height: 5rem;">
+                            <img src="resources/images/shop icon.png" alt="Shop pet necessities" class="img-fluid" style="height: 5rem;">
                         </div>
-                        <h3 class="card-title fw-semibold mb-3">Sell pet accessories</h3>
-                        <p class="card-text text-muted px-2">Set up your seller account and list pet products for thousands of pet owners to discover.</p>
+                        <h3 class="card-title fw-semibold mb-3">Shop pet necessities</h3>
+                        <p class="card-text text-muted px-2">Find the best deals on pet food, toys, and supplies for your furry friends.</p>
                     </div>
-                    <button class="btn btn-card-action mt-4 w-75"><a href="/PAWSTER/sellerapplication.php">Become a seller</a></button>
+                    <button class="btn btn-card-action mt-4 w-75"><a href="/PAWSTER/shop.php">Start shopping</a></button>
                 </div>
             </div>
 

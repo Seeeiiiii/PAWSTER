@@ -12,6 +12,74 @@
 <link rel="stylesheet" href="resources/css/admin.css">
 </head>
 <body>
+
+<?php
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
+$db   = new DatabaseConnection();
+$conn = $db->conn;
+
+/**
+ * JOIN query: pulls seller name from users, business name from tblapplicationform,
+ * submission date + status from tblsellerstatus — all linked by formid / userid.
+ */
+$sql = "
+    SELECT
+        ss.status_id,
+        ss.formid,
+        ss.userid,
+        CONCAT(u.first_name, ' ', u.last_name)  AS seller_name,
+        af.business_name,
+        DATE_FORMAT(ss.created_at, '%b %e')      AS submitted,
+        ss.status
+    FROM tblsellerstatus  ss
+    JOIN tblapplicationform af ON af.formid  = ss.formid
+    JOIN users              u  ON u.userid   = ss.userid
+    ORDER BY ss.created_at DESC
+";
+$result      = $conn->query($sql);
+$applications = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+
+/* ── helper: render one row ── */
+function renderAppRow(array $row): string {
+    $statusBadge = match(strtolower($row['status'])) {
+        'verified'  => '<span class="badge-s badge-green">Verified</span>',
+        'rejected'  => '<span class="badge-s badge-red">Rejected</span>',
+        default     => '<span class="badge-s badge-orange">Pending</span>',
+    };
+
+    $sid  = (int) $row['status_id'];
+    $name = htmlspecialchars($row['seller_name']);
+    $biz  = htmlspecialchars($row['business_name']);
+    $sub  = htmlspecialchars($row['submitted']);
+
+    /* Once a final decision is made, hide the buttons */
+    $actions = in_array(strtolower($row['status']), ['verified', 'rejected'])
+        ? '<span class="done-txt">Done</span>'
+        : '
+          <div class="act-col">
+            <form method="POST" action="/PAWSTER/controllers/update_seller_status.php" style="display:inline;">
+              <input type="hidden" name="status_id" value="' . $sid . '">
+              <input type="hidden" name="new_status" value="verified">
+              <button type="submit" class="btn-app">Approve</button>
+            </form>
+            <form method="POST" action="/PAWSTER/controllers/update_seller_status.php" style="display:inline;">
+              <input type="hidden" name="status_id" value="' . $sid . '">
+              <input type="hidden" name="new_status" value="rejected">
+              <button type="submit" class="btn-rej">Reject</button>
+            </form>
+          </div>';
+
+    return "
+        <tr>
+          <td>{$name}</td>
+          <td>{$biz}</td>
+          <td>{$sub}</td>
+          <td>{$statusBadge}</td>
+          <td>{$actions}</td>
+        </tr>";
+}
+?>
+
 <div class="admin-layout">
 
   <!-- SIDEBAR -->
@@ -62,7 +130,9 @@
       <div class="stat-grid">
         <div class="stat-card">
           <p class="stat-label">Pending Sellers</p>
-          <p class="stat-num">8</p>
+          <p class="stat-num">
+            <?= count(array_filter($applications, fn($r) => strtolower($r['status']) === 'pending')) ?>
+          </p>
           <span class="stat-pill pill-red">Needs Review</span>
         </div>
         <div class="stat-card">
@@ -82,6 +152,7 @@
         </div>
       </div>
 
+      <!-- Seller Applications (overview – latest 5) -->
       <div class="table-section">
         <div class="section-head">
           <div class="d-flex align-items-center gap-2">
@@ -96,21 +167,13 @@
               <tr><th>Seller Name</th><th>Business</th><th>Submitted</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Maria Santos</td><td>PawBites PH</td><td>May 15</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Jose Reyes</td><td>FurEver Shop</td><td>May 17</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Ana Gomez</td><td>GroomKit PH</td><td>May 13</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
+              <?php
+              $preview = array_slice($applications, 0, 5);
+              if (empty($preview)): ?>
+                <tr><td colspan="5" style="text-align:center; color:#9B7050;">No applications yet.</td></tr>
+              <?php else:
+                foreach ($preview as $row) echo renderAppRow($row);
+              endif; ?>
             </tbody>
           </table>
         </div>
@@ -153,20 +216,25 @@
 
     <!-- ── SELLERS ── -->
     <div class="admin-section" id="section-sellers">
+      <?php
+      $total    = count($applications);
+      $pending  = count(array_filter($applications, fn($r) => strtolower($r['status']) === 'pending'));
+      $rejected = count(array_filter($applications, fn($r) => strtolower($r['status']) === 'rejected'));
+      ?>
       <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
         <div class="stat-card">
-          <p class="stat-label">Total Sellers</p>
-          <p class="stat-num">47</p>
-          <span class="stat-pill pill-green">Active</span>
+          <p class="stat-label">Total Applications</p>
+          <p class="stat-num"><?= $total ?></p>
+          <span class="stat-pill pill-green">All Time</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Pending Review</p>
-          <p class="stat-num">8</p>
+          <p class="stat-num"><?= $pending ?></p>
           <span class="stat-pill pill-red">Needs Action</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Rejected</p>
-          <p class="stat-num">3</p>
+          <p class="stat-num"><?= $rejected ?></p>
           <span class="stat-pill pill-blue">This Month</span>
         </div>
       </div>
@@ -184,36 +252,11 @@
               <tr><th>Seller Name</th><th>Business</th><th>Submitted</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Maria Santos</td><td>PawBites PH</td><td>May 15</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Jose Reyes</td><td>FurEver Shop</td><td>May 17</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Ana Gomez</td><td>GroomKit PH</td><td>May 13</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
-              <tr>
-                <td>Carlo Mendoza</td><td>PetNest PH</td><td>May 10</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Liza Cruz</td><td>FurBuddy Store</td><td>May 8</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
-              <tr>
-                <td>Ramon Dela Torre</td><td>PawHouse MNL</td><td>May 6</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
+              <?php if (empty($applications)): ?>
+                <tr><td colspan="5" style="text-align:center; color:#9B7050;">No applications yet.</td></tr>
+              <?php else:
+                foreach ($applications as $row) echo renderAppRow($row);
+              endif; ?>
             </tbody>
           </table>
         </div>

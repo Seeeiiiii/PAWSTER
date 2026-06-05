@@ -51,29 +51,6 @@
 
         <hr class="section-divider mt-5">
 
-        <h4>Product Category :</h4>
-        <div class="row details-row mt-3 mb-2">
-            <div class="col-6">
-                <h5>Primary Category :</h5>
-                <select name="primary_category" id="category" class="form-select">
-                    <option value="Pet Food">Pet Food</option>
-                    <option value="Pet Accessories">Pet Accessories</option>
-                    <option value="Pet Clothes">Pet Clothes</option>
-                    <option value="Grooming Supplies">Grooming Supplies</option>
-                </select>
-            </div>
-            <div class="col-6">
-                <h5>Brand Name :</h5>
-                <input type="text" name="brand_name" class="form-control mb-3" placeholder="Pedigree">
-            </div>
-        </div>
-        <span>
-            <h5>Product Description :</h5>
-            <input type="text" name="product_desc" class="form-control mb-3" placeholder="Blank is a product specially created for....">
-        </span>
-
-        <hr class="section-divider mt-5">
-
         <h4>Upload Documents :</h4>
         <div class="d-flex gap-5 mt-3 text-center">
             <div class="p-3 business-permit flex-fill rounded-5">
