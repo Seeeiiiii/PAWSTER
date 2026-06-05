@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $id = intval($_POST['appointmentID']);
     $status = $_POST['status'];
 
-    if (in_array($status, ['Confirmed', 'Rejected'])) {
+    if (in_array($status, ['Approved', 'Rejected'])) {
         $stmt = $conn->prepare("UPDATE tblappointment SET status = ? WHERE appointmentID = ?");
         $stmt->bind_param("si", $status, $id);
         if ($stmt->execute()) {
@@ -273,16 +273,16 @@ function renderAppRow(array $row): string {
                       $formatted_dt = date("F j", strtotime($row['date'])) . " | " . htmlspecialchars($row['available_time']);
                       $client_name = !empty($row['client_name']) ? htmlspecialchars($row['client_name']) : 'Guest/Anonymous';
 
-                      if ($status === 'Confirmed') {
-                          $badge = '<span class="badge-s badge-green">Confirmed</span>';
-                          $action = '<span class="done-txt">Confirmed</span>';
+                      if ($status === 'Approved') {
+                          $badge = '<span class="badge-s badge-green">Approved</span>';
+                          $action = '<span class="done-txt">Approved</span>';
                       } elseif ($status === 'Rejected') {
                           $badge = '<span class="badge-s badge-red">Rejected</span>';
                           $action = '<span class="done-txt text-danger">Rejected</span>';
                       } else {
                           $badge = '<span class="badge-s badge-orange">Pending</span>';
                           $action = '<div class="act-col">'
-                                    . '<button class="btn-app" onclick="updateApptDatabaseStatus(' . $id . ', \'Confirmed\')">Confirm</button>'
+                                    . '<button class="btn-app" onclick="updateApptDatabaseStatus(' . $id . ', \'Approved\')">Approve</button>'
                                     . '<button class="btn-rej" onclick="updateApptDatabaseStatus(' . $id . ', \'Rejected\')">Reject</button>'
                                     . '</div>';
                       }
@@ -475,16 +475,16 @@ function renderAppRow(array $row): string {
                       $display_date_time = date("F j", strtotime($row['date'])) . " | " . htmlspecialchars($row['available_time']);
                       $client_name = !empty($row['client_name']) ? htmlspecialchars($row['client_name']) : 'Guest/Anonymous';
 
-                      if ($status === 'Confirmed') {
-                          $badge = '<span class="badge-s badge-green">Confirmed</span>';
-                          $action = '<span class="done-txt">Confirmed</span>';
+                      if ($status === 'Approved') {
+                          $badge = '<span class="badge-s badge-green">Approved</span>';
+                          $action = '<span class="done-txt">Approved</span>';
                       } elseif ($status === 'Rejected') {
                           $badge = '<span class="badge-s badge-red">Rejected</span>';
                           $action = '<span class="done-txt text-danger">Rejected</span>';
                       } else {
                           $badge = '<span class="badge-s badge-orange">Pending</span>';
                           $action = '<div class="act-col">'
-                                    . '<button class="btn-app" onclick="updateApptDatabaseStatus(' . $id . ', \'Confirmed\')">Confirm</button>'
+                                    . '<button class="btn-app" onclick="updateApptDatabaseStatus(' . $id . ', \'Approved\')">Approve</button>'
                                     . '<button class="btn-rej" onclick="updateApptDatabaseStatus(' . $id . ', \'Rejected\')">Reject</button>'
                                     . '</div>';
                       }
