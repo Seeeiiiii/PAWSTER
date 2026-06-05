@@ -52,7 +52,7 @@ $is_logged_in = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] 
 ?>
 
 <header>
-    <div class="position-fixed w-100" style="z-index: 1000;">
+    <div class="w-100" style="z-index: 1000;">
         <nav class="navbar navbar-expand-lg mx-2">
             <div class="container-fluid ms-2">
                 <a class="navbar-brand d-flex align-items-center fw-bold" href="<?= $navbar['home'] ?>">

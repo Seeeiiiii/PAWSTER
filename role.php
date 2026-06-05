@@ -59,7 +59,7 @@
                         <h3 class="card-title fw-semibold mb-3">Book grooming or vet</h3>
                         <p class="card-text text-muted px-2">Schedule grooming sessions, vet check-ups, or meet-and-greet appointments for your pets.</p>
                     </div>
-                    <button class="btn btn-card-action mt-4 w-75">Book appointment</button>
+                    <button class="btn btn-card-action mt-4 w-75"><a href="/PAWSTER/grooming.php">Book appointment</a></button>
                 </div>
             </div>
         </div>

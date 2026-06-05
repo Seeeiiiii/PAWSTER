@@ -212,6 +212,40 @@ function renderAppRow(array $row): string {
           </table>
         </div>
       </div>
+
+      <div class="table-section">
+        <div class="section-head">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-calendar3 sec-icon sec-icon"></i>
+            <span class="section-title">Appointments</span>
+          </div>
+          <a href="#" class="view-all-link" onclick="switchSection('adoptions'); return false;">View All →</a>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr><th>Adopter</th><th>Pet</th><th>Date</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Maria Santos</td><td>Dog</td><td>June 19</td>
+                <td><span class="badge-s badge-orange">Pending</span></td>
+                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              </tr>
+              <tr>
+                <td>Jose Reyes</td><td>Cat</td><td>June 15</td>
+                <td><span class="badge-s badge-blue">Under Review</span></td>
+                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              </tr>
+              <tr>
+                <td>Ana Gomez</td><td>Kitten</td><td>June 16</td>
+                <td><span class="badge-s badge-green">Approved</span></td>
+                <td><span class="done-txt">Done</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- ── SELLERS ── -->
@@ -325,6 +359,8 @@ function renderAppRow(array $row): string {
           </table>
         </div>
       </div>
+
+      
     </div>
 
     <!-- ── APPOINTMENTS ── -->
