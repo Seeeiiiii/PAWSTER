@@ -19,9 +19,6 @@ class ApplicationFormController
         string $address,
         string $business_permit,
         string $valid_id,
-        string $primary_category,
-        string $brand_name,
-        string $product_desc,
         int $userid
     ): bool {
 
@@ -37,24 +34,14 @@ class ApplicationFormController
 
         $form_id = $this->conn->insert_id;
 
+        $status = 'pending';
         $stmt2 = $this->conn->prepare(
-            "INSERT INTO tblsellerproduct (primary_category, brand_name, product_desc, sellerid)
-             VALUES (?, ?, ?, ?)"
+            "INSERT INTO tblsellerstatus (userid, formid, status)
+             VALUES (?, ?, ?)"
         );
-        $stmt2->bind_param("sssi", $primary_category, $brand_name, $product_desc, $form_id);
+        $stmt2->bind_param("iis", $userid, $form_id, $status);
 
         if (!$stmt2->execute()) {
-            return false;
-        }
-
-        $status = 'pending';
-        $stmt3 = $this->conn->prepare(
-            "INSERT INTO tblsellerstatus (userid, formid, status)
-     VALUES (?, ?, ?)"
-        );
-        $stmt3->bind_param("iis", $userid, $form_id, $status);
-
-        if (!$stmt3->execute()) {
             return false;
         }
 
@@ -78,7 +65,7 @@ class ApplicationFormController
             if (!in_array($photo_file['type'], $allowed)) return false;
             if ($photo_file['size'] > $max_size)          return false;
 
-            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/uploads/products/';
+            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/resources/images/';
             if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
             $photo_name = uniqid('prod_') . '_' . basename($photo_file['name']);
@@ -136,7 +123,7 @@ class ApplicationFormController
             if (!in_array($photo_file['type'], $allowed)) return false;
             if ($photo_file['size'] > $max_size)          return false;
 
-            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/uploads/products/';
+            $upload_dir = $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/resources/images/';
             if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
 
             $photo_name = uniqid('prod_') . '_' . basename($photo_file['name']);

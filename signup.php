@@ -124,7 +124,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <option value="+1">+1 (US)</option>
                             <option value="+44">+44 (UK)</option>
                         </select>
-                        <input type="tel" name="contact_number" class="form-control custom-input" placeholder="917-000-0000" required>
+                        <input type="tel" name="contact_number" class="form-control custom-input" maxlength="11" placeholder="917-000-0000" required>
                     </div>
                 </div>
 

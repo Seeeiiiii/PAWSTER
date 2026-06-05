@@ -23,7 +23,7 @@ class RegisterController
             "INSERT INTO users (first_name, last_name, contact_number, email, password)
              VALUES (?, ?, ?, ?, ?)"
         );
-        $stmt->bind_param("ssssss", $first_name, $last_name, $contact_number, $email, $hashed_password);
+        $stmt->bind_param("sssss", $first_name, $last_name, $contact_number, $email, $hashed_password);
         return $stmt->execute();
     }
 

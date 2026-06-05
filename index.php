@@ -1,3 +1,6 @@
+<?php
+require_once($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php');
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,9 +14,7 @@
 <body>
     <header>
         <?php
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+    
         if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
             include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php');
         } else {

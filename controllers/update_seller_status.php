@@ -37,11 +37,53 @@ $stmt = $conn->prepare(
 $stmt->bind_param("si", $new_status, $status_id);
 
 if ($stmt->execute() && $stmt->affected_rows > 0) {
-    /* Redirect back to the admin Sellers section */
+
+    /* On approval, copy application data into tblsellerprofile */
+    if ($new_status === 'verified') {
+
+        /* Get the formid for this status row */
+        $r = $conn->prepare(
+            "SELECT formid FROM tblsellerstatus WHERE status_id = ? LIMIT 1"
+        );
+        $r->bind_param("i", $status_id);
+        $r->execute();
+        $r->bind_result($formid);
+        $r->fetch();
+        $r->close();
+
+        if ($formid) {
+            /* Fetch business details from tblapplicationform */
+            $fetch = $conn->prepare(
+                "SELECT business_name, contact_num, dti_reg, bir_reg, address
+                 FROM tblapplicationform
+                 WHERE formid = ?
+                 LIMIT 1"
+            );
+            $fetch->bind_param("i", $formid);
+            $fetch->execute();
+            $fetch->bind_result($business_name, $contact_num, $dti_reg, $bir_reg, $address);
+            $fetch->fetch();
+            $fetch->close();
+
+            $ins = $conn->prepare(
+                "INSERT INTO tblsellerprofile (sellerid, businessname, contactnum, dti_reg, bir_reg, address)
+                 VALUES (?, ?, ?, ?, ?, ?)
+                 ON DUPLICATE KEY UPDATE
+                     businessname = VALUES(businessname),
+                     contactnum   = VALUES(contactnum),
+                     dti_reg      = VALUES(dti_reg),
+                     bir_reg      = VALUES(bir_reg),
+                     address      = VALUES(address)"
+            );
+            $ins->bind_param("issiis", $formid, $business_name, $contact_num, $dti_reg, $bir_reg, $address);
+            $ins->execute();
+            $ins->close();
+        }
+    }
+
     header('Location: /PAWSTER/admin.php#sellers');
     exit;
 }
 
-/* If nothing changed (already updated, or bad id) just go back */
 header('Location: /PAWSTER/admin.php');
 exit;

@@ -16,9 +16,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['application_btn'])) {
     $address          = mysqli_real_escape_string($db->conn, trim($_POST['address'] ?? ""));
     $business_permit  = $_FILES['business_permit']['name'] ?? "";
     $valid_id         = $_FILES['valid_id']['name'] ?? "";
-    $primary_category = mysqli_real_escape_string($db->conn, trim($_POST['primary_category'] ?? ""));
-    $brand_name       = mysqli_real_escape_string($db->conn, trim($_POST['brand_name'] ?? ""));
-    $product_desc     = mysqli_real_escape_string($db->conn, trim($_POST['product_desc'] ?? ""));
 
     $confirm1 = isset($_POST['confirm1']) ? $_POST['confirm1'] : '';
     $confirm2 = isset($_POST['confirm2']) ? $_POST['confirm2'] : '';
@@ -39,9 +36,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['application_btn'])) {
     elseif (empty($address))          $error = 'Please enter your address.';
     elseif (empty($business_permit))  $error = 'Please upload your business permit.';
     elseif (empty($valid_id))         $error = 'Please upload a valid ID.';
-    elseif (empty($primary_category)) $error = 'Please select a primary category.';
-    elseif (empty($brand_name))       $error = 'Please enter your brand name.';
-    elseif (empty($product_desc))     $error = 'Please enter your product description.';
     elseif (empty($confirm1) || empty($confirm2))
         $error = 'You must check both confirmation boxes to submit your application.';
     elseif (!preg_match('/^\d{10}$/', $raw_contact))
@@ -56,8 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['application_btn'])) {
         exit();
     } else {
         $success = $controller->submitApplication(
-            $business_name, $contact_num, $dti_reg, $bir_reg, $address, $business_permit, $valid_id,
-            $primary_category, $brand_name, $product_desc, $userid
+            $business_name, $contact_num, $dti_reg, $bir_reg, $address, $business_permit, $valid_id, $userid
         );
 
         if ($success) {

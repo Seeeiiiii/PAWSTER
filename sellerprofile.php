@@ -6,7 +6,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/app_form_controll
 $db   = new DatabaseConnection();
 $conn = $db->conn;
 
-/* ── POST: Add new listing (normal form POST, redirects back) ── */
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_listing') {
 
     $userid = (int)($_SESSION['auth_user']['userid'] ?? 0);
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_l
         redirect('Please log in.', 'login.php');
     }
 
-    /* Resolve sellerid (formid) for this user */
+
     $r = $conn->prepare("SELECT formid FROM tblsellerstatus WHERE userid = ? ORDER BY created_at DESC LIMIT 1");
     $r->bind_param("i", $userid);
     $r->execute();
@@ -45,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_l
     }
 }
 
-/* ── POST: Update existing listing (fetch/AJAX, returns JSON) ── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_listing') {
     header('Content-Type: application/json');
 
@@ -68,9 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     $controller = new ApplicationFormController();
     $success    = $controller->updateListing($productid, $userid, $category, $brand, $desc, $photo);
 
-    echo json_encode($success
-        ? ['success' => true]
-        : ['success' => false, 'error' => 'Update failed. Check ownership, photo format (PNG, max 5MB), or try again.']
+    echo json_encode(
+        $success
+            ? ['success' => true]
+            : ['success' => false, 'error' => 'Update failed. Check ownership, photo format (PNG, max 5MB), or try again.']
     );
     exit();
 }
@@ -109,12 +109,12 @@ if ($userid > 0) {
     $db_status   = (string)($db_status ?? '');
     $is_verified = (strtolower($db_status) === 'verified');
 
-    /* 2. Business details from tblapplicationform (exclude file columns) */
+
     if ($formid) {
         $stmt2 = $conn->prepare(
-            "SELECT business_name, contact_num, address
-             FROM tblapplicationform
-             WHERE formid = ?
+            "SELECT businessname, contactnum, address
+             FROM tblsellerprofile
+             WHERE sellerid = ?
              LIMIT 1"
         );
         $stmt2->bind_param("i", $formid);
@@ -123,12 +123,12 @@ if ($userid > 0) {
         $stmt2->fetch();
         $stmt2->close();
 
-        /* 3. All products for this seller (sellerid = formid per controller logic) */
+
         $stmt3 = $conn->prepare(
-            "SELECT productid, brand_name, product_desc, primary_category
-             FROM tblsellerproduct
-             WHERE sellerid = ?
-             ORDER BY productid ASC"
+            "SELECT productid, brand_name, product_desc, primary_category, productimage
+     FROM tblsellerproduct
+     WHERE sellerid = ?
+     ORDER BY productid ASC"
         );
         $stmt3->bind_param("i", $formid);
         $stmt3->execute();
@@ -138,11 +138,10 @@ if ($userid > 0) {
         }
         $stmt3->close();
 
-        /* 4. Primary category tag — take the first product's category */
+     
         $primary_category = !empty($listings) ? $listings[0]['primary_category'] : '';
     }
 
-    /* 5. User's real name */
     $stmt4 = $conn->prepare(
         "SELECT first_name, last_name FROM users WHERE userid = ? LIMIT 1"
     );
@@ -156,12 +155,14 @@ if ($userid > 0) {
 
 $listing_count = count($listings);
 
-function renderStars(int $count): string {
+function renderStars(int $count): string
+{
     return str_repeat('<span class="star">★</span>', $count);
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -174,14 +175,12 @@ function renderStars(int $count): string {
         }
     </style>
 </head>
+
 <body>
     <header style="position: relative; z-index: 100;">
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
     </header>
 
-    <!-- ══════════════════════════════════════════
-         MODAL 1 — Edit Profile
-    ══════════════════════════════════════════ -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content pawster-modal">
@@ -196,20 +195,20 @@ function renderStars(int $count): string {
                         <div class="field-group">
                             <label class="field-label" for="editName">Business name</label>
                             <input class="field-input" id="editName" type="text"
-                                   value="<?= htmlspecialchars($business_name) ?>"
-                                   placeholder="Business name" />
+                                value="<?= htmlspecialchars($business_name) ?>"
+                                placeholder="Business name" />
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="editContact">Contact number</label>
                             <input class="field-input" id="editContact" type="text"
-                                   value="<?= htmlspecialchars($contact_num) ?>"
-                                   placeholder="Contact number" />
+                                value="<?= htmlspecialchars($contact_num) ?>"
+                                placeholder="Contact number" />
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="editAddress">Address</label>
                             <input class="field-input" id="editAddress" type="text"
-                                   value="<?= htmlspecialchars($address) ?>"
-                                   placeholder="Address" />
+                                value="<?= htmlspecialchars($address) ?>"
+                                placeholder="Address" />
                         </div>
                     </div>
                 </div>
@@ -223,9 +222,6 @@ function renderStars(int $count): string {
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════
-         MODAL 2 — Manage Listings
-    ══════════════════════════════════════════ -->
     <div class="modal fade" id="listingsModal" tabindex="-1" aria-labelledby="listingsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content pawster-modal">
@@ -237,7 +233,7 @@ function renderStars(int $count): string {
 
                 <div class="modal-body pawster-modal__body">
 
-                    <!-- ── Add New Listing Form ── -->
+                 
                     <form action="/PAWSTER/sellerprofile.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="add_listing">
                         <div class="pawster-modal__fields" style="margin-bottom:1.25rem;">
@@ -284,7 +280,6 @@ function renderStars(int $count): string {
 
                     <hr class="listing-divider">
 
-                    <!-- ── Existing Listings ── -->
                     <p style="font-family:'Convergence',sans-serif; color:#9B7050; font-weight:600; margin:.75rem 0;">
                         Current Listings
                     </p>
@@ -302,19 +297,19 @@ function renderStars(int $count): string {
                                             <div class="field-group">
                                                 <label class="field-label">Brand name</label>
                                                 <input class="field-input edit-brand" type="text"
-                                                       value="<?= htmlspecialchars($item['brand_name']) ?>"
-                                                       placeholder="Brand name" />
+                                                    value="<?= htmlspecialchars($item['brand_name']) ?>"
+                                                    placeholder="Brand name" />
                                             </div>
                                             <div class="field-group">
                                                 <label class="field-label">Description</label>
                                                 <input class="field-input edit-desc" type="text"
-                                                       value="<?= htmlspecialchars($item['product_desc']) ?>"
-                                                       placeholder="Product description" />
+                                                    value="<?= htmlspecialchars($item['product_desc']) ?>"
+                                                    placeholder="Product description" />
                                             </div>
                                             <div class="field-group">
                                                 <label class="field-label">Category</label>
                                                 <select class="field-input edit-cat">
-                                                    <?php foreach (['Pet Food','Pet Accessories','Pet Clothes','Grooming Supplies'] as $cat): ?>
+                                                    <?php foreach (['Pet Food', 'Pet Accessories', 'Pet Clothes', 'Grooming Supplies'] as $cat): ?>
                                                         <option value="<?= htmlspecialchars($cat) ?>"
                                                             <?= $cat === $item['primary_category'] ? 'selected' : '' ?>>
                                                             <?= htmlspecialchars($cat) ?>
@@ -356,9 +351,7 @@ function renderStars(int $count): string {
         </div>
     </div>
 
-    <!-- ══════════════════════════════════════════
-         MAIN CONTENT
-    ══════════════════════════════════════════ -->
+
     <main class="dashboard">
 
         <section class="profile-banner" aria-label="Seller profile">
@@ -379,7 +372,7 @@ function renderStars(int $count): string {
                         <span class="badge <?= $is_verified ? 'badge--verified' : 'badge--pending' ?>">
                             <?php if ($is_verified): ?>
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
-                                    <path d="M13.485 1.431a1.473 1.473 0 0 0-2.084 0l-6.8 6.915-2.04-2.078a1.473 1.473 0 0 0-2.084 2.084l3.084 3.12a1.473 1.473 0 0 0 2.084 0l7.84-7.956a1.473 1.473 0 0 0 0-2.085z"/>
+                                    <path d="M13.485 1.431a1.473 1.473 0 0 0-2.084 0l-6.8 6.915-2.04-2.078a1.473 1.473 0 0 0-2.084 2.084l3.084 3.12a1.473 1.473 0 0 0 2.084 0l7.84-7.956a1.473 1.473 0 0 0 0-2.085z" />
                                 </svg>
                             <?php endif; ?>
                             <?= ucfirst(htmlspecialchars($db_status)) ?> seller
@@ -397,7 +390,7 @@ function renderStars(int $count): string {
             <div class="profile-banner__actions">
                 <button class="btn-edit" data-bs-toggle="modal" data-bs-target="#editModal" aria-label="Edit profile">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/>
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z" />
                     </svg>
                     Edit Profile
                 </button>
@@ -423,8 +416,8 @@ function renderStars(int $count): string {
                     <h2 class="card__title">My listings</h2>
                     <!-- Manage Listings opens the second modal -->
                     <a href="#" class="card__link"
-                       data-bs-toggle="modal" data-bs-target="#listingsModal">
-                       Manage Listings &rarr;
+                        data-bs-toggle="modal" data-bs-target="#listingsModal">
+                        Manage Listings &rarr;
                     </a>
                 </div>
                 <ul class="listing-list" role="list" id="listingDisplay">
@@ -433,7 +426,13 @@ function renderStars(int $count): string {
                     <?php endif; ?>
                     <?php foreach ($listings as $item): ?>
                         <li class="listing-item" data-productid="<?= (int)$item['productid'] ?>">
-                            <div class="listing-item__thumb" aria-hidden="true"></div>
+                            <div class="listing-item__thumb" aria-hidden="true">
+                                <?php if (!empty($item['productimage'])): ?>
+                                    <img src="/PAWSTER/resources/images/<?= htmlspecialchars($item['productimage']) ?>"
+                                        alt="<?= htmlspecialchars($item['brand_name']) ?>"
+                                        style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">
+                                <?php endif; ?>
+                            </div>
                             <div class="listing-item__info">
                                 <span class="listing-item__name">
                                     <?= htmlspecialchars($item['brand_name']) ?>
@@ -464,163 +463,175 @@ function renderStars(int $count): string {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
-        /* ── Edit Profile modal ── */
-        var editModal     = document.getElementById('editModal');
-        var saveEditBtn   = document.getElementById('saveEdit');
-        var bannerName    = document.getElementById('bannerName');
-        var bannerContact = document.getElementById('bannerContact');
-        var bannerAddress = document.getElementById('bannerAddress');
-        var editName      = document.getElementById('editName');
-        var editContact   = document.getElementById('editContact');
-        var editAddress   = document.getElementById('editAddress');
+            /* ── Edit Profile modal ── */
+            var editModal = document.getElementById('editModal');
+            var saveEditBtn = document.getElementById('saveEdit');
+            var bannerName = document.getElementById('bannerName');
+            var bannerContact = document.getElementById('bannerContact');
+            var bannerAddress = document.getElementById('bannerAddress');
+            var editName = document.getElementById('editName');
+            var editContact = document.getElementById('editContact');
+            var editAddress = document.getElementById('editAddress');
 
-        editModal.addEventListener('show.bs.modal', function () {
-            editName.value    = bannerName.textContent.trim();
-            editContact.value = bannerContact ? bannerContact.textContent.trim() : '';
-            editAddress.value = bannerAddress ? bannerAddress.textContent.trim() : '';
-        });
-        editModal.addEventListener('shown.bs.modal', function () { editName.focus(); });
+            editModal.addEventListener('show.bs.modal', function() {
+                editName.value = bannerName.textContent.trim();
+                editContact.value = bannerContact ? bannerContact.textContent.trim() : '';
+                editAddress.value = bannerAddress ? bannerAddress.textContent.trim() : '';
+            });
+            editModal.addEventListener('shown.bs.modal', function() {
+                editName.focus();
+            });
 
-        saveEditBtn.addEventListener('click', function () {
-            var name    = editName.value.trim();
-            var contact = editContact.value.trim();
-            var addr    = editAddress.value.trim();
-            if (name)    bannerName.textContent    = name;
-            if (contact && bannerContact) bannerContact.textContent = contact;
-            if (addr    && bannerAddress) bannerAddress.textContent = addr;
-            saveEditBtn.textContent      = 'Saved!';
-            saveEditBtn.style.background = '#2D8C4E';
-            setTimeout(function () {
-                saveEditBtn.textContent      = 'Save changes';
-                saveEditBtn.style.background = '';
-                bootstrap.Modal.getInstance(editModal).hide();
-            }, 900);
-        });
+            saveEditBtn.addEventListener('click', function() {
+                var name = editName.value.trim();
+                var contact = editContact.value.trim();
+                var addr = editAddress.value.trim();
+                if (name) bannerName.textContent = name;
+                if (contact && bannerContact) bannerContact.textContent = contact;
+                if (addr && bannerAddress) bannerAddress.textContent = addr;
+                saveEditBtn.textContent = 'Saved!';
+                saveEditBtn.style.background = '#2D8C4E';
+                setTimeout(function() {
+                    saveEditBtn.textContent = 'Save changes';
+                    saveEditBtn.style.background = '';
+                    bootstrap.Modal.getInstance(editModal).hide();
+                }, 900);
+            });
 
-        /* ── New listing: photo upload box click ── */
-        var newPhotoBox   = document.getElementById('new_photo_box');
-        var newPhotoInput = document.getElementById('new_photo');
-        var newPhotoName  = document.getElementById('new_photo_name');
+            /* ── New listing: photo upload box click ── */
+            var newPhotoBox = document.getElementById('new_photo_box');
+            var newPhotoInput = document.getElementById('new_photo');
+            var newPhotoName = document.getElementById('new_photo_name');
 
-        if (newPhotoBox) {
-            newPhotoBox.addEventListener('click', function () { newPhotoInput.click(); });
-            newPhotoInput.addEventListener('change', function () {
-                var file = newPhotoInput.files[0];
-                if (file) {
+            if (newPhotoBox) {
+                newPhotoBox.addEventListener('click', function() {
+                    newPhotoInput.click();
+                });
+                newPhotoInput.addEventListener('change', function() {
+                    var file = newPhotoInput.files[0];
+                    if (file) {
+                        if (file.type !== 'image/png') {
+                            newPhotoName.style.color = '#c0392b';
+                            newPhotoName.textContent = 'Only PNG files are allowed.';
+                            newPhotoInput.value = '';
+                            return;
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            newPhotoName.style.color = '#c0392b';
+                            newPhotoName.textContent = 'File must be under 5MB.';
+                            newPhotoInput.value = '';
+                            return;
+                        }
+                        newPhotoName.style.color = '#2D8C4E';
+                        newPhotoName.textContent = '✓ ' + file.name;
+                    }
+                });
+            }
+
+            /* ── Existing listings: photo upload boxes ── */
+            document.querySelectorAll('.edit-photo-box').forEach(function(box) {
+                var input = box.querySelector('.edit-photo-input');
+                var nameDiv = box.querySelector('.edit-photo-name');
+                box.addEventListener('click', function() {
+                    input.click();
+                });
+                input.addEventListener('change', function() {
+                    var file = input.files[0];
+                    if (!file) return;
                     if (file.type !== 'image/png') {
-                        newPhotoName.style.color = '#c0392b';
-                        newPhotoName.textContent = 'Only PNG files are allowed.';
-                        newPhotoInput.value = '';
+                        nameDiv.style.color = '#c0392b';
+                        nameDiv.textContent = 'Only PNG files are allowed.';
+                        input.value = '';
                         return;
                     }
                     if (file.size > 5 * 1024 * 1024) {
-                        newPhotoName.style.color = '#c0392b';
-                        newPhotoName.textContent = 'File must be under 5MB.';
-                        newPhotoInput.value = '';
+                        nameDiv.style.color = '#c0392b';
+                        nameDiv.textContent = 'File must be under 5MB.';
+                        input.value = '';
                         return;
                     }
-                    newPhotoName.style.color = '#2D8C4E';
-                    newPhotoName.textContent = '✓ ' + file.name;
-                }
-            });
-        }
-
-        /* ── Existing listings: photo upload boxes ── */
-        document.querySelectorAll('.edit-photo-box').forEach(function (box) {
-            var input    = box.querySelector('.edit-photo-input');
-            var nameDiv  = box.querySelector('.edit-photo-name');
-            box.addEventListener('click', function () { input.click(); });
-            input.addEventListener('change', function () {
-                var file = input.files[0];
-                if (!file) return;
-                if (file.type !== 'image/png') {
-                    nameDiv.style.color = '#c0392b';
-                    nameDiv.textContent = 'Only PNG files are allowed.';
-                    input.value = '';
-                    return;
-                }
-                if (file.size > 5 * 1024 * 1024) {
-                    nameDiv.style.color = '#c0392b';
-                    nameDiv.textContent = 'File must be under 5MB.';
-                    input.value = '';
-                    return;
-                }
-                nameDiv.style.color = '#2D8C4E';
-                nameDiv.textContent = '✓ ' + file.name;
-            });
-        });
-
-        /* ── Existing listings: save per row ── */
-        document.querySelectorAll('.save-listing-btn').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var row       = btn.closest('.listing-edit-row');
-                var productid = row.dataset.productid;
-                var brand     = row.querySelector('.edit-brand').value.trim();
-                var desc      = row.querySelector('.edit-desc').value.trim();
-                var cat       = row.querySelector('.edit-cat').value;
-                var photoInput = row.querySelector('.edit-photo-input');
-                var msg       = row.querySelector('.save-listing-msg');
-
-                if (!brand || !desc) {
-                    msg.style.color   = '#c0392b';
-                    msg.textContent   = 'Brand and description are required.';
-                    msg.style.display = 'inline';
-                    return;
-                }
-
-                btn.disabled    = true;
-                btn.textContent = 'Saving...';
-                msg.style.display = 'none';
-
-                var formData = new FormData();
-                formData.append('action',           'update_listing');
-                formData.append('productid',        productid);
-                formData.append('primary_category', cat);
-                formData.append('brand_name',       brand);
-                formData.append('product_desc',     desc);
-                if (photoInput && photoInput.files[0]) {
-                    formData.append('product_photo', photoInput.files[0]);
-                }
-
-                fetch(window.location.href, { method: 'POST', body: formData })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
-                    if (data.success) {
-                        btn.textContent      = 'Saved!';
-                        btn.style.background = '#2D8C4E';
-                        msg.style.color      = '#2D8C4E';
-                        msg.textContent      = 'Changes saved.';
-                        msg.style.display    = 'inline';
-                        setTimeout(function () {
-                            btn.textContent      = 'Save changes';
-                            btn.style.background = '';
-                            btn.disabled         = false;
-                        }, 1500);
-                    } else {
-                        msg.style.color   = '#c0392b';
-                        msg.textContent   = data.error || 'Something went wrong.';
-                        msg.style.display = 'inline';
-                        btn.disabled      = false;
-                        btn.textContent   = 'Save changes';
-                    }
-                })
-                .catch(function () {
-                    msg.style.color   = '#c0392b';
-                    msg.textContent   = 'Request failed.';
-                    msg.style.display = 'inline';
-                    btn.disabled      = false;
-                    btn.textContent   = 'Save changes';
+                    nameDiv.style.color = '#2D8C4E';
+                    nameDiv.textContent = '✓ ' + file.name;
                 });
             });
-        });
 
-    });
+            /* ── Existing listings: save per row ── */
+            document.querySelectorAll('.save-listing-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var row = btn.closest('.listing-edit-row');
+                    var productid = row.dataset.productid;
+                    var brand = row.querySelector('.edit-brand').value.trim();
+                    var desc = row.querySelector('.edit-desc').value.trim();
+                    var cat = row.querySelector('.edit-cat').value;
+                    var photoInput = row.querySelector('.edit-photo-input');
+                    var msg = row.querySelector('.save-listing-msg');
+
+                    if (!brand || !desc) {
+                        msg.style.color = '#c0392b';
+                        msg.textContent = 'Brand and description are required.';
+                        msg.style.display = 'inline';
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.textContent = 'Saving...';
+                    msg.style.display = 'none';
+
+                    var formData = new FormData();
+                    formData.append('action', 'update_listing');
+                    formData.append('productid', productid);
+                    formData.append('primary_category', cat);
+                    formData.append('brand_name', brand);
+                    formData.append('product_desc', desc);
+                    if (photoInput && photoInput.files[0]) {
+                        formData.append('product_photo', photoInput.files[0]);
+                    }
+
+                    fetch(window.location.href, {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(function(r) {
+                            return r.json();
+                        })
+                        .then(function(data) {
+                            if (data.success) {
+                                btn.textContent = 'Saved!';
+                                btn.style.background = '#2D8C4E';
+                                msg.style.color = '#2D8C4E';
+                                msg.textContent = 'Changes saved.';
+                                msg.style.display = 'inline';
+                                setTimeout(function() {
+                                    btn.textContent = 'Save changes';
+                                    btn.style.background = '';
+                                    btn.disabled = false;
+                                }, 1500);
+                            } else {
+                                msg.style.color = '#c0392b';
+                                msg.textContent = data.error || 'Something went wrong.';
+                                msg.style.display = 'inline';
+                                btn.disabled = false;
+                                btn.textContent = 'Save changes';
+                            }
+                        })
+                        .catch(function() {
+                            msg.style.color = '#c0392b';
+                            msg.textContent = 'Request failed.';
+                            msg.style.display = 'inline';
+                            btn.disabled = false;
+                            btn.textContent = 'Save changes';
+                        });
+                });
+            });
+
+        });
     </script>
 
     <footer>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/footer.php'); ?>
     </footer>
 </body>
+
 </html>

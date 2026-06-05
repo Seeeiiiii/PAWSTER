@@ -30,31 +30,6 @@ body {
     line-height: 1.6;
 }
 
-/* NAVBAR */
-.navbar {
-    background-color: var(--cream);
-    border-bottom: 1px solid var(--beige);
-    box-shadow: var(--shadow);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    padding: 16px 24px;
-}
-
-.navbar-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 32px;
-}
-
-.navbar-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
 
 .logo {
     width: 48px;
