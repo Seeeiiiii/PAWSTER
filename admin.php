@@ -1,27 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pawster – Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Convergence&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="resources/css/admin.css">
+</head>
+<body>
+
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
 $db   = new DatabaseConnection();
 $conn = $db->conn;
-
-// ── SELF-CONTAINED INTERNAL ROUTER FOR APPOINTMENTS ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'silent_update_appt') {
-    header('Content-Type: application/json');
-    $id = intval($_POST['appointmentID']);
-    $status = $_POST['status'];
-
-    if (in_array($status, ['Approved', 'Rejected'])) {
-        $stmt = $conn->prepare("UPDATE tblappointment SET status = ? WHERE appointmentID = ?");
-        $stmt->bind_param("si", $status, $id);
-        if ($stmt->execute()) {
-            echo json_encode(["status" => "success"]);
-            $stmt->close();
-            exit;
-        }
-        $stmt->close();
-    }
-    echo json_encode(["status" => "error"]);
-    exit;
-}
 
 /**
  * JOIN query: pulls seller name from users, business name from tblapplicationform,
@@ -84,22 +79,10 @@ function renderAppRow(array $row): string {
         </tr>";
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pawster – Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Convergence&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="resources/css/admin.css">
-</head>
-<body>
+
 <div class="admin-layout">
 
+  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-brand">
       <img src="resources/images/Logo.png" alt="Logo" class="brand-logo">
@@ -130,6 +113,7 @@ function renderAppRow(array $row): string {
     </nav>
   </aside>
 
+  <!-- MAIN -->
   <main class="admin-main">
 
     <div class="admin-topbar">
@@ -141,7 +125,7 @@ function renderAppRow(array $row): string {
       </div>
     </div>
 
-    <!-- ── OVERVIEW SECTION ── -->
+    <!-- ── OVERVIEW ── -->
     <div class="admin-section active" id="section-overview">
       <div class="stat-grid">
         <div class="stat-card">
@@ -158,13 +142,8 @@ function renderAppRow(array $row): string {
         </div>
         <div class="stat-card">
           <p class="stat-label">Appointments Today</p>
-          <p class="stat-num">
-            <?php
-            $res = $conn->query("SELECT COUNT(*) as c FROM tblappointment WHERE date = CURDATE()");
-            echo $res ? $res->fetch_assoc()['c'] : '0';
-            ?>
-          </p>
-          <span class="stat-pill pill-green">Live Tracking</span>
+          <p class="stat-num">6</p>
+          <span class="stat-pill pill-green">3 Confirmed</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Active Listings</p>
@@ -173,7 +152,7 @@ function renderAppRow(array $row): string {
         </div>
       </div>
 
-      <!-- Seller Applications Table -->
+      <!-- Seller Applications (overview – latest 5) -->
       <div class="table-section">
         <div class="section-head">
           <div class="d-flex align-items-center gap-2">
@@ -200,7 +179,6 @@ function renderAppRow(array $row): string {
         </div>
       </div>
 
-      <!-- Adoption Requests Table -->
       <div class="table-section">
         <div class="section-head">
           <div class="d-flex align-items-center gap-2">
@@ -235,78 +213,42 @@ function renderAppRow(array $row): string {
         </div>
       </div>
 
-      <!-- Appointment Requests Preview Table -->
       <div class="table-section">
         <div class="section-head">
           <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-calendar3 sec-icon"></i>
-            <span class="section-title">Appointment Requests</span>
+            <i class="bi bi-calendar3 sec-icon sec-icon"></i>
+            <span class="section-title">Appointments</span>
           </div>
-          <a href="#" class="view-all-link" onclick="switchSection('appointments'); return false;">View All →</a>
+          <a href="#" class="view-all-link" onclick="switchSection('adoptions'); return false;">View All →</a>
         </div>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
-              <tr>
-                <th>User Name</th>
-                <th>Type</th>
-                <th>Pet</th>
-                <th>Date &amp; Time</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
+              <tr><th>Adopter</th><th>Pet</th><th>Date</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <?php
-              // Links tblappointment.userid directly to users table to grab first and last names safely
-              $sql_appt = "SELECT a.appointmentID, a.service_type, a.date, a.select_pet, a.available_time, a.status, 
-                           CONCAT(u.first_name, ' ', u.last_name) AS client_name 
-                           FROM tblappointment a 
-                           LEFT JOIN users u ON u.userid = a.userid 
-                           ORDER BY a.appointmentID DESC LIMIT 3";
-              $res_appt = $conn->query($sql_appt);
-
-              if ($res_appt && $res_appt->num_rows > 0) {
-                  while($row = $res_appt->fetch_assoc()) {
-                      $id = $row['appointmentID'];
-                      $status = !empty($row['status']) ? $row['status'] : 'Pending';
-                      $formatted_dt = date("F j", strtotime($row['date'])) . " | " . htmlspecialchars($row['available_time']);
-                      $client_name = !empty($row['client_name']) ? htmlspecialchars($row['client_name']) : 'Guest/Anonymous';
-
-                      if ($status === 'Approved') {
-                          $badge = '<span class="badge-s badge-green">Approved</span>';
-                          $action = '<span class="done-txt">Approved</span>';
-                      } elseif ($status === 'Rejected') {
-                          $badge = '<span class="badge-s badge-red">Rejected</span>';
-                          $action = '<span class="done-txt text-danger">Rejected</span>';
-                      } else {
-                          $badge = '<span class="badge-s badge-orange">Pending</span>';
-                          $action = '<div class="act-col">'
-                                    . '<button class="btn-app" onclick="updateApptDatabaseStatus(' . $id . ', \'Approved\')">Approve</button>'
-                                    . '<button class="btn-rej" onclick="updateApptDatabaseStatus(' . $id . ', \'Rejected\')">Reject</button>'
-                                    . '</div>';
-                      }
-
-                      echo "<tr>";
-                      echo "<td><strong>" . $client_name . "</strong></td>";
-                      echo "<td>" . htmlspecialchars($row['service_type']) . "</td>";
-                      echo "<td>" . htmlspecialchars($row['select_pet']) . "</td>";
-                      echo "<td>" . $formatted_dt . "</td>";
-                      echo "<td>" . $badge . "</td>";
-                      echo "<td>" . $action . "</td>";
-                      echo "</tr>";
-                  }
-              } else {
-                  echo "<tr><td colspan='6' class='text-center py-3 text-muted'>No current appointments recorded.</td></tr>";
-              }
-              ?>
+              <tr>
+                <td>Maria Santos</td><td>Dog</td><td>June 19</td>
+                <td><span class="badge-s badge-orange">Pending</span></td>
+                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              </tr>
+              <tr>
+                <td>Jose Reyes</td><td>Cat</td><td>June 15</td>
+                <td><span class="badge-s badge-blue">Under Review</span></td>
+                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              </tr>
+              <tr>
+                <td>Ana Gomez</td><td>Kitten</td><td>June 16</td>
+                <td><span class="badge-s badge-green">Approved</span></td>
+                <td><span class="done-txt">Done</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ── SELLERS SECTION ── -->
+    <!-- ── SELLERS ── -->
     <div class="admin-section" id="section-sellers">
       <?php
       $total    = count($applications);
@@ -355,7 +297,7 @@ function renderAppRow(array $row): string {
       </div>
     </div>
 
-    <!-- ── ADOPTIONS SECTION ── -->
+    <!-- ── ADOPTIONS ── -->
     <div class="admin-section" id="section-adoptions">
       <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
         <div class="stat-card">
@@ -403,38 +345,41 @@ function renderAppRow(array $row): string {
                 <td><span class="badge-s badge-green">Approved</span></td>
                 <td><span class="done-txt">Done</span></td>
               </tr>
+              <tr>
+                <td>Ben Torres</td><td>Doga</td><td>Pitbull</td><td>June 14</td>
+                <td><span class="badge-s badge-orange">Pending</span></td>
+                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              </tr>
+              <tr>
+                <td>Rica Flores</td><td>Dora</td><td>Chihuahua</td><td>June 12</td>
+                <td><span class="badge-s badge-green">Approved</span></td>
+                <td><span class="done-txt">Done</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      
     </div>
 
-    <!-- ── APPOINTMENTS SECTION (FULL RECORDS) ── -->
+    <!-- ── APPOINTMENTS ── -->
     <div class="admin-section" id="section-appointments">
-      <?php
-      $appt_today = 0; $appt_week = 0; $appt_pending = 0;
-      $r1 = $conn->query("SELECT COUNT(*) as total FROM tblappointment WHERE date = CURDATE()");
-      if($r1) $appt_today = $r1->fetch_assoc()['total'];
-      $r2 = $conn->query("SELECT COUNT(*) as total FROM tblappointment WHERE YEARWEEK(date, 1) = YEARWEEK(CURDATE(), 1)");
-      if($r2) $appt_week = $r2->fetch_assoc()['total'];
-      $r3 = $conn->query("SELECT COUNT(*) as total FROM tblappointment WHERE status = 'Pending' OR status = '' OR status IS NULL");
-      if($r3) $appt_pending = $r3->fetch_assoc()['total'];
-      ?>
       <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
         <div class="stat-card">
           <p class="stat-label">Appointments Today</p>
-          <p class="stat-num"><?php echo $appt_today; ?></p>
-          <span class="stat-pill pill-green">Live Tracking</span>
+          <p class="stat-num">6</p>
+          <span class="stat-pill pill-green">3 Confirmed</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">This Week</p>
-          <p class="stat-num"><?php echo $appt_week; ?></p>
+          <p class="stat-num">21</p>
           <span class="stat-pill pill-blue">Scheduled</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Pending</p>
-          <p class="stat-num"><?php echo $appt_pending; ?></p>
-          <span class="stat-pill pill-red">Needs Review</span>
+          <p class="stat-num">9</p>
+          <span class="stat-pill pill-red">Awaiting Confirm</span>
         </div>
       </div>
 
@@ -448,68 +393,36 @@ function renderAppRow(array $row): string {
         <div class="table-responsive">
           <table class="data-table">
             <thead>
-              <tr>
-                <th>User Name</th>
-                <th>Type</th>
-                <th>Pet</th>
-                <th>Date &amp; Time</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
+              <tr><th>User</th><th>Type</th><th>Pet</th><th>Date & Time</th><th>Location</th><th>Status</th></tr>
             </thead>
             <tbody>
-              <?php
-              // Pulls the complete log of appointments linked cleanly by the valid userid column
-              $sql_full_appt = "SELECT a.appointmentID, a.service_type, a.date, a.select_pet, a.available_time, a.status, 
-                                CONCAT(u.first_name, ' ', u.last_name) AS client_name 
-                                FROM tblappointment a 
-                                LEFT JOIN users u ON u.userid = a.userid 
-                                ORDER BY a.appointmentID DESC";
-              $res_full_appt = $conn->query($sql_full_appt);
-
-              if ($res_full_appt && $res_full_appt->num_rows > 0) {
-                  while($row = $res_full_appt->fetch_assoc()) {
-                      $id = $row['appointmentID'];
-                      $status = !empty($row['status']) ? $row['status'] : 'Pending';
-                      $display_date_time = date("F j", strtotime($row['date'])) . " | " . htmlspecialchars($row['available_time']);
-                      $client_name = !empty($row['client_name']) ? htmlspecialchars($row['client_name']) : 'Guest/Anonymous';
-
-                      if ($status === 'Approved') {
-                          $badge = '<span class="badge-s badge-green">Approved</span>';
-                          $action = '<span class="done-txt">Approved</span>';
-                      } elseif ($status === 'Rejected') {
-                          $badge = '<span class="badge-s badge-red">Rejected</span>';
-                          $action = '<span class="done-txt text-danger">Rejected</span>';
-                      } else {
-                          $badge = '<span class="badge-s badge-orange">Pending</span>';
-                          $action = '<div class="act-col">'
-                                    . '<button class="btn-app" onclick="updateApptDatabaseStatus(' . $id . ', \'Approved\')">Approve</button>'
-                                    . '<button class="btn-rej" onclick="updateApptDatabaseStatus(' . $id . ', \'Rejected\')">Reject</button>'
-                                    . '</div>';
-                      }
-
-                      echo "<tr>";
-                      echo "<td><strong>" . $client_name . "</strong></td>";
-                      echo "<td>" . htmlspecialchars($row['service_type']) . "</td>";
-                      echo "<td>" . htmlspecialchars($row['select_pet']) . "</td>";
-                      echo "<td>" . $display_date_time . "</td>";
-                      echo "<td>PAWSTER</td>";
-                      echo "<td>" . $badge . "</td>";
-                      echo "<td>" . $action . "</td>";
-                      echo "</tr>";
-                  }
-              } else {
-                  echo "<tr><td colspan='7' class='text-center py-4 text-muted'>No entries registered inside tblappointment.</td></tr>";
-              }
-              ?>
+              <tr>
+                <td>Juan Dela Cruz</td><td>Grooming</td><td>Mochi</td><td>May 20 | 1:00 PM</td><td>Calamba Hub</td>
+                <td><span class="badge-s badge-blue">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td>Juan Dela Cruz</td><td>Vet Check</td><td>Mochi</td><td>June 3 | 10:00 AM</td><td>Pawster Vet</td>
+                <td><span class="badge-s badge-orange">Pending</span></td>
+              </tr>
+              <tr>
+                <td>Juan Dela Cruz</td><td>Meet & Greet</td><td>Mochi</td><td>June 7 | 12:00 PM</td><td>Tanauan Shelter</td>
+                <td><span class="badge-s badge-green">Scheduled</span></td>
+              </tr>
+              <tr>
+                <td>Maria Santos</td><td>Grooming</td><td>Doga</td><td>June 8 | 3:00 PM</td><td>Sta. Rosa Hub</td>
+                <td><span class="badge-s badge-blue">Confirmed</span></td>
+              </tr>
+              <tr>
+                <td>Ben Torres</td><td>Vet Check</td><td>Dora</td><td>June 10 | 9:00 AM</td><td>Pawster Vet</td>
+                <td><span class="badge-s badge-orange">Pending</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ── LISTINGS SECTION ── -->
+    <!-- ── LISTINGS ── -->
     <div class="admin-section" id="section-listings">
       <div class="stat-grid">
         <div class="stat-card">
@@ -557,13 +470,28 @@ function renderAppRow(array $row): string {
                 <td><span class="badge-s badge-orange">Pending</span></td>
                 <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
               </tr>
+              <tr>
+                <td>Hypoallergenic Pet Shampoo</td><td>PlayPaws</td><td>Grooming</td><td>₱499</td>
+                <td><span class="badge-s badge-green">Active</span></td>
+                <td><div class="act-col"><button class="btn-rej">Remove</button></div></td>
+              </tr>
+              <tr>
+                <td>Cat Scratching Post Deluxe</td><td>FurBuddy Store</td><td>Accessories</td><td>₱780</td>
+                <td><span class="badge-s badge-blue">Under Review</span></td>
+                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              </tr>
+              <tr>
+                <td>Orthopedic Dog Bed</td><td>PetNest PH</td><td>Beds</td><td>₱1,250</td>
+                <td><span class="badge-s badge-green">Active</span></td>
+                <td><div class="act-col"><button class="btn-rej">Remove</button></div></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ── USERS SECTION ── -->
+    <!-- ── USERS ── -->
     <div class="admin-section" id="section-users">
       <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
         <div class="stat-card">
@@ -600,13 +528,29 @@ function renderAppRow(array $row): string {
                 <td>Juan Dela Cruz</td><td>juan.dela.cruz@gmail.com</td><td>Buyer / Adopter</td><td>Calamba, Laguna</td><td>June 2025</td>
                 <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
               </tr>
+              <tr>
+                <td>Maria Santos</td><td>m.santos@gmail.com</td><td>Buyer</td><td>Manila</td><td>Mar 2025</td>
+                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td>Jose Reyes</td><td>jose.reyes@gmail.com</td><td>Adopter</td><td>Biñan, Laguna</td><td>Jan 2026</td>
+                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td>Ana Gomez</td><td>ana.gomez@gmail.com</td><td>Seller</td><td>Sta. Rosa, Laguna</td><td>Apr 2025</td>
+                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td>Ben Torres</td><td>ben.torres@gmail.com</td><td>Buyer / Adopter</td><td>Los Baños, Laguna</td><td>Feb 2026</td>
+                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ── SETTINGS SECTION ── -->
+    <!-- ── SETTINGS ── -->
     <div class="admin-section" id="section-settings">
       <div class="table-section">
         <div class="section-head">
@@ -616,6 +560,7 @@ function renderAppRow(array $row): string {
           </div>
         </div>
         <div style="display:flex; flex-direction:column; gap:0.8rem;">
+
           <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
             <div>
               <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Adoption Auto-Notifications</p>
@@ -624,6 +569,59 @@ function renderAppRow(array $row): string {
             <div class="form-check form-switch mb-0">
               <input class="form-check-input" type="checkbox" checked style="width:2.2rem; height:1.15rem; cursor:pointer; background-color:#AB8154; border-color:#AB8154;">
             </div>
+          </div>
+
+          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Seller Application Alerts</p>
+              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">Notify admin when a new seller applies</p>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" checked style="width:2.2rem; height:1.15rem; cursor:pointer; background-color:#AB8154; border-color:#AB8154;">
+            </div>
+          </div>
+
+          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Listing Review Required</p>
+              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">All new listings require admin approval before going live</p>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" style="width:2.2rem; height:1.15rem; cursor:pointer;">
+            </div>
+          </div>
+
+          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Maintenance Mode</p>
+              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">Take the platform offline for users temporarily</p>
+            </div>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" style="width:2.2rem; height:1.15rem; cursor:pointer;">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="table-section">
+        <div class="section-head">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-person-lock sec-icon"></i>
+            <span class="section-title">Admin Account</span>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          <div style="display:flex; flex-direction:column; gap:0.3rem;">
+            <label style="font-family:'Convergence',sans-serif; font-size:0.75rem; font-weight:700; color:#9B7050; text-transform:uppercase; letter-spacing:0.04em;">Admin Name</label>
+            <input type="text" value="Admin User" style="background:#FAF0E8; border:1.5px solid #D6C0A5; border-radius:0.55rem; padding:0.5rem 0.75rem; font-family:'Convergence',sans-serif; font-size:0.85rem; color:#3D1F08; outline:none; width:100%; max-width:360px;">
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.3rem;">
+            <label style="font-family:'Convergence',sans-serif; font-size:0.75rem; font-weight:700; color:#9B7050; text-transform:uppercase; letter-spacing:0.04em;">Email</label>
+            <input type="email" value="admin@pawster.ph" style="background:#FAF0E8; border:1.5px solid #D6C0A5; border-radius:0.55rem; padding:0.5rem 0.75rem; font-family:'Convergence',sans-serif; font-size:0.85rem; color:#3D1F08; outline:none; width:100%; max-width:360px;">
+          </div>
+          <div style="margin-top:0.25rem;">
+            <button style="background:#AB8154; color:#FAF0E8; border:none; border-radius:0.55rem; padding:0.5rem 1.25rem; font-family:'Convergence',sans-serif; font-size:0.83rem; font-weight:700; cursor:pointer;">Save Changes</button>
           </div>
         </div>
       </div>
@@ -666,26 +664,6 @@ document.querySelectorAll('.snav-link').forEach(link => {
     switchSection(link.dataset.section);
   });
 });
-
-/* BACKGROUND APPOINTMENT ENGINE */
-function updateApptDatabaseStatus(id, actionStatus) {
-  const formData = new FormData();
-  formData.append('action', 'silent_update_appt');
-  formData.append('appointmentID', id);
-  formData.append('status', actionStatus);
-
-  fetch(window.location.href, {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.status === 'success') {
-      window.location.reload();
-    }
-  })
-  .catch(err => console.error('Silent handling error:', err));
-}
 </script>
 </body>
 </html>
