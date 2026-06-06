@@ -39,7 +39,36 @@ $sql = "
 $result      = $conn->query($sql);
 $applications = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
 
-/* ── helper: render one row ── */
+// ── FETCH APPOINTMENTS FROM DATABASE ──
+// JOIN with users table to get the booker's full name
+$appt_sql = "
+    SELECT
+        a.appointmentID,
+        a.userid,
+        CONCAT(u.first_name, ' ', u.last_name) AS booked_by,
+        a.service_type,
+        a.select_pet,
+        DATE_FORMAT(a.date, '%b %e, %Y')        AS appt_date,
+        a.available_time,
+        a.status
+    FROM tblappointment a
+    LEFT JOIN users u ON u.userid = a.userid
+    ORDER BY a.appointmentID DESC
+";
+$appt_result  = $conn->query($appt_sql);
+$appointments = $appt_result ? $appt_result->fetch_all(MYSQLI_ASSOC) : [];
+
+// Stat counts for appointments
+$appt_total   = count($appointments);
+$appt_pending = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'pending'));
+$appt_approved = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'approved'));
+
+// Today's appointment count
+$today_sql = "SELECT COUNT(*) AS cnt FROM tblappointment WHERE date = CURDATE()";
+$today_res = $conn->query($today_sql);
+$appt_today = $today_res ? (int)$today_res->fetch_assoc()['cnt'] : 0;
+
+/* ── helper: render one seller row ── */
 function renderAppRow(array $row): string {
     $statusBadge = match(strtolower($row['status'])) {
         'verified'  => '<span class="badge-s badge-green">Verified</span>',
@@ -52,7 +81,6 @@ function renderAppRow(array $row): string {
     $biz  = htmlspecialchars($row['business_name']);
     $sub  = htmlspecialchars($row['submitted']);
 
-    /* Once a final decision is made, hide the buttons */
     $actions = in_array(strtolower($row['status']), ['verified', 'rejected'])
         ? '<span class="done-txt">Done</span>'
         : '
@@ -74,6 +102,41 @@ function renderAppRow(array $row): string {
           <td>{$name}</td>
           <td>{$biz}</td>
           <td>{$sub}</td>
+          <td>{$statusBadge}</td>
+          <td>{$actions}</td>
+        </tr>";
+}
+
+/* ── helper: render one appointment row ── */
+function renderApptRow(array $row): string {
+    $status = strtolower($row['status']);
+
+    $statusBadge = match($status) {
+        'approved' => '<span class="badge-s badge-green" id="appt-badge-' . $row['appointmentID'] . '">Approved</span>',
+        'rejected'  => '<span class="badge-s badge-red"   id="appt-badge-' . $row['appointmentID'] . '">Rejected</span>',
+        default     => '<span class="badge-s badge-orange" id="appt-badge-' . $row['appointmentID'] . '">Pending</span>',
+    };
+
+    $apptID  = (int) $row['appointmentID'];
+    $user    = htmlspecialchars($row['booked_by'] ?? '—');
+    $service = htmlspecialchars($row['service_type']);
+    $pet     = htmlspecialchars($row['select_pet']);
+    $date    = htmlspecialchars($row['appt_date']);
+    $time    = htmlspecialchars($row['available_time']);
+
+    $actions = in_array($status, ['approved', 'rejected'])
+        ? '<span class="done-txt" id="appt-action-' . $apptID . '">Done</span>'
+        : '<div class="act-col" id="appt-action-' . $apptID . '">
+             <button class="btn-app" onclick="updateApptStatus(' . $apptID . ', \'Approved\')">Approve</button>
+             <button class="btn-rej" onclick="updateApptStatus(' . $apptID . ', \'Rejected\')">Reject</button>
+           </div>';
+
+    return "
+        <tr id=\"appt-row-{$apptID}\">
+          <td>{$user}</td>
+          <td>{$service}</td>
+          <td>{$pet}</td>
+          <td>{$date} | {$time}</td>
           <td>{$statusBadge}</td>
           <td>{$actions}</td>
         </tr>";
@@ -140,10 +203,11 @@ function renderAppRow(array $row): string {
           <p class="stat-num">12</p>
           <span class="stat-pill pill-blue">Awaiting Approval</span>
         </div>
+        <!-- Live appointment stats -->
         <div class="stat-card">
           <p class="stat-label">Appointments Today</p>
-          <p class="stat-num">6</p>
-          <span class="stat-pill pill-green">3 Confirmed</span>
+          <p class="stat-num"><?= $appt_today ?></p>
+          <span class="stat-pill pill-green"><?= $appt_approved ?> Approved</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Active Listings</p>
@@ -213,35 +277,28 @@ function renderAppRow(array $row): string {
         </div>
       </div>
 
+      <!-- Overview: latest 5 appointments (live) -->
       <div class="table-section">
         <div class="section-head">
           <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-calendar3 sec-icon sec-icon"></i>
+            <i class="bi bi-calendar3 sec-icon"></i>
             <span class="section-title">Appointments</span>
           </div>
-          <a href="#" class="view-all-link" onclick="switchSection('adoptions'); return false;">View All →</a>
+          <a href="#" class="view-all-link" onclick="switchSection('appointments'); return false;">View All →</a>
         </div>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
-              <tr><th>Adopter</th><th>Pet</th><th>Date</th><th>Status</th><th>Action</th></tr>
+              <tr><th>Booked By</th><th>Service</th><th>Pet</th><th>Date &amp; Time</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Maria Santos</td><td>Dog</td><td>June 19</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Jose Reyes</td><td>Cat</td><td>June 15</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Ana Gomez</td><td>Kitten</td><td>June 16</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
+              <?php
+              $appt_preview = array_slice($appointments, 0, 5);
+              if (empty($appt_preview)): ?>
+                <tr><td colspan="6" style="text-align:center; color:#9B7050;">No appointments yet.</td></tr>
+              <?php else:
+                foreach ($appt_preview as $row) echo renderApptRow($row);
+              endif; ?>
             </tbody>
           </table>
         </div>
@@ -359,27 +416,25 @@ function renderAppRow(array $row): string {
           </table>
         </div>
       </div>
-
-      
     </div>
 
-    <!-- ── APPOINTMENTS ── -->
+    <!-- ── APPOINTMENTS (fully live from tblappointment) ── -->
     <div class="admin-section" id="section-appointments">
       <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
         <div class="stat-card">
           <p class="stat-label">Appointments Today</p>
-          <p class="stat-num">6</p>
-          <span class="stat-pill pill-green">3 Confirmed</span>
+          <p class="stat-num"><?= $appt_today ?></p>
+          <span class="stat-pill pill-green"><?= $appt_approved ?> Approved</span>
         </div>
         <div class="stat-card">
-          <p class="stat-label">This Week</p>
-          <p class="stat-num">21</p>
+          <p class="stat-label">Total All Time</p>
+          <p class="stat-num"><?= $appt_total ?></p>
           <span class="stat-pill pill-blue">Scheduled</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Pending</p>
-          <p class="stat-num">9</p>
-          <span class="stat-pill pill-red">Awaiting Confirm</span>
+          <p class="stat-num"><?= $appt_pending ?></p>
+          <span class="stat-pill pill-red">Awaiting Approval</span>
         </div>
       </div>
 
@@ -393,29 +448,21 @@ function renderAppRow(array $row): string {
         <div class="table-responsive">
           <table class="data-table">
             <thead>
-              <tr><th>User</th><th>Type</th><th>Pet</th><th>Date & Time</th><th>Location</th><th>Status</th></tr>
+              <tr>
+                <th>Booked By</th>
+                <th>Service</th>
+                <th>Pet</th>
+                <th>Date &amp; Time</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Juan Dela Cruz</td><td>Grooming</td><td>Mochi</td><td>May 20 | 1:00 PM</td><td>Calamba Hub</td>
-                <td><span class="badge-s badge-blue">Confirmed</span></td>
-              </tr>
-              <tr>
-                <td>Juan Dela Cruz</td><td>Vet Check</td><td>Mochi</td><td>June 3 | 10:00 AM</td><td>Pawster Vet</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-              </tr>
-              <tr>
-                <td>Juan Dela Cruz</td><td>Meet & Greet</td><td>Mochi</td><td>June 7 | 12:00 PM</td><td>Tanauan Shelter</td>
-                <td><span class="badge-s badge-green">Scheduled</span></td>
-              </tr>
-              <tr>
-                <td>Maria Santos</td><td>Grooming</td><td>Doga</td><td>June 8 | 3:00 PM</td><td>Sta. Rosa Hub</td>
-                <td><span class="badge-s badge-blue">Confirmed</span></td>
-              </tr>
-              <tr>
-                <td>Ben Torres</td><td>Vet Check</td><td>Dora</td><td>June 10 | 9:00 AM</td><td>Pawster Vet</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-              </tr>
+              <?php if (empty($appointments)): ?>
+                <tr><td colspan="6" style="text-align:center; color:#9B7050;">No appointments yet.</td></tr>
+              <?php else:
+                foreach ($appointments as $row) echo renderApptRow($row);
+              endif; ?>
             </tbody>
           </table>
         </div>
@@ -664,6 +711,37 @@ document.querySelectorAll('.snav-link').forEach(link => {
     switchSection(link.dataset.section);
   });
 });
+
+function updateApptStatus(apptId, newStatus) {
+  const formData = new FormData();
+  formData.append('appointment_id', apptId);
+  formData.append('new_status', newStatus);
+
+  fetch('/PAWSTER/controllers/update_appointment_status.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.status === 'success') {
+      // Swap badge
+      const badge = document.getElementById('appt-badge-' + apptId);
+      if (badge) {
+        const isApproved = newStatus === 'Approved';
+        badge.className   = 'badge-s ' + (isApproved ? 'badge-green' : 'badge-red');
+        badge.textContent = newStatus;
+      }
+      // Swap action buttons → Done
+      const action = document.getElementById('appt-action-' + apptId);
+      if (action) {
+        action.outerHTML = '<span class="done-txt" id="appt-action-' + apptId + '">Done</span>';
+      }
+    } else {
+      alert('Error: ' + (data.message || 'Could not update status.'));
+    }
+  })
+  .catch(() => alert('Network error. Please try again.'));
+}
 </script>
 </body>
 </html>

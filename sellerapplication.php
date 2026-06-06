@@ -8,6 +8,11 @@
 </head>
 
 <body>
+    <?php
+    include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    $db = new DatabaseConnection();
+    ?>
     <header>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
     </header>
@@ -130,4 +135,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
