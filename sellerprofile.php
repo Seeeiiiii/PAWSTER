@@ -29,14 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_l
     $category = trim($_POST['primary_category'] ?? '');
     $brand    = trim($_POST['brand_name']       ?? '');
     $desc     = trim($_POST['product_desc']     ?? '');
+    $price    = (float)($_POST['price']         ?? 0);
     $photo    = $_FILES['product_photo']        ?? [];
 
-    if (!$category || !$brand || !$desc) {
-        redirect('Please fill in all listing fields.', 'sellerprofile.php');
+    if (!$category || !$brand || !$desc || $price <= 0) {
+        redirect('Please fill in all listing fields including a valid price.', 'sellerprofile.php');
     }
 
     $controller = new ApplicationFormController();
-    $success    = $controller->addListing($category, $brand, $desc, $sellerid, $photo);
+    $success    = $controller->addListing($category, $brand, $desc, $price, $sellerid, $photo);
 
     if ($success) {
         redirect('Listing added successfully!', 'sellerprofile.php');
@@ -53,19 +54,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     $category  = trim($_POST['primary_category']  ?? '');
     $brand     = trim($_POST['brand_name']         ?? '');
     $desc      = trim($_POST['product_desc']       ?? '');
+    $price     = (float)($_POST['price']           ?? 0);
     $photo     = $_FILES['product_photo']          ?? [];
 
     if (!$userid) {
         echo json_encode(['success' => false, 'error' => 'Not logged in.']);
         exit();
     }
-    if (!$productid || !$category || !$brand || !$desc) {
-        echo json_encode(['success' => false, 'error' => 'All fields are required.']);
+    if (!$productid || !$category || !$brand || !$desc || $price <= 0) {
+        echo json_encode(['success' => false, 'error' => 'All fields including price are required.']);
         exit();
     }
 
     $controller = new ApplicationFormController();
-    $success    = $controller->updateListing($productid, $userid, $category, $brand, $desc, $photo);
+    $success    = $controller->updateListing($productid, $userid, $category, $brand, $desc, $price, $photo);
 
     echo json_encode(
         $success
@@ -125,7 +127,7 @@ if ($userid > 0) {
 
 
         $stmt3 = $conn->prepare(
-            "SELECT productid, brand_name, product_desc, primary_category, productimage
+            "SELECT productid, brand_name, product_desc, primary_category, price, productimage
      FROM tblsellerproduct
      WHERE sellerid = ?
      ORDER BY productid ASC"
@@ -250,9 +252,9 @@ function renderStars(int $count): string
                                 <label class="field-label" for="new_category">Primary Category</label>
                                 <select class="field-input" name="primary_category" id="new_category">
                                     <option value="Pet Food">Pet Food</option>
+                                    <option value="Grooming Supplies">Grooming Supplies</option>
                                     <option value="Pet Accessories">Pet Accessories</option>
                                     <option value="Pet Clothes">Pet Clothes</option>
-                                    <option value="Grooming Supplies">Grooming Supplies</option>
                                 </select>
                             </div>
                             <div class="field-group">
@@ -262,6 +264,10 @@ function renderStars(int $count): string
                             <div class="field-group">
                                 <label class="field-label" for="new_desc">Product Description</label>
                                 <input class="field-input" name="product_desc" id="new_desc" type="text" placeholder="e.g. Good for all pets" />
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="new_price">Price (₱)</label>
+                                <input class="field-input" name="price" id="new_price" type="number" min="0.01" step="0.01" placeholder="e.g. 250.00" />
                             </div>
                             <div class="field-group">
                                 <label class="field-label" for="new_photo">Product Photo <span style="font-weight:400; font-size:.8rem;">(PNG only, max 5MB — optional)</span></label>
@@ -305,6 +311,12 @@ function renderStars(int $count): string
                                                 <input class="field-input edit-desc" type="text"
                                                     value="<?= htmlspecialchars($item['product_desc']) ?>"
                                                     placeholder="Product description" />
+                                            </div>
+                                            <div class="field-group">
+                                                <label class="field-label">Price (₱)</label>
+                                                <input class="field-input edit-price" type="number" min="0.01" step="0.01"
+                                                    value="<?= number_format((float)$item['price'], 2, '.', '') ?>"
+                                                    placeholder="e.g. 250.00" />
                                             </div>
                                             <div class="field-group">
                                                 <label class="field-label">Category</label>
@@ -410,11 +422,11 @@ function renderStars(int $count): string
 
         <div class="content-grid">
 
-            <!-- My Listings -->
+
             <section class="card" aria-label="My listings">
                 <div class="card__header">
                     <h2 class="card__title">My listings</h2>
-                    <!-- Manage Listings opens the second modal -->
+                
                     <a href="#" class="card__link"
                         data-bs-toggle="modal" data-bs-target="#listingsModal">
                         Manage Listings &rarr;
@@ -439,7 +451,7 @@ function renderStars(int $count): string
                                     — <?= htmlspecialchars($item['product_desc']) ?>
                                 </span>
                                 <span class="listing-item__price">
-                                    <?= htmlspecialchars($item['primary_category']) ?>
+                                    ₱<?= number_format((float)$item['price'], 2) ?>
                                 </span>
                             </div>
                         </li>
@@ -447,7 +459,7 @@ function renderStars(int $count): string
                 </ul>
             </section>
 
-            <!-- Recent Reviews -->
+  
             <section class="card" aria-label="Recent reviews">
                 <div class="card__header">
                     <h2 class="card__title">Recent reviews</h2>
@@ -465,7 +477,7 @@ function renderStars(int $count): string
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            /* ── Edit Profile modal ── */
+  
             var editModal = document.getElementById('editModal');
             var saveEditBtn = document.getElementById('saveEdit');
             var bannerName = document.getElementById('bannerName');
@@ -500,7 +512,6 @@ function renderStars(int $count): string
                 }, 900);
             });
 
-            /* ── New listing: photo upload box click ── */
             var newPhotoBox = document.getElementById('new_photo_box');
             var newPhotoInput = document.getElementById('new_photo');
             var newPhotoName = document.getElementById('new_photo_name');
@@ -530,7 +541,7 @@ function renderStars(int $count): string
                 });
             }
 
-            /* ── Existing listings: photo upload boxes ── */
+            
             document.querySelectorAll('.edit-photo-box').forEach(function(box) {
                 var input = box.querySelector('.edit-photo-input');
                 var nameDiv = box.querySelector('.edit-photo-name');
@@ -557,7 +568,6 @@ function renderStars(int $count): string
                 });
             });
 
-            /* ── Existing listings: save per row ── */
             document.querySelectorAll('.save-listing-btn').forEach(function(btn) {
                 btn.addEventListener('click', function() {
                     var row = btn.closest('.listing-edit-row');
@@ -565,12 +575,13 @@ function renderStars(int $count): string
                     var brand = row.querySelector('.edit-brand').value.trim();
                     var desc = row.querySelector('.edit-desc').value.trim();
                     var cat = row.querySelector('.edit-cat').value;
+                    var price = row.querySelector('.edit-price').value.trim();
                     var photoInput = row.querySelector('.edit-photo-input');
                     var msg = row.querySelector('.save-listing-msg');
 
-                    if (!brand || !desc) {
+                    if (!brand || !desc || !price) {
                         msg.style.color = '#c0392b';
-                        msg.textContent = 'Brand and description are required.';
+                        msg.textContent = 'Brand, description, and price are required.';
                         msg.style.display = 'inline';
                         return;
                     }
@@ -585,6 +596,7 @@ function renderStars(int $count): string
                     formData.append('primary_category', cat);
                     formData.append('brand_name', brand);
                     formData.append('product_desc', desc);
+                    formData.append('price', price);
                     if (photoInput && photoInput.files[0]) {
                         formData.append('product_photo', photoInput.files[0]);
                     }

@@ -3,25 +3,26 @@
 <?php
 include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/fetchproducts.php');
 
-// ── Resolve active category from GET param ──────────────────────
+
+$primary_categories = ['Pet Food', 'Grooming Supplies', 'Pet Accessories', 'Pet Clothes'];
 $active_category = null;
 if (
     isset($_GET['category']) &&
-    in_array($_GET['category'], prod_auto::CATEGORIES, true)
+    in_array($_GET['category'], $primary_categories, true)
 ) {
     $active_category = $_GET['category'];
 }
 
-// ── Resolve page from GET param ─────────────────────────────────
+
 $current_page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 
-// ── Load products ────────────────────────────────────────────────
+
 $prodLoader   = new prod_auto($db, $active_category, $current_page, 12);
 $products     = $prodLoader->products;
 $total_pages  = $prodLoader->total_pages;
 
 
-// ── Helper: build URL preserving current filters ────────────────
+
 function shop_url(array $overrides = []): string {
     $params = [];
     if (isset($_GET['category'])) $params['category'] = $_GET['category'];
@@ -45,17 +46,20 @@ function shop_url(array $overrides = []): string {
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
 </header>
 
-<!-- ── Category Navigation ──────────────────────────────────── -->
+
 <nav class="category-nav">
     <div class="category-container">
 
-        <!-- "All" button clears the category filter -->
+        
         <a href="<?= shop_url(['category' => null, 'page' => null]) ?>"
            class="category-btn <?= $active_category === null ? 'active' : '' ?>">
             All
         </a>
 
-        <?php foreach (prod_auto::CATEGORIES as $cat): ?>
+        <?php
+        $primary_categories = ['Pet Food', 'Grooming Supplies', 'Pet Accessories', 'Pet Clothes'];
+        foreach ($primary_categories as $cat):
+        ?>
             <a href="<?= shop_url(['category' => $cat, 'page' => null]) ?>"
                class="category-btn <?= $active_category === $cat ? 'active' : '' ?>">
                 <?= htmlspecialchars($cat) ?>
@@ -68,7 +72,7 @@ function shop_url(array $overrides = []): string {
 <div class="container">
     <main class="main-content">
 
-        <!-- ── Search Section ───────────────────────────────── -->
+
         <section class="search-section">
             <h2 class="search-title">
                 <?= $active_category
@@ -82,7 +86,7 @@ function shop_url(array $overrides = []): string {
             </div>
         </section>
 
-        <!-- ── Product Grid ─────────────────────────────────── -->
+   
         <section class="products-section">
 
             <?php if (empty($products)): ?>
@@ -102,12 +106,10 @@ function shop_url(array $overrides = []): string {
                                  loading="lazy">
                         </div>
                         <div class="product-info">
-                            <span class="product-category-badge">
-                                <?= htmlspecialchars($product['category']) ?>
-                            </span>
+                            <p class="product-price">₱<?= number_format((float)$product['price'], 2) ?></p>
                             <h3 class="product-title"><?= htmlspecialchars($product['brand_name']) ?></h3>
-                            <p class="product-brand"><?= htmlspecialchars($product['primary_category']) ?></p>
                             <p class="product-desc"><?= htmlspecialchars($product['product_desc']) ?></p>
+                            <p class="product-seller"><?= htmlspecialchars($product['business_name'] ?? '') ?></p>
                             <button class="add-to-cart-btn"
                                     data-id="<?= (int) $product['productid'] ?>">
                                 Add to Cart
@@ -118,17 +120,17 @@ function shop_url(array $overrides = []): string {
                 </div>
             <?php endif; ?>
 
-            <!-- ── Pagination ───────────────────────────────── -->
+
             <?php if ($total_pages > 1): ?>
             <div class="pagination">
 
-                <!-- Prev -->
+         
                 <?php if ($current_page > 1): ?>
                 <a href="<?= shop_url(['page' => $current_page - 1]) ?>" class="page-btn">‹</a>
                 <?php endif; ?>
 
                 <?php
-                // Show a sliding window of page numbers
+            
                 $window = 2;
                 $start  = max(1, $current_page - $window);
                 $end    = min($total_pages, $current_page + $window);
@@ -168,7 +170,7 @@ function shop_url(array $overrides = []): string {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// ── Client-side search filter (instant, no round-trip needed) ──
+
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.addEventListener('input', function () {
@@ -181,7 +183,7 @@ if (searchInput) {
     });
 }
 
-// ── Add-to-cart placeholder ─────────────────────────────────────
+
 document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', function () {
         const id = this.dataset.id;

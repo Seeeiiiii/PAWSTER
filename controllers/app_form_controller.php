@@ -52,6 +52,7 @@ class ApplicationFormController
         string $primary_category,
         string $brand_name,
         string $product_desc,
+        float  $price,
         int    $sellerid,
         array  $photo_file = []
     ): bool {
@@ -76,16 +77,16 @@ class ApplicationFormController
 
         if ($photo_name) {
             $stmt = $this->conn->prepare(
-                "INSERT INTO tblsellerproduct (primary_category, brand_name, product_desc, sellerid, productimage)
-                 VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO tblsellerproduct (primary_category, brand_name, product_desc, price, sellerid, productimage)
+                 VALUES (?, ?, ?, ?, ?, ?)"
             );
-            $stmt->bind_param("sssis", $primary_category, $brand_name, $product_desc, $sellerid, $photo_name);
+            $stmt->bind_param("sssdis", $primary_category, $brand_name, $product_desc, $price, $sellerid, $photo_name);
         } else {
             $stmt = $this->conn->prepare(
-                "INSERT INTO tblsellerproduct (primary_category, brand_name, product_desc, sellerid)
-                 VALUES (?, ?, ?, ?)"
+                "INSERT INTO tblsellerproduct (primary_category, brand_name, product_desc, price, sellerid)
+                 VALUES (?, ?, ?, ?, ?)"
             );
-            $stmt->bind_param("sssi", $primary_category, $brand_name, $product_desc, $sellerid);
+            $stmt->bind_param("sssdi", $primary_category, $brand_name, $product_desc, $price, $sellerid);
         }
 
         return $stmt->execute();
@@ -97,6 +98,7 @@ class ApplicationFormController
         string $primary_category,
         string $brand_name,
         string $product_desc,
+        float  $price,
         array  $photo_file = []
     ): bool {
 
@@ -135,17 +137,17 @@ class ApplicationFormController
         if ($photo_name) {
             $stmt = $this->conn->prepare(
                 "UPDATE tblsellerproduct
-                 SET primary_category = ?, brand_name = ?, product_desc = ?, productimage = ?
+                 SET primary_category = ?, brand_name = ?, product_desc = ?, price = ?, productimage = ?
                  WHERE productid = ?"
             );
-            $stmt->bind_param("ssssi", $primary_category, $brand_name, $product_desc, $photo_name, $productid);
+            $stmt->bind_param("sssdsi", $primary_category, $brand_name, $product_desc, $price, $photo_name, $productid);
         } else {
             $stmt = $this->conn->prepare(
                 "UPDATE tblsellerproduct
-                 SET primary_category = ?, brand_name = ?, product_desc = ?
+                 SET primary_category = ?, brand_name = ?, product_desc = ?, price = ?
                  WHERE productid = ?"
             );
-            $stmt->bind_param("sssi", $primary_category, $brand_name, $product_desc, $productid);
+            $stmt->bind_param("sssdi", $primary_category, $brand_name, $product_desc, $price, $productid);
         }
 
         return $stmt->execute();

@@ -1,10 +1,5 @@
 <?php
-/**
- * update_appointment_status.php
- * Place this file at: /PAWSTER/controllers/update_appointment_status.php
- *
- * Responds with JSON — called via fetch() from admin.php (no page reload).
- */
+
 
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
 

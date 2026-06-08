@@ -8,14 +8,12 @@ class prod_auto {
     public int   $total_count  = 0;
     public int   $total_pages  = 1;
 
-    // Valid category values — must match the ENUM in tblsellerproduct
+
     public const CATEGORIES = [
-        'Food & Treats',
-        'Collar & Leashes',
-        'Grooming',
-        'Bed & Crates',
-        'Toys',
-        'Health & Vet',
+        'Pet Food',
+        'Grooming Supplies',
+        'Pet Accessories',
+        'Pet Clothes',
     ];
 
     /**
@@ -38,9 +36,9 @@ class prod_auto {
         $offset = ($page - 1) * $per_page;
 
         if ($category !== null) {
-            // Get total count for this category
+
             $countStmt = $db->conn->prepare(
-                "SELECT COUNT(*) FROM tblsellerproduct WHERE category = ?"
+                "SELECT COUNT(*) FROM tblsellerproduct WHERE primary_category = ?"
             );
             $countStmt->bind_param("s", $category);
             $countStmt->execute();
@@ -48,23 +46,37 @@ class prod_auto {
             $countStmt->fetch();
             $countStmt->close();
 
-            // Paginated results
+      
             $stmt = $db->conn->prepare(
-                "SELECT * FROM tblsellerproduct WHERE category = ? ORDER BY brand_name ASC LIMIT ? OFFSET ?"
+                "SELECT p.*, f.business_name
+                 FROM tblsellerproduct p
+                 LEFT JOIN tblapplicationform f ON f.formid = p.sellerid
+                 WHERE p.primary_category = ?
+                 ORDER BY p.brand_name ASC
+                 LIMIT ? OFFSET ?"
             );
             $stmt->bind_param("sii", $category, $per_page, $offset);
             $stmt->execute();
             $result = $stmt->get_result();
         } else {
-            // Get total count for all products
-            $countResult = mysqli_query($db->conn, "SELECT COUNT(*) FROM tblsellerproduct");
-            $this->total_count = (int) mysqli_fetch_row($countResult)[0];
+       
+            $countStmt = $db->conn->prepare("SELECT COUNT(*) FROM tblsellerproduct");
+            $countStmt->execute();
+            $countStmt->bind_result($this->total_count);
+            $countStmt->fetch();
+            $countStmt->close();
 
-            // Paginated results
-            $result = mysqli_query(
-                $db->conn,
-                "SELECT * FROM tblsellerproduct ORDER BY category ASC, brand_name ASC LIMIT $per_page OFFSET $offset"
+          
+            $stmt = $db->conn->prepare(
+                "SELECT p.*, f.business_name
+                 FROM tblsellerproduct p
+                 LEFT JOIN tblapplicationform f ON f.formid = p.sellerid
+                 ORDER BY p.primary_category ASC, p.brand_name ASC
+                 LIMIT ? OFFSET ?"
             );
+            $stmt->bind_param("ii", $per_page, $offset);
+            $stmt->execute();
+            $result = $stmt->get_result();
         }
 
         while ($row = mysqli_fetch_assoc($result)) {
