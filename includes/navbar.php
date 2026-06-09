@@ -10,6 +10,11 @@
         color: #AB8154;
     }
 
+    .bi-cart-check-fill{
+        font-size: 2rem;
+        color: #AB8154;
+    }
+
     .bi-person-circle {
         font-size: 1.7em;
     }
@@ -34,6 +39,8 @@
     .dropdown-item {
         font-family: 'Convergence', sans-serif !important;
     }
+    
+    
 </style>
 
 <?php
@@ -43,7 +50,8 @@ $navbar = array(
     "userprof"   => "/PAWSTER/userprof.php",
     "sellerform" => "/PAWSTER/sellerapplication.php",
     "sellerprof" => "/PAWSTER/sellerprofile.php",
-    "shop" => "/PAWSTER/shop.php"
+    "shop" => "/PAWSTER/shop.php",
+    "cart" => "/PAWSTER/cart.php"
 );
 
 $first_name = $_SESSION['auth_user']['first_name'] ?? 'Guest';
@@ -88,8 +96,8 @@ if ($is_logged_in) {
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto me-5">
-                        <li class="nav-item">
+                    <ul class="navbar-nav ms-auto me-1 ">
+                        <li class="nav-item d-flex flex-row align-items-center ">
                             <div class="dropdown">
                                 <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -117,6 +125,9 @@ if ($is_logged_in) {
                                     <?php endif; ?>
 
                                 </div>
+                            </div>
+                            <div>
+                                <a href="<?= $navbar['cart'] ?>"><i class="bi bi-cart-check-fill ms-3"></i></a>
                             </div>
                         </li>
                     </ul>

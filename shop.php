@@ -187,14 +187,34 @@ if (searchInput) {
 document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', function () {
         const id = this.dataset.id;
-        // TODO: POST to cart controller with productid = id
-        console.log('Add to cart:', id);
-        this.textContent = '✓ Added!';
-        this.style.backgroundColor = 'var(--dark-brown)';
-        setTimeout(() => {
-            this.textContent = 'Add to Cart';
-            this.style.backgroundColor = '';
-        }, 1500);
+        const originalText = this.textContent;
+        this.disabled = true;
+
+        const formData = new FormData();
+        formData.append('action', 'add_to_cart');
+        formData.append('productid', id);
+
+        fetch('/PAWSTER/cart.php', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    this.textContent = '✓ Added!';
+                    this.style.backgroundColor = 'var(--dark-brown)';
+
+                    /* update cart badge if it exists in navbar */
+                    const badge = document.getElementById('cart-count');
+                    if (badge) badge.textContent = data.cart_count;
+
+                    setTimeout(() => {
+                        this.textContent = originalText;
+                        this.style.backgroundColor = '';
+                        this.disabled = false;
+                    }, 1500);
+                } else {
+                    this.disabled = false;
+                }
+            })
+            .catch(() => { this.disabled = false; });
     });
 });
 </script>

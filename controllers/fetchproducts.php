@@ -8,7 +8,6 @@ class prod_auto {
     public int   $total_count  = 0;
     public int   $total_pages  = 1;
 
-
     public const CATEGORIES = [
         'Pet Food',
         'Grooming Supplies',
@@ -46,11 +45,10 @@ class prod_auto {
             $countStmt->fetch();
             $countStmt->close();
 
-      
             $stmt = $db->conn->prepare(
-                "SELECT p.*, f.business_name
+                "SELECT p.*, sp.businessname AS business_name
                  FROM tblsellerproduct p
-                 LEFT JOIN tblapplicationform f ON f.formid = p.sellerid
+                 LEFT JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
                  WHERE p.primary_category = ?
                  ORDER BY p.brand_name ASC
                  LIMIT ? OFFSET ?"
@@ -59,18 +57,17 @@ class prod_auto {
             $stmt->execute();
             $result = $stmt->get_result();
         } else {
-       
+
             $countStmt = $db->conn->prepare("SELECT COUNT(*) FROM tblsellerproduct");
             $countStmt->execute();
             $countStmt->bind_result($this->total_count);
             $countStmt->fetch();
             $countStmt->close();
 
-          
             $stmt = $db->conn->prepare(
-                "SELECT p.*, f.business_name
+                "SELECT p.*, sp.businessname AS business_name
                  FROM tblsellerproduct p
-                 LEFT JOIN tblapplicationform f ON f.formid = p.sellerid
+                 LEFT JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
                  ORDER BY p.primary_category ASC, p.brand_name ASC
                  LIMIT ? OFFSET ?"
             );
@@ -79,7 +76,7 @@ class prod_auto {
             $result = $stmt->get_result();
         }
 
-        while ($row = mysqli_fetch_assoc($result)) {
+        while ($row = $result->fetch_assoc()) {
             $this->products[] = $row;
         }
 

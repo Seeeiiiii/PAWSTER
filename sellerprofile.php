@@ -78,6 +78,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 }
 
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_listing') {
+    header('Content-Type: application/json');
+
+    $userid    = (int)($_SESSION['auth_user']['userid'] ?? 0);
+    $productid = (int)($_POST['productid'] ?? 0);
+
+    if (!$userid) {
+        echo json_encode(['success' => false, 'error' => 'Not logged in.']);
+        exit();
+    }
+    if (!$productid) {
+        echo json_encode(['success' => false, 'error' => 'Invalid product.']);
+        exit();
+    }
+
+    /* Verify ownership before deleting */
+    $check = $conn->prepare(
+        "SELECT p.productid FROM tblsellerproduct p
+         JOIN tblsellerstatus s ON s.formid = p.sellerid
+         WHERE p.productid = ? AND s.userid = ? LIMIT 1"
+    );
+    $check->bind_param("ii", $productid, $userid);
+    $check->execute();
+    $check->store_result();
+    $owned = $check->num_rows > 0;
+    $check->close();
+
+    if (!$owned) {
+        echo json_encode(['success' => false, 'error' => 'Product not found or not yours.']);
+        exit();
+    }
+
+    $del = $conn->prepare("DELETE FROM tblsellerproduct WHERE productid = ?");
+    $del->bind_param("i", $productid);
+
+    echo json_encode(
+        $del->execute() && $del->affected_rows > 0
+            ? ['success' => true]
+            : ['success' => false, 'error' => 'Delete failed. Please try again.']
+    );
+    exit();
+}
+
 $userid = isset($_GET['userid'])
     ? (int) $_GET['userid']
     : (int) ($_SESSION['auth_user']['userid'] ?? 0);
@@ -286,10 +329,12 @@ function renderStars(int $count): string
 
                     <hr class="listing-divider">
 
-                    <p style="font-family:'Convergence',sans-serif; color:#9B7050; font-weight:600; margin:.75rem 0;">
+                    <button type="button" id="toggleCurrentListings"
+                        style="background:none; border:none; cursor:pointer; font-family:'Convergence',sans-serif; color:#9B7050; font-weight:600; font-size:1rem; padding:0; margin:.75rem 0; display:flex; align-items:center; gap:.4rem; width:100%;">
                         Current Listings
-                    </p>
-                    <div id="existingListings">
+                        <svg id="currentListingsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div id="existingListings" style="display:none;">
                         <?php if (empty($listings)): ?>
                             <p style="text-align:center; color:#9B7050; font-family:'Convergence',sans-serif;">
                                 No listings found for this account.
@@ -341,6 +386,9 @@ function renderStars(int $count): string
                                             <div style="display:flex; align-items:center; gap:.75rem; margin-top:.5rem;">
                                                 <button type="button" class="btn-save save-listing-btn" style="flex:1;">
                                                     Save changes
+                                                </button>
+                                                <button type="button" class="delete-listing-btn" style="background:#c0392b; color:#fff; border:none; border-radius:8px; padding:.45rem .9rem; cursor:pointer; font-family:'Convergence',sans-serif; font-size:.85rem;">
+                                                    Delete
                                                 </button>
                                                 <span class="save-listing-msg" style="font-family:'Convergence',sans-serif; font-size:.82rem; display:none;"></span>
                                             </div>
@@ -426,7 +474,6 @@ function renderStars(int $count): string
             <section class="card" aria-label="My listings">
                 <div class="card__header">
                     <h2 class="card__title">My listings</h2>
-                
                     <a href="#" class="card__link"
                         data-bs-toggle="modal" data-bs-target="#listingsModal">
                         Manage Listings &rarr;
@@ -476,6 +523,21 @@ function renderStars(int $count): string
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            /* ── Current Listings toggle (inside modal) ── */
+            var toggleCurrent  = document.getElementById('toggleCurrentListings');
+            var existingList   = document.getElementById('existingListings');
+            var currentChevron = document.getElementById('currentListingsChevron');
+
+            if (toggleCurrent) {
+                toggleCurrent.addEventListener('click', function () {
+                    var open = existingList.style.display !== 'none';
+                    existingList.style.display = open ? 'none' : '';
+                    currentChevron.style.transform = open ? '' : 'rotate(180deg)';
+                });
+            }
+
+
 
   
             var editModal = document.getElementById('editModal');
@@ -634,6 +696,58 @@ function renderStars(int $count): string
                             msg.style.display = 'inline';
                             btn.disabled = false;
                             btn.textContent = 'Save changes';
+                        });
+                });
+            });
+
+            document.querySelectorAll('.delete-listing-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var row = btn.closest('.listing-edit-row');
+                    var productid = row.dataset.productid;
+                    var msg = row.querySelector('.save-listing-msg');
+
+                    if (!confirm('Delete this listing? This cannot be undone.')) return;
+
+                    btn.disabled = true;
+                    btn.textContent = 'Deleting...';
+
+                    var formData = new FormData();
+                    formData.append('action', 'delete_listing');
+                    formData.append('productid', productid);
+
+                    fetch(window.location.href, { method: 'POST', body: formData })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                /* Remove the row + its divider from the modal */
+                                var divider = row.nextElementSibling;
+                                if (divider && divider.classList.contains('listing-divider')) divider.remove();
+                                row.remove();
+
+                                /* Remove from the sidebar listing display */
+                                var sideItem = document.querySelector('#listingDisplay [data-productid="' + productid + '"]');
+                                if (sideItem) sideItem.remove();
+
+                                /* Update the active listings count */
+                                var countEl = document.querySelector('.metric-card__value');
+                                if (countEl && !isNaN(parseInt(countEl.textContent))) {
+                                    countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+                                }
+
+                            } else {
+                                msg.style.color = '#c0392b';
+                                msg.textContent = data.error || 'Delete failed.';
+                                msg.style.display = 'inline';
+                                btn.disabled = false;
+                                btn.textContent = 'Delete';
+                            }
+                        })
+                        .catch(function() {
+                            msg.style.color = '#c0392b';
+                            msg.textContent = 'Request failed.';
+                            msg.style.display = 'inline';
+                            btn.disabled = false;
+                            btn.textContent = 'Delete';
                         });
                 });
             });
