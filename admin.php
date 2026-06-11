@@ -1,3 +1,4 @@
+<?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,10 +14,38 @@
 </head>
 <body>
 
+<?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'; ?>
+
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
-$db   = new DatabaseConnection();
 $conn = $db->conn;
+
+// ── FETCH PETS ──
+$pets_sql = "SELECT * FROM tblpets ORDER BY created_at DESC";
+$pets_result = $conn->query($pets_sql);
+$all_pets = $pets_result ? $pets_result->fetch_all(MYSQLI_ASSOC) : [];
+
+// ── FETCH ADOPTION REQUESTS ──
+$adopt_sql = "
+    SELECT
+        ar.requestid,
+        ar.petid,
+        ar.userid,
+        ar.status,
+        ar.created_at,
+        CONCAT(u.first_name, ' ', u.last_name) AS adopter_name,
+        p.name AS pet_name,
+        p.breed AS pet_breed
+    FROM tbladoptionrequest ar
+    JOIN users u ON u.userid = ar.userid
+    JOIN tblpets p ON p.petid = ar.petid
+    ORDER BY ar.created_at DESC
+";
+$adopt_result = $conn->query($adopt_sql);
+$adoption_requests = $adopt_result ? $adopt_result->fetch_all(MYSQLI_ASSOC) : [];
+
+$adopt_pending  = count(array_filter($adoption_requests, fn($r) => strtolower($r['status']) === 'pending'));
+$adopt_approved = count(array_filter($adoption_requests, fn($r) => strtolower($r['status']) === 'approved'));
+$adopt_rejected = count(array_filter($adoption_requests, fn($r) => strtolower($r['status']) === 'rejected'));
 
 /**
  * JOIN query: pulls seller name from users, business name from tblapplicationform,
@@ -161,6 +190,9 @@ function renderApptRow(array $row): string {
       <a href="#" class="snav-link" data-section="adoptions">
         <i class="bi bi-heart"></i><span>Adoptions</span>
       </a>
+      <a href="#" class="snav-link" data-section="pets">
+        <i class="bi bi-emoji-smile"></i><span>Pets</span>
+      </a>
       <a href="#" class="snav-link" data-section="appointments">
         <i class="bi bi-calendar3"></i><span>Appointments</span>
       </a>
@@ -181,11 +213,6 @@ function renderApptRow(array $row): string {
 
     <div class="admin-topbar">
       <h2 class="topbar-title" id="topbar-title">Admin Overview</h2>
-      <div class="topbar-user">
-        <i class="bi bi-person-circle"></i>
-        <span>| User</span>
-        <i class="bi bi-chevron-down"></i>
-      </div>
     </div>
 
     <!-- ── OVERVIEW ── -->
@@ -358,19 +385,19 @@ function renderApptRow(array $row): string {
     <div class="admin-section" id="section-adoptions">
       <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
         <div class="stat-card">
-          <p class="stat-label">Total Requests</p>
-          <p class="stat-num">12</p>
+          <p class="stat-label">Pending Requests</p>
+          <p class="stat-num"><?= $adopt_pending ?></p>
           <span class="stat-pill pill-blue">Awaiting Approval</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Approved</p>
-          <p class="stat-num">34</p>
-          <span class="stat-pill pill-green">This Month</span>
+          <p class="stat-num"><?= $adopt_approved ?></p>
+          <span class="stat-pill pill-green">All Time</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Rejected</p>
-          <p class="stat-num">5</p>
-          <span class="stat-pill pill-red">This Month</span>
+          <p class="stat-num"><?= $adopt_rejected ?></p>
+          <span class="stat-pill pill-red">All Time</span>
         </div>
       </div>
 
@@ -387,31 +414,149 @@ function renderApptRow(array $row): string {
               <tr><th>Adopter</th><th>Pet</th><th>Breed</th><th>Date</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
+              <?php if (empty($adoption_requests)): ?>
+                <tr><td colspan="6" style="text-align:center;color:#9B7050;">No adoption requests yet.</td></tr>
+              <?php else: foreach ($adoption_requests as $ar):
+                $arStatus = strtolower($ar['status']);
+                $badge = match($arStatus) {
+                  'approved' => '<span class="badge-s badge-green">Approved</span>',
+                  'rejected' => '<span class="badge-s badge-red">Rejected</span>',
+                  default    => '<span class="badge-s badge-orange" id="adopt-badge-' . $ar['requestid'] . '">Pending</span>',
+                };
+                $actions = in_array($arStatus, ['approved','rejected'])
+                  ? '<span class="done-txt">Done</span>'
+                  : '<div class="act-col" id="adopt-action-' . $ar['requestid'] . '">
+                       <button class="btn-app" onclick="updateAdoptStatus(' . $ar['requestid'] . ',\'Approved\')">Approve</button>
+                       <button class="btn-rej" onclick="updateAdoptStatus(' . $ar['requestid'] . ',\'Rejected\')">Reject</button>
+                     </div>';
+              ?>
               <tr>
-                <td>Maria Santos</td><td>Mochi</td><td>Shih Tzu</td><td>June 19</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+                <td><?= htmlspecialchars($ar['adopter_name']) ?></td>
+                <td><?= htmlspecialchars($ar['pet_name']) ?></td>
+                <td><?= htmlspecialchars($ar['pet_breed']) ?></td>
+                <td><?= date('M j', strtotime($ar['created_at'])) ?></td>
+                <td><?= $badge ?></td>
+                <td><?= $actions ?></td>
               </tr>
-              <tr>
-                <td>Jose Reyes</td><td>Miko</td><td>Persian Cat</td><td>June 15</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+              <?php endforeach; endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PETS ── -->
+    <div class="admin-section" id="section-pets">
+      <div class="table-section">
+        <div class="section-head">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle sec-icon" style="color:#AB8154;"></i>
+            <span class="section-title">Add New Pet</span>
+          </div>
+        </div>
+        <div id="petFormMsg" style="display:none;padding:.55rem .85rem;border-radius:.55rem;font-family:'Convergence',sans-serif;font-size:.83rem;margin-bottom:.75rem;"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.75rem 1rem;">
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Category *</label>
+            <select id="pCat" class="pet-inp">
+              <option value="Dogs">Dogs</option>
+              <option value="Cats">Cats</option>
+              <option value="Rabbits">Rabbits</option>
+              <option value="Birds">Birds</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Name *</label>
+            <input id="pName" type="text" class="pet-inp" placeholder="e.g. Mochi">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Breed *</label>
+            <input id="pBreed" type="text" class="pet-inp" placeholder="e.g. Shih Tzu">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Age *</label>
+            <input id="pAge" type="text" class="pet-inp" placeholder="e.g. 2 years old">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Sex *</label>
+            <input id="pSex" type="text" class="pet-inp" placeholder="e.g. Female">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Color</label>
+            <input id="pColor" type="text" class="pet-inp" placeholder="e.g. White & Brown">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Weight</label>
+            <input id="pWeight" type="text" class="pet-inp" placeholder="e.g. 4.2kg">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Temperament</label>
+            <input id="pTemp" type="text" class="pet-inp" placeholder="e.g. Gentle, Playful">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Good With Kids</label>
+            <input id="pKids" type="text" class="pet-inp" placeholder="e.g. Yes">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Location</label>
+            <input id="pLoc" type="text" class="pet-inp" placeholder="e.g. Calamba, Laguna">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.25rem;">
+            <label class="pet-lbl">Pet Photo</label>
+            <input id="pImg" type="file" accept="image/*" style="font-family:'Convergence',sans-serif;font-size:.82rem;color:#3D1F08;">
+          </div>
+        </div>
+        <div style="margin-top:.85rem;">
+          <label class="pet-lbl" style="display:block;margin-bottom:.4rem;">Health Documents</label>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem .9rem;">
+            <?php foreach([
+              ['vacc',   'Vaccination Certificate'],
+              ['deworm', 'Deworming Record'],
+              ['neuter', 'Neutering Certificate'],
+              ['vet',    'Vet Health Certificate'],
+              ['agree',  'Adoption Agreement Form'],
+            ] as [$k,$l]): ?>
+            <label style="font-family:'Convergence',sans-serif;font-size:.82rem;color:#3D1F08;display:flex;align-items:center;gap:.3rem;cursor:pointer;">
+              <input type="checkbox" class="pet-doc-chk" value="<?= $k ?>"> <?= $l ?>
+            </label>
+            <?php endforeach; ?>
+          </div>
+        </div>
+        <div style="margin-top:1rem;">
+          <button onclick="submitPet()" style="background:#AB8154;color:#FAF0E8;border:none;border-radius:.6rem;padding:.55rem 1.4rem;font-family:'Convergence',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;">Add Pet</button>
+        </div>
+      </div>
+
+      <div class="table-section" style="margin-top:1.2rem;">
+        <div class="section-head">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-grid sec-icon" style="color:#AB8154;"></i>
+            <span class="section-title">All Pets (<?= count($all_pets) ?>)</span>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr><th>Photo</th><th>Name</th><th>Breed</th><th>Age</th><th>Sex</th><th>Location</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody id="petsTableBody">
+              <?php if (empty($all_pets)): ?>
+                <tr><td colspan="8" style="text-align:center;color:#9B7050;">No pets added yet.</td></tr>
+              <?php else: foreach ($all_pets as $p):
+                $imgSrc = $p['image'] ? '/PAWSTER/uploads/pets/' . htmlspecialchars($p['image']) : '';
+              ?>
+              <tr id="pet-row-<?= $p['petid'] ?>">
+                <td><?= $imgSrc ? '<img src="'.$imgSrc.'" style="width:40px;height:40px;border-radius:.4rem;object-fit:cover;">' : '<span style="color:#C4A882;">—</span>' ?></td>
+                <td><?= htmlspecialchars($p['name']) ?></td>
+                <td><?= htmlspecialchars($p['breed']) ?></td>
+                <td><?= htmlspecialchars($p['age']) ?></td>
+                <td><?= htmlspecialchars($p['sex']) ?></td>
+                <td><?= htmlspecialchars($p['location']) ?></td>
+                <td><span class="badge-s <?= strtolower($p['status']) === 'available' ? 'badge-green' : 'badge-red' ?>"><?= htmlspecialchars($p['status']) ?></span></td>
+                <td><button class="btn-rej" onclick="deletePet(<?= $p['petid'] ?>)">Remove</button></td>
               </tr>
-              <tr>
-                <td>Ana Gomez</td><td>Luna</td><td>Kitten</td><td>June 16</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
-              <tr>
-                <td>Ben Torres</td><td>Doga</td><td>Pitbull</td><td>June 14</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Rica Flores</td><td>Dora</td><td>Chihuahua</td><td>June 12</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
+              <?php endforeach; endif; ?>
             </tbody>
           </table>
         </div>
@@ -680,6 +825,9 @@ function renderApptRow(array $row): string {
 <style>
 .admin-section { display: none; }
 .admin-section.active { display: block; }
+.pet-lbl { font-family:'Convergence',sans-serif; font-size:.75rem; font-weight:700; color:#9B7050; text-transform:uppercase; letter-spacing:.04em; }
+.pet-inp { background:#FAF0E8; border:1.5px solid #D6C0A5; border-radius:.55rem; padding:.45rem .75rem; font-family:'Convergence',sans-serif; font-size:.83rem; color:#3D1F08; outline:none; width:100%; }
+.pet-inp:focus { border-color:#AB8154; }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -711,6 +859,75 @@ document.querySelectorAll('.snav-link').forEach(link => {
     switchSection(link.dataset.section);
   });
 });
+
+// ── PETS ──
+function submitPet() {
+  const msg = document.getElementById('petFormMsg');
+  const fd = new FormData();
+  fd.append('name',         document.getElementById('pName').value.trim());
+  fd.append('category',     document.getElementById('pCat').value);
+  fd.append('breed',        document.getElementById('pBreed').value.trim());
+  fd.append('age',          document.getElementById('pAge').value.trim());
+  fd.append('sex',          document.getElementById('pSex').value.trim());
+  fd.append('color',        document.getElementById('pColor').value.trim());
+  fd.append('weight',       document.getElementById('pWeight').value.trim());
+  fd.append('temperament',  document.getElementById('pTemp').value.trim());
+  fd.append('good_with_kids', document.getElementById('pKids').value.trim());
+  fd.append('location',     document.getElementById('pLoc').value.trim());
+  const docs = [...document.querySelectorAll('.pet-doc-chk:checked')].map(c => c.value).join(',');
+  fd.append('docs', docs);
+  const imgFile = document.getElementById('pImg').files[0];
+  if (imgFile) fd.append('image', imgFile);
+
+  fetch('/PAWSTER/controllers/add_pet_controller.php', { method:'POST', body:fd })
+    .then(r => r.json())
+    .then(data => {
+      msg.style.display = 'block';
+      if (data.status === 'success') {
+        msg.style.background = '#d4edda'; msg.style.color = '#2d6a2d';
+        msg.textContent = data.message + ' Refresh to see the updated list.';
+        ['pName','pBreed','pAge','pSex','pColor','pWeight','pTemp','pKids','pLoc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('pImg').value = '';
+        document.querySelectorAll('.pet-doc-chk').forEach(c => c.checked = false);
+      } else {
+        msg.style.background = '#fde8e4'; msg.style.color = '#8b2500';
+        msg.textContent = data.message;
+      }
+    })
+    .catch(() => { msg.style.display='block'; msg.style.background='#fde8e4'; msg.style.color='#8b2500'; msg.textContent='Network error.'; });
+}
+
+function deletePet(petId) {
+  if (!confirm('Remove this pet from the adoption listing?')) return;
+  const fd = new FormData();
+  fd.append('petid', petId);
+  fetch('/PAWSTER/controllers/delete_pet_controller.php', { method:'POST', body:fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        const row = document.getElementById('pet-row-' + petId);
+        if (row) row.remove();
+      } else { alert(data.message); }
+    });
+}
+
+// ── ADOPTIONS ──
+function updateAdoptStatus(requestId, newStatus) {
+  const fd = new FormData();
+  fd.append('requestid', requestId);
+  fd.append('new_status', newStatus);
+  fetch('/PAWSTER/controllers/update_adopt_status.php', { method:'POST', body:fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        const badge = document.getElementById('adopt-badge-' + requestId);
+        const action = document.getElementById('adopt-action-' + requestId);
+        if (badge) { badge.className = 'badge-s ' + (newStatus === 'Approved' ? 'badge-green' : 'badge-red'); badge.textContent = newStatus; }
+        if (action) action.outerHTML = '<span class="done-txt">Done</span>';
+      } else { alert(data.message || 'Could not update status.'); }
+    })
+    .catch(() => alert('Network error.'));
+}
 
 function updateApptStatus(apptId, newStatus) {
   const formData = new FormData();
