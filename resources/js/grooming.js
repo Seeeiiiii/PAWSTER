@@ -94,7 +94,6 @@ function prevMonth() {
     updateSummary();
 }
 
-// Fixed missing code initialization error from original booking.js call
 function nextMonth() {
     if (state.month === 11) { state.month = 0; state.year++; }
     else state.month++;
@@ -209,7 +208,6 @@ function updateSummary() {
     document.getElementById('s-fee').textContent = 'PHP ' + state.fee;
     document.getElementById('s-pet').textContent = state.pet;
 
-    // Dynamically update the summary layout text
     if (typeof AUTH_USER_CONTEXT !== 'undefined') {
         document.getElementById('s-booked-by').textContent = AUTH_USER_CONTEXT.name;
     }
@@ -235,7 +233,6 @@ function selectPayment(method) {
     if (method === 'card') {
         cardDrop.style.display = 'block';
         gcashDrop.style.display = 'none';
-        // Animate open
         cardDrop.classList.remove('pay-dropdown-closing');
         cardDrop.classList.add('pay-dropdown-open');
     } else {
@@ -268,17 +265,12 @@ function confirmBooking() {
     if (!state.day) { alert('Please select a date.'); return; }
     if (!state.slot) { alert('Please select a time slot.'); return; }
 
-    // Read information dynamically from the system authentication configuration
     const userId = (typeof AUTH_USER_CONTEXT !== 'undefined') ? AUTH_USER_CONTEXT.id : 0;
     const userName = (typeof AUTH_USER_CONTEXT !== 'undefined') ? AUTH_USER_CONTEXT.name : 'Guest User';
 
-    // Format relational date attribute structured for standard MySQL operations
     const formattedMonth = String(state.month + 1).padStart(2, '0');
     const formattedDay = String(state.day).padStart(2, '0');
     const computedDbDate = `${state.year}-${formattedMonth}-${formattedDay}`;
-
-    if (!state.day) { alert('Please select a date.'); return; }
-    if (!state.slot) { alert('Please select a time slot.'); return; }
 
     // Validate payment fields
     if (paymentState.method === 'card') {
@@ -297,7 +289,6 @@ function confirmBooking() {
         }
     }
 
-    // Build functional payload object
     const booking = {
         id: Date.now(),
         userid: userId,
@@ -316,13 +307,41 @@ function confirmBooking() {
         created: new Date().toISOString()
     };
 
-    // Save configuration references to client state instances
-    const existing = JSON.parse(localStorage.getItem('pawster_appointments') || '[]');
-    existing.unshift(booking);
-    localStorage.setItem('pawster_appointments', JSON.stringify(existing));
+    const existingAppts = JSON.parse(localStorage.getItem('pawster_appointments') || '[]');
+    existingAppts.unshift(booking);
+    localStorage.setItem('pawster_appointments', JSON.stringify(existingAppts));
 
-    // Ship data payload to backend execution pipeline handlers
     sendBookingToDatabase(booking);
+}
+
+function resetBookingForm() {
+    state.day = null;
+    state.slot = null;
+    state.service = 'Grooming';
+    state.fee = 150;
+    state.pet = 'Dog';
+
+    document.getElementById('booking-notes').value = '';
+    document.getElementById('card-number').value = '';
+    document.getElementById('card-expiry').value = '';
+    document.getElementById('card-cvv').value = '';
+    document.getElementById('card-name').value = '';
+    document.getElementById('gcash-number').value = '';
+    document.getElementById('gcash-name').value = '';
+
+    document.querySelectorAll('.svc-btn').forEach(btn => btn.classList.remove('active'));
+    const defaultService = document.querySelector('.svc-btn');
+    if (defaultService) defaultService.classList.add('active');
+
+    document.querySelectorAll('.pet-pill').forEach(btn => btn.classList.remove('active'));
+    const defaultPet = document.querySelector('.pet-pill[data-pet="Dog"]');
+    if (defaultPet) defaultPet.classList.add('active');
+
+    document.getElementById('slots-label').textContent = 'Available time slots';
+
+    renderCalendar();
+    renderSlots();
+    updateSummary();
 }
 
 function sendBookingToDatabase(bookingData) {
@@ -335,59 +354,20 @@ function sendBookingToDatabase(bookingData) {
     })
         .then(response => response.json())
         .then(data => {
-           if (data.status === 'success') {
-    showBookingModal(bookingData);
-
-    // Reset state
-    state.day = null;
-    state.slot = null;
-    state.service = 'Grooming';
-    state.fee = 150;
-    state.pet = 'Dog';
-
-    // Reset notes
-    document.getElementById('booking-notes').value = '';
-
-    // Reset card fields
-    document.getElementById('card-number').value = '';
-    document.getElementById('card-expiry').value = '';
-    document.getElementById('card-cvv').value = '';
-    document.getElementById('card-name').value = '';
-
-    // Reset GCash fields
-    document.getElementById('gcash-number').value = '';
-    document.getElementById('gcash-name').value = '';
-
-    // Reset service button
-    document.querySelectorAll('.svc-btn').forEach(btn =>
-        btn.classList.remove('active')
-    );
-
-    const defaultService = document.querySelector('.svc-btn');
-    if (defaultService) defaultService.classList.add('active');
-
-    // Reset pet buttons
-    document.querySelectorAll('.pet-pill').forEach(btn =>
-        btn.classList.remove('active')
-    );
-
-    const defaultPet = document.querySelector('.pet-pill[data-pet="Dog"]');
-    if (defaultPet) defaultPet.classList.add('active');
-
-    // Refresh UI
-    renderCalendar();
-    renderSlots();
-    updateSummary();
-}
+            if (data.status === 'success') {
+                // Pass resetBookingForm as the callback so reset only fires after user closes modal
+                showBookingModal(bookingData, resetBookingForm);
+            } else {
+                alert('Booking failed: ' + (data.message || 'Unknown error. Please try again.'));
+            }
         })
         .catch(error => {
             console.error('Asynchronous transaction processing error:', error);
+            alert('A network error occurred. Please check your connection and try again.');
         });
 }
 
-
-
-function showBookingModal(b) {
+function showBookingModal(b, onDone) {
     const old = document.getElementById('booking-confirm-modal');
     if (old) old.remove();
 
@@ -406,17 +386,20 @@ function showBookingModal(b) {
               <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Pet</td><td style="color:#3D1F08;font-weight:700;">${b.pet}</td></tr>
               <tr><td style="color:#9B7050;padding:0.2rem 0.5rem 0.2rem 0;">Fee</td><td style="color:#3D1F08;font-weight:700;">PHP ${b.fee}</td></tr>
             </table>
-            <button onclick="document.getElementById('booking-confirm-modal').remove()"
+            <button id="booking-done-btn"
               style="background:#AB8154;color:#fff;border:none;border-radius:0.6rem;padding:0.55rem 1.5rem;font-family:'Convergence',sans-serif;font-weight:700;font-size:0.87rem;cursor:pointer;width:100%;">Done</button>
           </div>
         </div>`;
     document.body.appendChild(modal);
-}
 
+    document.getElementById('booking-done-btn').addEventListener('click', () => {
+        modal.remove();
+        if (typeof onDone === 'function') onDone();
+    });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
     renderSlots();
     updateSummary();
 });
-
