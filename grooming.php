@@ -14,7 +14,7 @@ $is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticate
 // ── BACKEND API ROUTER FOR SAVING APPOINTMENTS ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_appt') {
     header('Content-Type: application/json');
-    
+
     // Grab raw JSON payload from the request body
     $inputData = file_get_contents('php://input');
     $booking = json_decode($inputData, true);
@@ -24,20 +24,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
         $conn = $db->conn;
 
         // Escape input strings and parse parameters dynamically
-        $userid  = intval($booking['userid']); 
+        $userid  = intval($booking['userid']);
         $service = $conn->real_escape_string($booking['service']);
         $pet     = $conn->real_escape_string($booking['pet']);
-        
+
         // Handle conversion of human-readable dates if date_raw is unavailable
         $date_raw = !empty($booking['date_raw']) ? $booking['date_raw'] : date("Y-m-d", strtotime($booking['date']));
         $date    = $conn->real_escape_string($date_raw);
         $time    = $conn->real_escape_string($booking['time']);
-        $status  = 'Pending'; 
+        $status  = 'Pending';
 
         // SQL Query utilizing dynamic parameters
         $query = "INSERT INTO tblappointment (userid, service_type, date, select_pet, available_time, status) 
                   VALUES (?, ?, ?, ?, ?, ?)";
-                  
+
         $stmt = $conn->prepare($query);
         $stmt->bind_param("isssss", $userid, $service, $date, $pet, $time, $status);
 
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
     <link rel="stylesheet" href="resources/css/grooming.css">
     <link rel="stylesheet" href="resources/css/global.css">
-    
+
     <!-- Safely pass dynamic global session details to your JavaScript file -->
     <script>
         const AUTH_USER_CONTEXT = {
@@ -96,25 +96,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
                         <p class="card-section-title">Service type:</p>
                         <div class="row g-2">
                             <div class="col-6">
-                                <button class="svc-btn w-100 active" data-service="Grooming" data-fee="450" onclick="selectService(this)">
+                                <button class="svc-btn w-100 active" data-service="Grooming" data-fee="150" onclick="selectService(this)">
                                     <img src="resources/images/groom icon.png" alt="Grooming" class="svc-img">
                                     <span class="svc-label">Grooming</span>
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="svc-btn w-100" data-service="Vet check-up" data-fee="600" onclick="selectService(this)">
+                                <button class="svc-btn w-100" data-service="Vet check-up" data-fee="150" onclick="selectService(this)">
                                     <img src="resources/images/check-up icon.png" alt="Vet check-up" class="svc-img">
                                     <span class="svc-label">Vet check-up</span>
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="svc-btn w-100" data-service="Vaccination" data-fee="350" onclick="selectService(this)">
+                                <button class="svc-btn w-100" data-service="Vaccination" data-fee="150" onclick="selectService(this)">
                                     <img src="resources/images/vaccine icon.png" alt="Vaccination" class="svc-img">
                                     <span class="svc-label">Vaccination</span>
                                 </button>
                             </div>
                             <div class="col-6">
-                                <button class="svc-btn w-100" data-service="Meet & greet" data-fee="200" onclick="selectService(this)">
+                                <button class="svc-btn w-100" data-service="Meet & greet" data-fee="150" onclick="selectService(this)">
                                     <img src="resources/images/heart icon.png" alt="Meet & greet" class="svc-img">
                                     <span class="svc-label">Meet &amp; greet</span>
                                 </button>
@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
                 <div class="col-md-8">
                     <div class="booking-card h-100">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <p class="card-section-title mb-0" id="cal-month-label">Pick a date – May 2026</p>
+                            <p class="card-section-title mb-0" id="cal-month-label">Pick a date – June 2026</p>
                             <div class="d-flex gap-2">
                                 <button class="cal-nav-btn" onclick="prevMonth()"><i class="bi bi-chevron-left"></i></button>
                                 <button class="cal-nav-btn" onclick="nextMonth()"><i class="bi bi-chevron-right"></i></button>
@@ -195,15 +195,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
                                 <span class="s-key">Location</span>
                                 <span class="s-val">PAWSTER</span>
                             </div>
+                            <div class="summary-row">
+                                <span class="s-key">Service fee</span>
+                                <span class="s-val" id="s-fee">PHP 150</span>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6 d-flex flex-column justify-content-between">
-                        <div class="summary-table">
-                            <div class="summary-row">
-                                <span class="s-kaey">Service fee</span>
-                                <span class="s-val" id="s-fee">PHP 450</span>
+
+                        <!-- Payment Method -->
+                        <p class="card-section-title mt-1 mb-2">Payment method:</p>
+                        <div class="d-flex gap-2 mb-2">
+                            <button class="pay-btn active" id="pay-btn-card" onclick="selectPayment('card')">
+                                <span class="pay-icon">💳</span> Card
+                            </button>
+                            <button class="pay-btn" id="pay-btn-gcash" onclick="selectPayment('gcash')">
+                                <span class="pay-icon">
+                                    <img src="resources/images/gcash.png"
+                                        alt="GCash" style="height:16px;vertical-align:middle;">
+                                </span> Gcash
+                            </button>
+                        </div>
+
+                        <!-- Card Dropdown -->
+                        <div class="pay-dropdown" id="pay-dropdown-card">
+                            <div class="pay-field">
+                                <label>Cardholder Name</label>
+                                <input type="text" id="card-name" placeholder="Juan dela Cruz" autocomplete="cc-name">
+                            </div>
+                            <div class="pay-field">
+                                <label>Card Number</label>
+                                <input type="text" id="card-number" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="formatCardNumber(this)" autocomplete="cc-number">
+                            </div>
+                            <div class="d-flex gap-2">
+                                <div class="pay-field flex-fill">
+                                    <label>Expiry</label>
+                                    <input type="text" id="card-expiry" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)" autocomplete="cc-exp">
+                                </div>
+                                <div class="pay-field" style="width:90px;">
+                                    <label>CVV</label>
+                                    <input type="password" id="card-cvv" placeholder="•••" maxlength="4" autocomplete="cc-csc">
+                                </div>
                             </div>
                         </div>
+
+                        <!-- GCash Dropdown -->
+                        <div class="pay-dropdown" id="pay-dropdown-gcash" style="display:none;">
+                            <div class="pay-field">
+                                <label>GCash Number</label>
+                                <input type="tel" id="gcash-number" placeholder="09XX XXX XXXX" maxlength="13" oninput="formatGcash(this)">
+                            </div>
+                            <div class="pay-field">
+                                <label>Account Name</label>
+                                <input type="text" id="gcash-name" placeholder="Full name on GCash">
+                            </div>
+                        </div>
+
                         <button class="confirm-btn w-100 mt-3" onclick="confirmBooking()">Confirm booking</button>
                     </div>
                 </div>

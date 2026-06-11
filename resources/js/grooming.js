@@ -1,22 +1,26 @@
 const MONTHS = [
-    'January','February','March','April','May','June',
-    'July','August','September','October','November','December'
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
 ];
-const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 let state = {
     year: 2026,
-    month: 4,
+    month: 5,
     day: null,
     service: 'Grooming',
-    fee: 450,
+    fee: 150,
     slot: null,
     pet: 'Dog'
 };
 
+let paymentState = {
+    method: 'card'  // 'card' or 'gcash'
+};
+
 const allSlots = [
-    '9:00 am','10:00 am','11:00 am','12:00 pm','1:00 pm',
-    '2:00 pm','3:00 pm','4:00 pm','5:00 pm','6:00 pm'
+    '9:00 am', '10:00 am', '11:00 am', '12:00 pm', '1:00 pm',
+    '2:00 pm', '3:00 pm', '4:00 pm', '5:00 pm', '6:00 pm'
 ];
 
 function seededRandom(seed) {
@@ -174,8 +178,7 @@ function onPetInputChange(input) {
 }
 
 const PET_EMOJI = {
-    dog:'🐶', cat:'🐱', bird:'🐦', rabbit:'🐰', fish:'🐠',
-    hamster:'🐹', turtle:'🐢', snake:'🐍', lizard:'🦎', parrot:'🦜'
+    dog: '🐶', cat: '🐱', bird: '🐦'
 };
 
 function confirmAddPet() {
@@ -220,8 +223,49 @@ function updateSummary() {
     }
 }
 
+function selectPayment(method) {
+    paymentState.method = method;
+
+    document.getElementById('pay-btn-card').classList.toggle('active', method === 'card');
+    document.getElementById('pay-btn-gcash').classList.toggle('active', method === 'gcash');
+
+    const cardDrop = document.getElementById('pay-dropdown-card');
+    const gcashDrop = document.getElementById('pay-dropdown-gcash');
+
+    if (method === 'card') {
+        cardDrop.style.display = 'block';
+        gcashDrop.style.display = 'none';
+        // Animate open
+        cardDrop.classList.remove('pay-dropdown-closing');
+        cardDrop.classList.add('pay-dropdown-open');
+    } else {
+        gcashDrop.style.display = 'block';
+        cardDrop.style.display = 'none';
+        gcashDrop.classList.remove('pay-dropdown-closing');
+        gcashDrop.classList.add('pay-dropdown-open');
+    }
+}
+
+function formatCardNumber(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 16);
+    input.value = v.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function formatExpiry(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, 2) + ' / ' + v.slice(2);
+    input.value = v;
+}
+
+function formatGcash(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 4 && v.length <= 7) v = v.slice(0, 4) + ' ' + v.slice(4);
+    else if (v.length > 7) v = v.slice(0, 4) + ' ' + v.slice(4, 7) + ' ' + v.slice(7);
+    input.value = v;
+}
+
 function confirmBooking() {
-    if (!state.day)  { alert('Please select a date.');      return; }
+    if (!state.day) { alert('Please select a date.'); return; }
     if (!state.slot) { alert('Please select a time slot.'); return; }
 
     // Read information dynamically from the system authentication configuration
@@ -233,22 +277,43 @@ function confirmBooking() {
     const formattedDay = String(state.day).padStart(2, '0');
     const computedDbDate = `${state.year}-${formattedMonth}-${formattedDay}`;
 
+    if (!state.day) { alert('Please select a date.'); return; }
+    if (!state.slot) { alert('Please select a time slot.'); return; }
+
+    // Validate payment fields
+    if (paymentState.method === 'card') {
+        const cn = document.getElementById('card-number').value.replace(/\s/g, '');
+        const ce = document.getElementById('card-expiry').value;
+        const cv = document.getElementById('card-cvv').value;
+        const ch = document.getElementById('card-name').value.trim();
+        if (!ch || cn.length < 13 || !ce || cv.length < 3) {
+            alert('Please complete your card details.'); return;
+        }
+    } else {
+        const gn = document.getElementById('gcash-number').value.replace(/\s/g, '');
+        const ga = document.getElementById('gcash-name').value.trim();
+        if (gn.length < 11 || !ga) {
+            alert('Please complete your GCash details.'); return;
+        }
+    }
+
     // Build functional payload object
     const booking = {
-        id:       Date.now(),
-        userid:   userId,
-        user:     userName,
-        service:  state.service,
-        pet:      state.pet,
-        date:     MONTHS[state.month] + ' ' + state.day + ', ' + state.year,
+        id: Date.now(),
+        userid: userId,
+        user: userName,
+        service: state.service,
+        pet: state.pet,
+        date: MONTHS[state.month] + ' ' + state.day + ', ' + state.year,
         date_raw: computedDbDate,
         datetime: MONTHS[state.month] + ' ' + state.day + ' | ' + state.slot,
-        time:     state.slot,
-        fee:      state.fee,
+        time: state.slot,
+        fee: state.fee,
+        payment_method: paymentState.method,
         location: 'PAWSTER',
-        notes:    document.getElementById('booking-notes').value.trim(),
-        status:   'Pending',
-        created:  new Date().toISOString()
+        notes: document.getElementById('booking-notes').value.trim(),
+        status: 'Pending',
+        created: new Date().toISOString()
     };
 
     // Save configuration references to client state instances
@@ -268,18 +333,59 @@ function sendBookingToDatabase(bookingData) {
         },
         body: JSON.stringify(bookingData)
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            showBookingModal(bookingData);
-        } else {
-            alert('Booking failed: ' + (data.message || 'Unknown infrastructure processing error.'));
-        }
-    })
-    .catch(error => {
-        console.error('Asynchronous transaction processing error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+           if (data.status === 'success') {
+    showBookingModal(bookingData);
+
+    // Reset state
+    state.day = null;
+    state.slot = null;
+    state.service = 'Grooming';
+    state.fee = 150;
+    state.pet = 'Dog';
+
+    // Reset notes
+    document.getElementById('booking-notes').value = '';
+
+    // Reset card fields
+    document.getElementById('card-number').value = '';
+    document.getElementById('card-expiry').value = '';
+    document.getElementById('card-cvv').value = '';
+    document.getElementById('card-name').value = '';
+
+    // Reset GCash fields
+    document.getElementById('gcash-number').value = '';
+    document.getElementById('gcash-name').value = '';
+
+    // Reset service button
+    document.querySelectorAll('.svc-btn').forEach(btn =>
+        btn.classList.remove('active')
+    );
+
+    const defaultService = document.querySelector('.svc-btn');
+    if (defaultService) defaultService.classList.add('active');
+
+    // Reset pet buttons
+    document.querySelectorAll('.pet-pill').forEach(btn =>
+        btn.classList.remove('active')
+    );
+
+    const defaultPet = document.querySelector('.pet-pill[data-pet="Dog"]');
+    if (defaultPet) defaultPet.classList.add('active');
+
+    // Refresh UI
+    renderCalendar();
+    renderSlots();
+    updateSummary();
 }
+        })
+        .catch(error => {
+            console.error('Asynchronous transaction processing error:', error);
+        });
+}
+
+
 
 function showBookingModal(b) {
     const old = document.getElementById('booking-confirm-modal');
@@ -307,8 +413,10 @@ function showBookingModal(b) {
     document.body.appendChild(modal);
 }
 
+
 document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
     renderSlots();
     updateSummary();
 });
+

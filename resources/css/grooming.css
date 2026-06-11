@@ -374,6 +374,66 @@
     background-color: #9B6240;
 }
 
+/* ── Payment Method ── */
+.pay-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    border: 2px solid #D4B896;
+    border-radius: 0.6rem;
+    background: #fff;
+    color: #3D1F08;
+    font-family: 'Convergence', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+.pay-btn:hover  { border-color: #AB8154; background: #FDF5EE; }
+.pay-btn.active { border-color: #AB8154; background: #FDF0E3; color: #7A4A1E; }
+
+.pay-dropdown {
+    background: #FDF5EE;
+    border: 1px solid #E8D5BE;
+    border-radius: 0.7rem;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.25rem;
+    animation: paySlideDown 0.22s ease;
+}
+
+@keyframes paySlideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.pay-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0.6rem;
+}
+.pay-field label {
+    font-size: 0.72rem;
+    color: #9B7050;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.pay-field input {
+    border: 1.5px solid #D4B896;
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.85rem;
+    font-family: 'Convergence', sans-serif;
+    color: #3D1F08;
+    background: #fff;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.pay-field input:focus { border-color: #AB8154; }
+.pay-field input::placeholder { color: #C4A882; }
+
 @media (max-width: 767px) {
     .hero-title { font-size: 1.6rem; }
     .hero-curve { height: 45px; }
