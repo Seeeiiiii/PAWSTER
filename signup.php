@@ -121,10 +121,8 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div class="input-group">
                         <select name="country_code" class="form-select custom-input" style="max-width: 110px;">
                             <option value="+63">+63 (PH)</option>
-                            <option value="+1">+1 (US)</option>
-                            <option value="+44">+44 (UK)</option>
                         </select>
-                        <input type="tel" name="contact_number" class="form-control custom-input" maxlength="11" placeholder="917-000-0000" required>
+                        <input type="tel" name="contact_number" class="form-control custom-input" maxlength="10" placeholder="917-000-0000" required>
                     </div>
                 </div>
 

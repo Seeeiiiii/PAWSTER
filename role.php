@@ -35,7 +35,7 @@ include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php');
                         <h3 class="card-title fw-semibold mb-3">Adopt a pet</h3>
                         <p class="card-text text-muted px-2">Browse available dogs, cats, and more. Find your perfect companion and give them a home.</p>
                     </div>
-                    <button class="btn btn-card-action mt-4 w-75">Browse pets</button>
+                    <button class="btn btn-card-action mt-4 w-75"><a href="/PAWSTER/adoption.php">Adopt pets</a></button>
                 </div>
             </div>
 

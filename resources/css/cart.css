@@ -635,15 +635,6 @@ button {
     font-weight: 600;
 }
 
-/* ── Site Footer ──────────────────────────────────────────── */
-.site-footer {
-    background: #8B5E34;
-    text-align: center;
-    padding: 16px 24px;
-    font-size: .78rem;
-    color: rgba(245,239,230,.7);
-    margin-top: auto;
-}
 
 /* ── Checkout Grid: left column wrapper ──────────────────────
    Keeps the cart items and delivery address stacked together
@@ -989,4 +980,10 @@ button {
     outline: 2.5px solid #B68A5A;
     outline-offset: 2px;
     border-radius: 6px;
+}
+
+.shipping-notice {
+    font-size: 0.78rem;
+    color: #b45309;
+    margin: 2px 0 8px 0;
 }

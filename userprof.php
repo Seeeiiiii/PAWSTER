@@ -10,7 +10,7 @@ $current_fullname = trim(($_SESSION['auth_user']['first_name'] ?? '') . ' ' . ($
 $current_fullname = $current_fullname ?: 'Guest User';
 $is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
 
-// ── FETCH THIS USER'S APPOINTMENTS LIVE FROM DB ──
+
 $appointments = [];
 if ($is_logged_in && $current_userid) {
   $db   = new DatabaseConnection();
@@ -27,9 +27,42 @@ if ($is_logged_in && $current_userid) {
     $appointments[] = $row;
   }
   $stmt->close();
+
+  $orders = [];
+  $ostmt = $db->conn->prepare(
+    "SELECT o.orderid, o.order_status, o.total_price, o.updated_at,
+            p.brand_name, p.productimage
+     FROM tblorder o
+     JOIN tblorder_items oi ON oi.orderid = o.orderid
+     JOIN tblsellerproduct p ON p.productid = oi.productid
+     WHERE o.userid = ?
+     ORDER BY o.updated_at DESC"
+  );
+  $ostmt->bind_param("i", $current_userid);
+  $ostmt->execute();
+  $ores = $ostmt->get_result();
+  while ($row = $ores->fetch_assoc()) {
+    $orders[] = $row;
+  }
+  $ostmt->close();
+
+
+  $ustmt = $db->conn->prepare(
+    "SELECT u.contact_number,
+            CONCAT_WS(', ', da.secondary_address, da.barangay, da.city, da.province, da.region) AS full_address
+     FROM users u
+     LEFT JOIN tbldelivery_address da ON da.accountid = u.userid
+     WHERE u.userid = ?
+     ORDER BY da.addressid DESC
+     LIMIT 1"
+  );
+  $ustmt->bind_param("i", $current_userid);
+  $ustmt->execute();
+  $ustmt->bind_result($user_contact, $user_address);
+  $ustmt->fetch();
+  $ustmt->close();
 }
 
-// Upcoming = today or future, capped at 3 for the Orders tab preview
 $upcoming = array_values(array_filter(
   $appointments,
   fn($a) => strtotime($a['date']) >= strtotime('today')
@@ -127,38 +160,37 @@ function initials(string $name): string
               <span class="icard-title">Recent Orders</span>
               <a href="#" class="view-all-lnk">View All →</a>
             </div>
-            <div class="order-row">
-              <div class="thumb-sq"></div>
-              <div class="row-info">
-                <p class="row-name">Premium Dog Chew Treats</p>
-                <p class="row-meta">PawBites PH | Order #PW-00328 | May 14</p>
-              </div>
-              <div class="order-right">
-                <p class="order-price">₱189</p>
-                <span class="pill pill-green">Delivered</span>
-              </div>
-            </div>
-            <div class="order-row">
-              <div class="thumb-sq"></div>
-              <div class="row-info">
-                <p class="row-name">Interactive Dog Toy Bundle</p>
-                <p class="row-meta">NaturePet | Order #PW-00329 | May 16</p>
-              </div>
-              <div class="order-right">
-                <p class="order-price">₱256</p>
-                <span class="pill pill-blue">In Transit</span>
-              </div>
-            </div>
-            <div class="order-row">
-              <div class="thumb-sq"></div>
-              <div class="row-info">
-                <p class="row-name">Hypoallergenic Pet Shampoo</p>
-                <p class="row-meta">PlayPaws | Order #PW-00115 | May 13</p>
-              </div>
-              <div class="order-right">
-                <p class="order-price">₱499</p>
-                <span class="pill pill-green">Delivered</span>
-              </div>
+            <div class="order-row d-flex flex-column align-items-start">
+              <?php if (empty($orders)): ?>
+                <p class="row-meta" style="padding:.5rem 0;">No orders yet.</p>
+                <?php else: foreach (array_slice($orders, 0, 3) as $ord):
+                  $odate = date('M j', strtotime($ord['updated_at']));
+                  $opill = match (strtolower(trim($ord['order_status']))) {
+                    'delivered'  => 'pill-green',
+                    'in transit', 'shipped' => 'pill-blue',
+                    'cancelled'  => 'pill-red',
+                    default      => 'pill-orange',
+                  };
+                ?>
+                  <div class="order-row">
+                    <div class="thumb-sq">
+                      <?php if (!empty($ord['productimage'])): ?>
+                        <img src="/PAWSTER/resources/images/<?= htmlspecialchars($ord['productimage']) ?>"
+                          alt="<?= htmlspecialchars($ord['brand_name']) ?>"
+                          style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+                      <?php endif; ?>
+                    </div>
+                    <div class="row-info">
+                      <p class="row-name"><?= htmlspecialchars($ord['brand_name']) ?></p>
+                      <p class="row-meta">Order #<?= (int)$ord['orderid'] ?> | <?= $odate ?></p>
+                    </div>
+                    <div class="order-right">
+                      <p class="order-price">₱<?= number_format((float)$ord['total_price'], 2) ?></p>
+                      <span class="pill <?= $opill ?>"><?= htmlspecialchars($ord['order_status']) ?></span>
+                    </div>
+                  </div>
+              <?php endforeach;
+              endif; ?>
             </div>
           </div>
 
@@ -207,11 +239,11 @@ function initials(string $name): string
           </div>
           <div class="acct-row">
             <div class="acct-key"><i class="bi bi-telephone"></i> Phone</div>
-            <div class="acct-val"><?= htmlspecialchars($_SESSION['auth_user']['phone']   ?? '—') ?></div>
+            <div class="acct-val">+63-<?= htmlspecialchars($user_contact ?? '—') ?></div>
           </div>
           <div class="acct-row acct-last">
             <div class="acct-key"><i class="bi bi-geo-alt"></i> Address</div>
-            <div class="acct-val"><?= htmlspecialchars($_SESSION['auth_user']['address'] ?? '—') ?></div>
+            <div class="acct-val"><?= htmlspecialchars($user_address ?? '—') ?></div>
           </div>
         </div>
 

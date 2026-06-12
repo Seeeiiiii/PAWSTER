@@ -2,209 +2,9 @@
 
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/app_form_controller.php';
-
-$db   = new DatabaseConnection();
-$conn = $db->conn;
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_listing') {
-
-    $userid = (int)($_SESSION['auth_user']['userid'] ?? 0);
-    if (!$userid) {
-        redirect('Please log in.', 'login.php');
-    }
-
-
-    $r = $conn->prepare("SELECT formid FROM tblsellerstatus WHERE userid = ? ORDER BY created_at DESC LIMIT 1");
-    $r->bind_param("i", $userid);
-    $r->execute();
-    $r->bind_result($sellerid);
-    $r->fetch();
-    $r->close();
-
-    if (!$sellerid) {
-        redirect('No seller application found.', 'sellerprofile.php');
-    }
-
-    $category = trim($_POST['primary_category'] ?? '');
-    $brand    = trim($_POST['brand_name']       ?? '');
-    $desc     = trim($_POST['product_desc']     ?? '');
-    $price    = (float)($_POST['price']         ?? 0);
-    $photo    = $_FILES['product_photo']        ?? [];
-
-    if (!$category || !$brand || !$desc || $price <= 0) {
-        redirect('Please fill in all listing fields including a valid price.', 'sellerprofile.php');
-    }
-
-    $controller = new ApplicationFormController();
-    $success    = $controller->addListing($category, $brand, $desc, $price, $sellerid, $photo);
-
-    if ($success) {
-        redirect('Listing added successfully!', 'sellerprofile.php');
-    } else {
-        redirect('Failed to add listing. Check your photo (PNG, max 5MB) and try again.', 'sellerprofile.php');
-    }
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_listing') {
-    header('Content-Type: application/json');
-
-    $userid    = (int)($_SESSION['auth_user']['userid'] ?? 0);
-    $productid = (int)($_POST['productid']        ?? 0);
-    $category  = trim($_POST['primary_category']  ?? '');
-    $brand     = trim($_POST['brand_name']         ?? '');
-    $desc      = trim($_POST['product_desc']       ?? '');
-    $price     = (float)($_POST['price']           ?? 0);
-    $photo     = $_FILES['product_photo']          ?? [];
-
-    if (!$userid) {
-        echo json_encode(['success' => false, 'error' => 'Not logged in.']);
-        exit();
-    }
-    if (!$productid || !$category || !$brand || !$desc || $price <= 0) {
-        echo json_encode(['success' => false, 'error' => 'All fields including price are required.']);
-        exit();
-    }
-
-    $controller = new ApplicationFormController();
-    $success    = $controller->updateListing($productid, $userid, $category, $brand, $desc, $price, $photo);
-
-    echo json_encode(
-        $success
-            ? ['success' => true]
-            : ['success' => false, 'error' => 'Update failed. Check ownership, photo format (PNG, max 5MB), or try again.']
-    );
-    exit();
-}
-
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_listing') {
-    header('Content-Type: application/json');
-
-    $userid    = (int)($_SESSION['auth_user']['userid'] ?? 0);
-    $productid = (int)($_POST['productid'] ?? 0);
-
-    if (!$userid) {
-        echo json_encode(['success' => false, 'error' => 'Not logged in.']);
-        exit();
-    }
-    if (!$productid) {
-        echo json_encode(['success' => false, 'error' => 'Invalid product.']);
-        exit();
-    }
-
-    /* Verify ownership before deleting */
-    $check = $conn->prepare(
-        "SELECT p.productid FROM tblsellerproduct p
-         JOIN tblsellerstatus s ON s.formid = p.sellerid
-         WHERE p.productid = ? AND s.userid = ? LIMIT 1"
-    );
-    $check->bind_param("ii", $productid, $userid);
-    $check->execute();
-    $check->store_result();
-    $owned = $check->num_rows > 0;
-    $check->close();
-
-    if (!$owned) {
-        echo json_encode(['success' => false, 'error' => 'Product not found or not yours.']);
-        exit();
-    }
-
-    $del = $conn->prepare("DELETE FROM tblsellerproduct WHERE productid = ?");
-    $del->bind_param("i", $productid);
-
-    echo json_encode(
-        $del->execute() && $del->affected_rows > 0
-            ? ['success' => true]
-            : ['success' => false, 'error' => 'Delete failed. Please try again.']
-    );
-    exit();
-}
-
-$userid = isset($_GET['userid'])
-    ? (int) $_GET['userid']
-    : (int) ($_SESSION['auth_user']['userid'] ?? 0);
-
-
-$is_verified  = false;
-$db_status     = '';
-$formid       = null;
-$business_name = '';
-$contact_num   = '';
-$address       = '';
-$member_name   = '';
-$primary_category = '';
-$listings      = [];
-
-if ($userid > 0) {
-
-    $stmt = $conn->prepare(
-        "SELECT status, formid
-         FROM tblsellerstatus
-         WHERE userid = ?
-         ORDER BY created_at DESC
-         LIMIT 1"
-    );
-    $stmt->bind_param("i", $userid);
-    $stmt->execute();
-    $stmt->bind_result($db_status, $formid);
-    $stmt->fetch();
-    $stmt->close();
-
-    $db_status   = (string)($db_status ?? '');
-    $is_verified = (strtolower($db_status) === 'verified');
-
-
-    if ($formid) {
-        $stmt2 = $conn->prepare(
-            "SELECT businessname, contactnum, address
-             FROM tblsellerprofile
-             WHERE sellerid = ?
-             LIMIT 1"
-        );
-        $stmt2->bind_param("i", $formid);
-        $stmt2->execute();
-        $stmt2->bind_result($business_name, $contact_num, $address);
-        $stmt2->fetch();
-        $stmt2->close();
-
-
-        $stmt3 = $conn->prepare(
-            "SELECT productid, brand_name, product_desc, primary_category, price, productimage
-     FROM tblsellerproduct
-     WHERE sellerid = ?
-     ORDER BY productid ASC"
-        );
-        $stmt3->bind_param("i", $formid);
-        $stmt3->execute();
-        $res = $stmt3->get_result();
-        while ($row = $res->fetch_assoc()) {
-            $listings[] = $row;
-        }
-        $stmt3->close();
-
-     
-        $primary_category = !empty($listings) ? $listings[0]['primary_category'] : '';
-    }
-
-    $stmt4 = $conn->prepare(
-        "SELECT first_name, last_name FROM users WHERE userid = ? LIMIT 1"
-    );
-    $stmt4->bind_param("i", $userid);
-    $stmt4->execute();
-    $stmt4->bind_result($first_name, $last_name);
-    $stmt4->fetch();
-    $stmt4->close();
-    $member_name = trim("$first_name $last_name");
-}
-
-$listing_count = count($listings);
-
-function renderStars(int $count): string
-{
-    return str_repeat('<span class="star">★</span>', $count);
-}
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_controller.php';
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -245,9 +45,15 @@ function renderStars(int $count): string
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="editContact">Contact number</label>
-                            <input class="field-input" id="editContact" type="text"
-                                value="<?= htmlspecialchars($contact_num) ?>"
-                                placeholder="Contact number" />
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="background: #f0f0f0; padding: 0.5rem 0.75rem; border-radius: 8px; font-family: monospace;">+63</span>
+                                <input class="field-input" id="editContact" type="text"
+                                    value="<?= preg_replace('/^\+63/', '', htmlspecialchars($contact_num)) ?>"
+                                    placeholder="9123456789" maxlength="10"
+                                    inputmode="numeric" pattern="\d{10}"
+                                    title="Enter 10 digits" style="flex:1;" />
+                            </div>
+                            <small style="font-size: 0.75rem; color: #666;">Enter 10 digits (numbers only)</small>
                         </div>
                         <div class="field-group">
                             <label class="field-label" for="editAddress">Address</label>
@@ -278,16 +84,25 @@ function renderStars(int $count): string
 
                 <div class="modal-body pawster-modal__body">
 
-                 
+
                     <form action="/PAWSTER/sellerprofile.php" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="add_listing">
                         <div class="pawster-modal__fields" style="margin-bottom:1.25rem;">
                             <p style="font-family:'Convergence',sans-serif; color:#9B7050; font-weight:600; margin-bottom:.75rem;">
                                 Add New Listing
                             </p>
-                            <?php if (!empty($_SESSION['message'])): ?>
-                                <p style="color:#c0392b; font-family:'Convergence',sans-serif; font-size:.85rem; margin-bottom:.5rem;">
-                                    <?= htmlspecialchars($_SESSION['message']) ?>
+                            <?php
+                            $allowed_messages = [
+                                'Listing added successfully!',
+                                'Failed to add listing. Check your photo (PNG, max 5MB) and try again.'
+                            ];
+                            if (!empty($_SESSION['message']) && in_array($_SESSION['message'], $allowed_messages)):
+                                $msg = $_SESSION['message'];
+                                // success message = green, error message = red
+                                $color = ($msg === 'Listing added successfully!') ? '#2D8C4E' : '#c0392b';
+                            ?>
+                                <p style="color:<?= $color ?>; font-family:'Convergence',sans-serif; font-size:.85rem; margin-bottom:.5rem;">
+                                    <?= htmlspecialchars($msg) ?>
                                 </p>
                                 <?php unset($_SESSION['message']); ?>
                             <?php endif; ?>
@@ -332,7 +147,9 @@ function renderStars(int $count): string
                     <button type="button" id="toggleCurrentListings"
                         style="background:none; border:none; cursor:pointer; font-family:'Convergence',sans-serif; color:#9B7050; font-weight:600; font-size:1rem; padding:0; margin:.75rem 0; display:flex; align-items:center; gap:.4rem; width:100%;">
                         Current Listings
-                        <svg id="currentListingsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;"><polyline points="6 9 12 15 18 9"/></svg>
+                        <svg id="currentListingsChevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s;">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
                     </button>
                     <div id="existingListings" style="display:none;">
                         <?php if (empty($listings)): ?>
@@ -419,12 +236,11 @@ function renderStars(int $count): string
                 <h1 class="profile-banner__name" id="bannerName">
                     <?= htmlspecialchars($business_name ?: 'Unnamed Business') ?>
                 </h1>
+                <!-- Replace lines 224–229 with: -->
                 <p class="profile-banner__meta">
                     <span id="bannerContact"><?= htmlspecialchars($contact_num) ?></span>
-                    <?php if ($address): ?>
-                        &nbsp;·&nbsp;
-                        <span id="bannerAddress"><?= htmlspecialchars($address) ?></span>
-                    <?php endif; ?>
+                    &nbsp;·&nbsp;
+                    <span id="bannerAddress"><?= htmlspecialchars($address) ?></span>
                 </p>
                 <div class="profile-banner__badges" id="bannerBadges">
 
@@ -463,7 +279,7 @@ function renderStars(int $count): string
                 <span class="metric-card__label">Account holder</span>
             </div>
             <div class="metric-card">
-                <span class="metric-card__value"><?= $listing_count ?></span>
+                <span class="metric-card__value" id="listingCount"><?= $listing_count ?></span>
                 <span class="metric-card__label">Active listings</span>
             </div>
         </section>
@@ -506,7 +322,7 @@ function renderStars(int $count): string
                 </ul>
             </section>
 
-  
+
             <section class="card" aria-label="Recent reviews">
                 <div class="card__header">
                     <h2 class="card__title">Recent reviews</h2>
@@ -521,240 +337,7 @@ function renderStars(int $count): string
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            /* ── Current Listings toggle (inside modal) ── */
-            var toggleCurrent  = document.getElementById('toggleCurrentListings');
-            var existingList   = document.getElementById('existingListings');
-            var currentChevron = document.getElementById('currentListingsChevron');
-
-            if (toggleCurrent) {
-                toggleCurrent.addEventListener('click', function () {
-                    var open = existingList.style.display !== 'none';
-                    existingList.style.display = open ? 'none' : '';
-                    currentChevron.style.transform = open ? '' : 'rotate(180deg)';
-                });
-            }
-
-
-
-  
-            var editModal = document.getElementById('editModal');
-            var saveEditBtn = document.getElementById('saveEdit');
-            var bannerName = document.getElementById('bannerName');
-            var bannerContact = document.getElementById('bannerContact');
-            var bannerAddress = document.getElementById('bannerAddress');
-            var editName = document.getElementById('editName');
-            var editContact = document.getElementById('editContact');
-            var editAddress = document.getElementById('editAddress');
-
-            editModal.addEventListener('show.bs.modal', function() {
-                editName.value = bannerName.textContent.trim();
-                editContact.value = bannerContact ? bannerContact.textContent.trim() : '';
-                editAddress.value = bannerAddress ? bannerAddress.textContent.trim() : '';
-            });
-            editModal.addEventListener('shown.bs.modal', function() {
-                editName.focus();
-            });
-
-            saveEditBtn.addEventListener('click', function() {
-                var name = editName.value.trim();
-                var contact = editContact.value.trim();
-                var addr = editAddress.value.trim();
-                if (name) bannerName.textContent = name;
-                if (contact && bannerContact) bannerContact.textContent = contact;
-                if (addr && bannerAddress) bannerAddress.textContent = addr;
-                saveEditBtn.textContent = 'Saved!';
-                saveEditBtn.style.background = '#2D8C4E';
-                setTimeout(function() {
-                    saveEditBtn.textContent = 'Save changes';
-                    saveEditBtn.style.background = '';
-                    bootstrap.Modal.getInstance(editModal).hide();
-                }, 900);
-            });
-
-            var newPhotoBox = document.getElementById('new_photo_box');
-            var newPhotoInput = document.getElementById('new_photo');
-            var newPhotoName = document.getElementById('new_photo_name');
-
-            if (newPhotoBox) {
-                newPhotoBox.addEventListener('click', function() {
-                    newPhotoInput.click();
-                });
-                newPhotoInput.addEventListener('change', function() {
-                    var file = newPhotoInput.files[0];
-                    if (file) {
-                        if (file.type !== 'image/png') {
-                            newPhotoName.style.color = '#c0392b';
-                            newPhotoName.textContent = 'Only PNG files are allowed.';
-                            newPhotoInput.value = '';
-                            return;
-                        }
-                        if (file.size > 5 * 1024 * 1024) {
-                            newPhotoName.style.color = '#c0392b';
-                            newPhotoName.textContent = 'File must be under 5MB.';
-                            newPhotoInput.value = '';
-                            return;
-                        }
-                        newPhotoName.style.color = '#2D8C4E';
-                        newPhotoName.textContent = '✓ ' + file.name;
-                    }
-                });
-            }
-
-            
-            document.querySelectorAll('.edit-photo-box').forEach(function(box) {
-                var input = box.querySelector('.edit-photo-input');
-                var nameDiv = box.querySelector('.edit-photo-name');
-                box.addEventListener('click', function() {
-                    input.click();
-                });
-                input.addEventListener('change', function() {
-                    var file = input.files[0];
-                    if (!file) return;
-                    if (file.type !== 'image/png') {
-                        nameDiv.style.color = '#c0392b';
-                        nameDiv.textContent = 'Only PNG files are allowed.';
-                        input.value = '';
-                        return;
-                    }
-                    if (file.size > 5 * 1024 * 1024) {
-                        nameDiv.style.color = '#c0392b';
-                        nameDiv.textContent = 'File must be under 5MB.';
-                        input.value = '';
-                        return;
-                    }
-                    nameDiv.style.color = '#2D8C4E';
-                    nameDiv.textContent = '✓ ' + file.name;
-                });
-            });
-
-            document.querySelectorAll('.save-listing-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var row = btn.closest('.listing-edit-row');
-                    var productid = row.dataset.productid;
-                    var brand = row.querySelector('.edit-brand').value.trim();
-                    var desc = row.querySelector('.edit-desc').value.trim();
-                    var cat = row.querySelector('.edit-cat').value;
-                    var price = row.querySelector('.edit-price').value.trim();
-                    var photoInput = row.querySelector('.edit-photo-input');
-                    var msg = row.querySelector('.save-listing-msg');
-
-                    if (!brand || !desc || !price) {
-                        msg.style.color = '#c0392b';
-                        msg.textContent = 'Brand, description, and price are required.';
-                        msg.style.display = 'inline';
-                        return;
-                    }
-
-                    btn.disabled = true;
-                    btn.textContent = 'Saving...';
-                    msg.style.display = 'none';
-
-                    var formData = new FormData();
-                    formData.append('action', 'update_listing');
-                    formData.append('productid', productid);
-                    formData.append('primary_category', cat);
-                    formData.append('brand_name', brand);
-                    formData.append('product_desc', desc);
-                    formData.append('price', price);
-                    if (photoInput && photoInput.files[0]) {
-                        formData.append('product_photo', photoInput.files[0]);
-                    }
-
-                    fetch(window.location.href, {
-                            method: 'POST',
-                            body: formData
-                        })
-                        .then(function(r) {
-                            return r.json();
-                        })
-                        .then(function(data) {
-                            if (data.success) {
-                                btn.textContent = 'Saved!';
-                                btn.style.background = '#2D8C4E';
-                                msg.style.color = '#2D8C4E';
-                                msg.textContent = 'Changes saved.';
-                                msg.style.display = 'inline';
-                                setTimeout(function() {
-                                    btn.textContent = 'Save changes';
-                                    btn.style.background = '';
-                                    btn.disabled = false;
-                                }, 1500);
-                            } else {
-                                msg.style.color = '#c0392b';
-                                msg.textContent = data.error || 'Something went wrong.';
-                                msg.style.display = 'inline';
-                                btn.disabled = false;
-                                btn.textContent = 'Save changes';
-                            }
-                        })
-                        .catch(function() {
-                            msg.style.color = '#c0392b';
-                            msg.textContent = 'Request failed.';
-                            msg.style.display = 'inline';
-                            btn.disabled = false;
-                            btn.textContent = 'Save changes';
-                        });
-                });
-            });
-
-            document.querySelectorAll('.delete-listing-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var row = btn.closest('.listing-edit-row');
-                    var productid = row.dataset.productid;
-                    var msg = row.querySelector('.save-listing-msg');
-
-                    if (!confirm('Delete this listing? This cannot be undone.')) return;
-
-                    btn.disabled = true;
-                    btn.textContent = 'Deleting...';
-
-                    var formData = new FormData();
-                    formData.append('action', 'delete_listing');
-                    formData.append('productid', productid);
-
-                    fetch(window.location.href, { method: 'POST', body: formData })
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) {
-                            if (data.success) {
-                                /* Remove the row + its divider from the modal */
-                                var divider = row.nextElementSibling;
-                                if (divider && divider.classList.contains('listing-divider')) divider.remove();
-                                row.remove();
-
-                                /* Remove from the sidebar listing display */
-                                var sideItem = document.querySelector('#listingDisplay [data-productid="' + productid + '"]');
-                                if (sideItem) sideItem.remove();
-
-                                /* Update the active listings count */
-                                var countEl = document.querySelector('.metric-card__value');
-                                if (countEl && !isNaN(parseInt(countEl.textContent))) {
-                                    countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
-                                }
-
-                            } else {
-                                msg.style.color = '#c0392b';
-                                msg.textContent = data.error || 'Delete failed.';
-                                msg.style.display = 'inline';
-                                btn.disabled = false;
-                                btn.textContent = 'Delete';
-                            }
-                        })
-                        .catch(function() {
-                            msg.style.color = '#c0392b';
-                            msg.textContent = 'Request failed.';
-                            msg.style.display = 'inline';
-                            btn.disabled = false;
-                            btn.textContent = 'Delete';
-                        });
-                });
-            });
-
-        });
-    </script>
-
+    <script src="resources/js/sellerprofile.js"></script>
     <footer>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/footer.php'); ?>
     </footer>

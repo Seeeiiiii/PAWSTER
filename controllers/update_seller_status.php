@@ -38,10 +38,10 @@ $stmt->bind_param("si", $new_status, $status_id);
 
 if ($stmt->execute() && $stmt->affected_rows > 0) {
 
-    /* On approval, copy application data into tblsellerprofile */
+
     if ($new_status === 'verified') {
 
-        /* Get the formid for this status row */
+
         $r = $conn->prepare(
             "SELECT formid FROM tblsellerstatus WHERE status_id = ? LIMIT 1"
         );
@@ -52,7 +52,7 @@ if ($stmt->execute() && $stmt->affected_rows > 0) {
         $r->close();
 
         if ($formid) {
-            /* Fetch business details from tblapplicationform */
+
             $fetch = $conn->prepare(
                 "SELECT business_name, contact_num, dti_reg, bir_reg, address
                  FROM tblapplicationform

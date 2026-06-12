@@ -51,6 +51,8 @@ $navbar = array(
     "sellerform" => "/PAWSTER/sellerapplication.php",
     "sellerprof" => "/PAWSTER/sellerprofile.php",
     "shop" => "/PAWSTER/shop.php",
+    "adopt" => "/PAWSTER/adoption.php",
+    "groom" => "/PAWSTER/grooming.php",
     "cart" => "/PAWSTER/cart.php"
 );
 
@@ -109,11 +111,13 @@ if ($is_logged_in) {
 
                                     <?php if ($is_logged_in): ?>
                                         <a class="dropdown-item" href="<?= $navbar['userprof'] ?>">User Profile</a>
+                                        <a class="dropdown-item" href="<?= $navbar['adopt'] ?>">Browse Pets</a>
+                                        <a class="dropdown-item" href="<?= $navbar['shop'] ?>">Browse Products</a>
+                                        <a class="dropdown-item" href="<?= $navbar['groom'] ?>">Grooming Services</a> 
                                         <?php if ($is_seller): ?>
                                             <a class="dropdown-item" href="<?= $navbar['sellerprof'] ?>">Seller Profile</a>
                                         <?php else: ?>
-                                            <a class="dropdown-item" href="<?= $navbar['sellerform'] ?>">Become a seller!</a>
-                                            <a class="dropdown-item" href="<?= $navbar['shop'] ?>">Check commerce page</a>
+                                            <a class="dropdown-item" href="<?= $navbar['sellerform'] ?>">Become a seller!</a>   
                                         <?php endif; ?>
                                         <form method="POST" action="/PAWSTER/authentication/auth_login.php" class="d-inline">
                                             <input type="hidden" name="logout_btn" value="1">
@@ -122,6 +126,7 @@ if ($is_logged_in) {
                                     <?php else: ?>
                                         <a class="dropdown-item" href="<?= $navbar['login'] ?>">Login</a>
                                         <a class="dropdown-item" href="<?= $navbar['shop'] ?>">Check commerce page</a>
+                                        <a class="dropdown-item" href="<?= $navbar['adopt'] ?>">Browse Pets</a>
                                     <?php endif; ?>
 
                                 </div>

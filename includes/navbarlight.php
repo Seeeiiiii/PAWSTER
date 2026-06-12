@@ -37,18 +37,42 @@
 </style>
 
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 $navbar = array(
-    "home"     => "/PAWSTER/resources/php/index.php",
-    "login"    => "/PAWSTER/resources/php/login.php",
-    "userprof" => "/PAWSTER/resources/php/userprof.php"
+    "home"       => "/PAWSTER/index.php",
+    "login"      => "/PAWSTER/login.php",
+    "userprof"   => "/PAWSTER/userprof.php",
+    "sellerform" => "/PAWSTER/sellerapplication.php",
+    "sellerprof" => "/PAWSTER/sellerprofile.php",
+    "shop" => "/PAWSTER/shop.php",
+    "adopt" => "/PAWSTER/adoption.php",
+    "groom" => "/PAWSTER/grooming.php",
+    "cart" => "/PAWSTER/cart.php"
 );
 
-$first_name   = $_SESSION['auth_user']['first_name'] ?? 'Guest';
+$first_name = $_SESSION['auth_user']['first_name'] ?? 'Guest';
 $is_logged_in = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
+
+$is_seller = false;
+if ($is_logged_in) {
+    $user_id = $_SESSION['auth_user']['userid'] ?? null;
+
+    if ($user_id) {
+
+        $stmt = $db->conn->prepare("
+            SELECT 1 FROM tblsellerstatus
+            WHERE userid = ?
+            LIMIT 1
+        ");
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->store_result();
+        $is_seller = $stmt->num_rows > 0;
+        $stmt->close();
+
+       
+        $_SESSION['is_seller_applicant'] = $is_seller;
+    }
+}
 ?>
 
 <header>
@@ -76,16 +100,26 @@ $is_logged_in = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] 
                                         <span> | <?= htmlspecialchars($first_name) ?></span>
                                     </i>
                                 </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
                                     <?php if ($is_logged_in): ?>
                                         <a class="dropdown-item" href="<?= $navbar['userprof'] ?>">User Profile</a>
+                                        <a class="dropdown-item" href="<?= $navbar['adopt'] ?>">Browse Pets</a>
+                                        <a class="dropdown-item" href="<?= $navbar['shop'] ?>">Browse Products</a>
+                                        <a class="dropdown-item" href="<?= $navbar['groom'] ?>">Grooming Services</a> 
+                                        <?php if ($is_seller): ?>
+                                            <a class="dropdown-item" href="<?= $navbar['sellerprof'] ?>">Seller Profile</a>
+                                        <?php else: ?>
+                                            <a class="dropdown-item" href="<?= $navbar['sellerform'] ?>">Become a seller!</a>   
+                                        <?php endif; ?>
                                         <form method="POST" action="/PAWSTER/authentication/auth_login.php" class="d-inline">
                                             <input type="hidden" name="logout_btn" value="1">
                                             <button type="submit" class="dropdown-item">Logout</button>
                                         </form>
                                     <?php else: ?>
                                         <a class="dropdown-item" href="<?= $navbar['login'] ?>">Login</a>
+                                        <a class="dropdown-item" href="<?= $navbar['shop'] ?>">Check commerce page</a>
+                                        <a class="dropdown-item" href="<?= $navbar['adopt'] ?>">Browse Pets</a>
                                     <?php endif; ?>
 
                                 </div>
