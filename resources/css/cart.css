@@ -645,7 +645,303 @@ button {
     margin-top: auto;
 }
 
-/* ── Responsive ───────────────────────────────────────────── */
+/* ── Checkout Grid: left column wrapper ──────────────────────
+   Keeps the cart items and delivery address stacked together
+   in the wide column, with the payment card beside them. */
+.checkout-left {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+}
+
+/* ── Order Status Notices ─────────────────────────────────── */
+.order-success {
+    background: #fff;
+    border: 1.5px solid #D4C0A8;
+    border-radius: 18px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    font-size: .9rem;
+    color: #4A3728;
+}
+
+.order-success-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin-bottom: 14px;
+    color: #4A3728;
+}
+
+.receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+    font-size: .85rem;
+}
+
+.receipt-table th {
+    text-align: left;
+    padding: 6px 8px;
+    font-weight: 700;
+    color: #7A6252;
+    border-bottom: 1.5px solid #D4C0A8;
+}
+
+.receipt-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #E8D9C8;
+}
+
+.receipt-table th:nth-child(3),
+.receipt-table td:nth-child(3),
+.receipt-table th:nth-child(4),
+.receipt-table td:nth-child(4) {
+    text-align: right;
+}
+
+.receipt-summary-row {
+    text-align: right;
+    margin: 4px 0;
+    font-size: .85rem;
+    color: #6A5242;
+}
+
+.receipt-summary-row.total {
+    font-weight: 800;
+    color: #4A3728;
+}
+
+.order-success-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-weight: 700;
+    color: #8B5E34;
+    transition: opacity .2s;
+}
+
+.order-success-link:hover {
+    opacity: .7;
+}
+
+.order-error {
+    background: #FBE7E7;
+    border: 1.5px solid #EFC2C2;
+    color: #7A2E2E;
+    border-radius: 16px;
+    padding: 14px 22px;
+    margin-bottom: 22px;
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+/* ── Empty Cart State ─────────────────────────────────────── */
+.empty-state {
+    text-align: center;
+    color: #7A6252;
+    padding: 40px 0;
+    font-size: .9rem;
+}
+
+.empty-state a {
+    color: #8B5E34;
+    font-weight: 700;
+}
+
+.empty-state a:hover {
+    opacity: .7;
+}
+
+/* Block-level pay button used for <a> "Log in" / "Start Shopping" links */
+.pay-btn-link {
+    display: block;
+    text-decoration: none;
+}
+
+/* ── Delivery Address Card ────────────────────────────────── */
+.address-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.address-loading,
+.address-empty {
+    font-size: .85rem;
+    color: #7A6252;
+    margin: 0;
+}
+
+.address-login-notice {
+    font-size: .875rem;
+    color: #7A6252;
+}
+
+.address-login-notice a {
+    color: #8B5E34;
+    font-weight: 700;
+}
+
+.address-login-notice a:hover {
+    opacity: .7;
+}
+
+.address-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fff;
+    border: 1.5px solid #E0CFB8;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: .875rem;
+    color: #4A3728;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.address-option:hover {
+    border-color: #B68A5A;
+}
+
+.address-option:has(input:checked) {
+    border-color: #B68A5A;
+    box-shadow: 0 0 0 3px rgba(182,138,90,.15);
+}
+
+.address-option input[type="radio"] {
+    margin-top: 3px;
+    width: 16px;
+    height: 16px;
+    accent-color: #B68A5A;
+    flex-shrink: 0;
+}
+
+.address-option .address-text {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.address-option .address-text strong {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.delete-address-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #B0947A;
+    flex-shrink: 0;
+    transition: background .2s, color .2s;
+}
+
+.delete-address-btn:hover {
+    background: #FBE7E7;
+    color: #C0392B;
+}
+
+.add-address-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1.5px dashed #B68A5A;
+    color: #8B5E34;
+    border-radius: 12px;
+    padding: 10px 18px;
+    font-size: .875rem;
+    font-weight: 700;
+    transition: background .2s, border-color .2s;
+}
+
+.add-address-btn:hover {
+    background: rgba(182,138,90,.1);
+    border-color: #8B5E34;
+}
+
+.address-form {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1.5px solid #D4C0A8;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.field-label {
+    display: block;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #7A6252;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.address-form select.form-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23B68A5A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.address-form select.form-input:disabled {
+    background-color: #F5EFE6;
+    color: #B0947A;
+    cursor: not-allowed;
+}
+
+.address-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.save-address-btn {
+    background: #B68A5A;
+    color: #fff;
+    border-radius: 12px;
+    padding: 10px 22px;
+    font-size: .875rem;
+    font-weight: 700;
+    transition: background .2s;
+}
+
+.save-address-btn:hover {
+    background: #8B5E34;
+}
+
+.cancel-address-btn {
+    background: transparent;
+    color: #8B5E34;
+    border: 1.5px solid #D4C0A8;
+    border-radius: 12px;
+    padding: 10px 22px;
+    font-size: .875rem;
+    font-weight: 700;
+    transition: background .2s;
+}
+
+.cancel-address-btn:hover {
+    background: #F5EFE6;
+}
+
+.address-error {
+    color: #C0392B;
+    font-size: .8rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+
 @media (max-width: 860px) {
     .checkout-grid {
         grid-template-columns: 1fr;
