@@ -19,6 +19,24 @@
 <?php
 $conn = $db->conn;
 
+// ── FETCH LISTINGS ──
+$listings_sql = "
+    SELECT sp.productid, sp.brand_name, sp.primary_category, sp.price, sp.listing_status,
+           CONCAT(u.first_name, ' ', u.last_name) AS seller_name
+    FROM tblsellerproduct sp
+    JOIN tblsellerprofile sp2 ON sp2.sellerid = sp.sellerid
+    JOIN users u ON u.userid = sp2.sellerid
+    ORDER BY sp.productid DESC
+";
+$listings_result = $db->conn->query($listings_sql);
+$all_listings = $listings_result ? $listings_result->fetch_all(MYSQLI_ASSOC) : [];
+$listings_active  = count(array_filter($all_listings, fn($l) => strtolower($l['listing_status'] ?? 'active') === 'active'));
+$listings_pending = count(array_filter($all_listings, fn($l) => strtolower($l['listing_status'] ?? '') === 'pending'));
+$listings_removed = count(array_filter($all_listings, fn($l) => strtolower($l['listing_status'] ?? '') === 'removed'));
+$total_sellers_sql = "SELECT COUNT(DISTINCT sellerid) AS cnt FROM tblsellerprofile";
+$ts_res = $db->conn->query($total_sellers_sql);
+$total_sellers = $ts_res ? (int)$ts_res->fetch_assoc()['cnt'] : 0;
+
 // ── FETCH PETS ──
 $pets_sql = "SELECT * FROM tblpets ORDER BY created_at DESC";
 $pets_result = $conn->query($pets_sql);
@@ -238,8 +256,8 @@ function renderApptRow(array $row): string {
         </div>
         <div class="stat-card">
           <p class="stat-label">Active Listings</p>
-          <p class="stat-num">312</p>
-          <span class="stat-pill pill-green">↑ 9% this week</span>
+          <p class="stat-num"><?= $listings_active ?></p>
+          <span class="stat-pill pill-green">Live Products</span>
         </div>
       </div>
 
@@ -619,22 +637,22 @@ function renderApptRow(array $row): string {
       <div class="stat-grid">
         <div class="stat-card">
           <p class="stat-label">Active Listings</p>
-          <p class="stat-num">312</p>
-          <span class="stat-pill pill-green">↑ 9% this week</span>
+          <p class="stat-num"><?= $listings_active ?></p>
+          <span class="stat-pill pill-green">Live</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Pending Review</p>
-          <p class="stat-num">14</p>
+          <p class="stat-num"><?= $listings_pending ?></p>
           <span class="stat-pill pill-red">Needs Review</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Removed</p>
-          <p class="stat-num">7</p>
-          <span class="stat-pill pill-blue">This Month</span>
+          <p class="stat-num"><?= $listings_removed ?></p>
+          <span class="stat-pill pill-blue">All Time</span>
         </div>
         <div class="stat-card">
           <p class="stat-label">Total Sellers</p>
-          <p class="stat-num">47</p>
+          <p class="stat-num"><?= $total_sellers ?></p>
           <span class="stat-pill pill-green">Active</span>
         </div>
       </div>
@@ -652,31 +670,29 @@ function renderApptRow(array $row): string {
               <tr><th>Product</th><th>Seller</th><th>Category</th><th>Price</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Premium Dog Chew Treats</td><td>PawBites PH</td><td>Food</td><td>₱189</td>
-                <td><span class="badge-s badge-green">Active</span></td>
-                <td><div class="act-col"><button class="btn-rej">Remove</button></div></td>
+              <?php if (empty($all_listings)): ?>
+                <tr><td colspan="6" style="text-align:center;color:#9B7050;">No listings yet.</td></tr>
+              <?php else: foreach ($all_listings as $lst):
+                $lstStatus = strtolower($lst['listing_status'] ?? 'active');
+                $badge = match($lstStatus) {
+                  'active'  => '<span class="badge-s badge-green">Active</span>',
+                  'pending' => '<span class="badge-s badge-orange">Pending</span>',
+                  'removed' => '<span class="badge-s badge-red">Removed</span>',
+                  default   => '<span class="badge-s badge-green">Active</span>',
+                };
+                $actions = $lstStatus === 'removed'
+                  ? '<span class="done-txt">Removed</span>'
+                  : '<div class="act-col"><button class="btn-rej" onclick="removeListing('.$lst['productid'].')">Remove</button></div>';
+              ?>
+              <tr id="listing-row-<?= $lst['productid'] ?>">
+                <td><?= htmlspecialchars($lst['brand_name']) ?></td>
+                <td><?= htmlspecialchars($lst['seller_name'] ?? '—') ?></td>
+                <td><?= htmlspecialchars($lst['primary_category']) ?></td>
+                <td>₱<?= number_format((float)$lst['price'], 2) ?></td>
+                <td id="listing-badge-<?= $lst['productid'] ?>"><?= $badge ?></td>
+                <td><?= $actions ?></td>
               </tr>
-              <tr>
-                <td>Interactive Dog Toy Bundle</td><td>NaturePet</td><td>Toys</td><td>₱256</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Hypoallergenic Pet Shampoo</td><td>PlayPaws</td><td>Grooming</td><td>₱499</td>
-                <td><span class="badge-s badge-green">Active</span></td>
-                <td><div class="act-col"><button class="btn-rej">Remove</button></div></td>
-              </tr>
-              <tr>
-                <td>Cat Scratching Post Deluxe</td><td>FurBuddy Store</td><td>Accessories</td><td>₱780</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Orthopedic Dog Bed</td><td>PetNest PH</td><td>Beds</td><td>₱1,250</td>
-                <td><span class="badge-s badge-green">Active</span></td>
-                <td><div class="act-col"><button class="btn-rej">Remove</button></div></td>
-              </tr>
+              <?php endforeach; endif; ?>
             </tbody>
           </table>
         </div>
@@ -912,6 +928,23 @@ function deletePet(petId) {
 }
 
 // ── ADOPTIONS ──
+function removeListing(productId) {
+  if (!confirm('Remove this listing?')) return;
+  const fd = new FormData();
+  fd.append('productid', productId);
+  fetch('/PAWSTER/controllers/remove_listing_controller.php', { method:'POST', body:fd })
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        const badge = document.getElementById('listing-badge-' + productId);
+        if (badge) badge.innerHTML = '<span class="badge-s badge-red">Removed</span>';
+        const row = document.getElementById('listing-row-' + productId);
+        if (row) row.querySelector('td:last-child').innerHTML = '<span class="done-txt">Removed</span>';
+      } else { alert(data.message); }
+    })
+    .catch(() => alert('Network error.'));
+}
+
 function updateAdoptStatus(requestId, newStatus) {
   const fd = new FormData();
   fd.append('requestid', requestId);

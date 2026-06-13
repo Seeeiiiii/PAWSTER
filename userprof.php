@@ -46,6 +46,24 @@ if ($is_logged_in && $current_userid) {
   }
   $ostmt->close();
 
+  // ── ADOPTION REQUESTS ──
+  $adoptions = [];
+  $adstmt = $db->conn->prepare(
+    "SELECT ar.requestid, ar.status, ar.created_at,
+            p.name AS pet_name, p.breed, p.image
+     FROM tbladoptionrequest ar
+     JOIN tblpets p ON p.petid = ar.petid
+     WHERE ar.userid = ?
+     ORDER BY ar.created_at DESC"
+  );
+  $adstmt->bind_param("i", $current_userid);
+  $adstmt->execute();
+  $adres = $adstmt->get_result();
+  while ($row = $adres->fetch_assoc()) {
+    $adoptions[] = $row;
+  }
+  $adstmt->close();
+
 
   $ustmt = $db->conn->prepare(
     "SELECT u.contact_number,
@@ -282,17 +300,29 @@ function initials(string $name): string
       <!-- ── ADOPTIONS TAB ── -->
       <div class="tab-pane" id="tab-adoptions">
         <div class="info-card">
-          <div class="icard-head"><span class="icard-title">Adoption History</span></div>
+          <div class="icard-head"><span class="icard-title">Adoption Requests</span></div>
+          <?php if (empty($adoptions)): ?>
+            <p class="row-meta" style="padding:.5rem 0;">No adoption requests yet.</p>
+          <?php else: foreach ($adoptions as $ad):
+            $adDate = date('M j, Y', strtotime($ad['created_at']));
+            $adPill = match(strtolower($ad['status'])) {
+              'approved' => 'pill-blue',
+              'rejected' => 'pill-red',
+              default    => 'pill-orange',
+            };
+            $adImg = $ad['image'] ? '/PAWSTER/uploads/pets/' . htmlspecialchars($ad['image']) : '';
+          ?>
           <div class="order-row">
-            <div class="thumb-sq" style="background:#C4A882;"></div>
+            <div class="thumb-sq" style="<?= $adImg ? 'background-image:url('.$adImg.');background-size:cover;background-position:center;' : 'background:#C4A882;' ?>"></div>
             <div class="row-info">
-              <p class="row-name">Mochi – Shih Tzu</p>
-              <p class="row-meta">Applied May 28, 2026</p>
+              <p class="row-name"><?= htmlspecialchars($ad['pet_name']) ?> – <?= htmlspecialchars($ad['breed']) ?></p>
+              <p class="row-meta">Applied <?= $adDate ?></p>
             </div>
             <div class="order-right">
-              <span class="pill pill-blue">Under Review</span>
+              <span class="pill <?= $adPill ?>"><?= htmlspecialchars(ucfirst(strtolower($ad['status']))) ?></span>
             </div>
           </div>
+          <?php endforeach; endif; ?>
         </div>
       </div><!-- /tab-adoptions -->
 
