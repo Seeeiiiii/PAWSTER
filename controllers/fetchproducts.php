@@ -37,7 +37,7 @@ class prod_auto {
         if ($category !== null) {
 
             $countStmt = $db->conn->prepare(
-                "SELECT COUNT(*) FROM tblsellerproduct WHERE primary_category = ?"
+                "SELECT COUNT(*) FROM tblsellerproduct WHERE primary_category = ? AND listing_status != 'deleted'"
             );
             $countStmt->bind_param("s", $category);
             $countStmt->execute();
@@ -49,7 +49,7 @@ class prod_auto {
                 "SELECT p.*, sp.businessname AS business_name
                  FROM tblsellerproduct p
                  LEFT JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
-                 WHERE p.primary_category = ?
+                 WHERE p.primary_category = ? AND p.listing_status != 'deleted'
                  ORDER BY p.brand_name ASC
                  LIMIT ? OFFSET ?"
             );
@@ -58,7 +58,7 @@ class prod_auto {
             $result = $stmt->get_result();
         } else {
 
-            $countStmt = $db->conn->prepare("SELECT COUNT(*) FROM tblsellerproduct");
+            $countStmt = $db->conn->prepare("SELECT COUNT(*) FROM tblsellerproduct WHERE listing_status != 'deleted'");
             $countStmt->execute();
             $countStmt->bind_result($this->total_count);
             $countStmt->fetch();
@@ -68,6 +68,7 @@ class prod_auto {
                 "SELECT p.*, sp.businessname AS business_name
                  FROM tblsellerproduct p
                  LEFT JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
+                 WHERE p.listing_status != 'deleted'
                  ORDER BY p.primary_category ASC, p.brand_name ASC
                  LIMIT ? OFFSET ?"
             );

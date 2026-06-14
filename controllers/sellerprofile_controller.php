@@ -1,5 +1,9 @@
 <?php
 
+ob_start();
+error_reporting(0);
+ini_set('display_errors', 0);
+
 $db   = new DatabaseConnection();
 $conn = $db->conn;
 
@@ -44,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_l
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_listing') {
+    ob_clean();
     header('Content-Type: application/json');
 
     $userid    = (int)($_SESSION['auth_user']['userid'] ?? 0);
@@ -91,6 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_listing') {
+    ob_clean();
     header('Content-Type: application/json');
 
     $userid    = (int)($_SESSION['auth_user']['userid'] ?? 0);
@@ -121,11 +127,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
         exit();
     }
 
-    $del = $conn->prepare("DELETE FROM tblsellerproduct WHERE productid = ?");
+    $del = $conn->prepare("UPDATE tblsellerproduct SET listing_status = 'deleted' WHERE productid = ?");
     $del->bind_param("i", $productid);
+    $del->execute();
+    $affected = $del->affected_rows;
+    $del->close();
 
     echo json_encode(
-        $del->execute() && $del->affected_rows > 0
+        $affected > 0
             ? ['success' => true]
             : ['success' => false, 'error' => 'Delete failed. Please try again.']
     );
@@ -133,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_profile') {
+    ob_clean();
     header('Content-Type: application/json');
 
     $userid  = (int)($_SESSION['auth_user']['userid'] ?? 0);
@@ -245,7 +255,7 @@ if ($userid > 0) {
         $stmt3 = $conn->prepare(
             "SELECT productid, brand_name, product_desc, primary_category, price, productimage
      FROM tblsellerproduct
-     WHERE sellerid = ?
+     WHERE sellerid = ? AND listing_status != 'deleted'
      ORDER BY productid ASC"
         );
         $stmt3->bind_param("i", $formid);
