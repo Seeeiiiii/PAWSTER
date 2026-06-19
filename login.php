@@ -130,7 +130,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             <input class="form-check-input" type="checkbox" id="keepSigned">
                             <label class="form-check-label text-muted" for="keepSigned">Keep me signed in</label>
                         </div>
-                        <a href="#" class="forgot-link">Forgot your password?</a>
+                        <a href="forgotpassword.php" class="forgot-link">Forgot your password?</a>
                     </div>
 
                     <div class="d-flex justify-content-center py-1">

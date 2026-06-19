@@ -20,7 +20,7 @@
 <?php
 $conn = $db->conn;
 
-// ── FETCH LISTINGS ──
+
 $listings_sql = "
     SELECT sp.productid, sp.brand_name, sp.primary_category, sp.price, sp.listing_status,
            CONCAT(u.first_name, ' ', u.last_name) AS seller_name

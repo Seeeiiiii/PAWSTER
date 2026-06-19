@@ -1,6 +1,16 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/cart_control.php';
+
+/**
+ * $cart_items
+ * @var int $order_error
+ * @var array $order_success
+ * @var array $cart_items
+ * @var array $userid
+ * @var int $total
+ * @var int $pawpoints
+ */
 ?>
 
 <!DOCTYPE html>

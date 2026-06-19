@@ -1,7 +1,6 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
 
-// Initialize the session handler dynamically if not already active
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,7 +11,6 @@ $current_userid   = $_SESSION['auth_user']['userid'] ?? 0;
 $current_fullname = $_SESSION['auth_user']['first_name'] . ' ' . $_SESSION['auth_user']['last_name'] ?? 'Guest User';
 $is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
 
-// ── BACKEND API ROUTER FOR SAVING APPOINTMENTS ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_appt') {
     header('Content-Type: application/json');
 
@@ -56,6 +54,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
         echo json_encode(["status" => "error", "message" => "Invalid or empty data received."]);
     }
     exit; // Stop executing to prevent HTML pollution inside the JSON pipeline response
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'get_booked_slots') {
+    header('Content-Type: application/json');
+
+    $date = $_GET['date'] ?? '';
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        echo json_encode(["status" => "error", "message" => "Invalid date."]);
+        exit;
+    }
+
+    $db = new DatabaseConnection();
+    $conn = $db->conn;
+
+    $query = "SELECT available_time FROM tblappointment WHERE date = ? AND status IN ('Approved', 'Confirmed')";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $date);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $bookedTimes = [];
+    while ($row = $result->fetch_assoc()) {
+        $formatted = date("g:i a", strtotime($row['available_time']));
+        $bookedTimes[] = $formatted;
+    }
+
+    echo json_encode(["status" => "success", "booked" => $bookedTimes]);
+    $stmt->close();
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -365,19 +392,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- ── Show the policy modal once per browser session ── -->
     <script>
-        function closePolicyModal() {
-            document.getElementById('policy-modal-overlay').style.display = 'none';
-            sessionStorage.setItem('pawster_policy_seen', '1');
-        }
+    function closePolicyModal() {
+        document.getElementById('policy-modal-overlay').style.display = 'none';
+    }
 
-        (function () {
-            if (!sessionStorage.getItem('pawster_policy_seen')) {
-                document.getElementById('policy-modal-overlay').style.display = 'flex';
-            }
-        })();
-    </script>
+    (function () {
+        document.getElementById('policy-modal-overlay').style.display = 'flex';
+    })();
+</script>
 </body>
 
 </html>

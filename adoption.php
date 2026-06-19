@@ -1,11 +1,21 @@
 <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php'; ?>
-<?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php'; ?>
+<?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php'; 
+
+/**
+ *
+ * @var array $is_logged_in
+ * @var array $order_success
+
+ */
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pawster – Adoption</title>
+<title>Adoption</title>
 <link rel="icon"  href="/PAWSTER/resources/images/logo white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +29,6 @@
 <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'; ?>
 
 <?php
-// Fetch pets from DB
 $pets = [];
 $result = $db->conn->query("SELECT * FROM tblpets WHERE status = 'Available' ORDER BY created_at DESC");
 if ($result) {

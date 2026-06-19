@@ -11,7 +11,6 @@ body {
     width: 100%;
     border-radius: 1rem;
     max-height: 42rem;
-
 }
 
 .left-panel {
@@ -144,13 +143,11 @@ body {
     transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
 }
 
-
 .custom-slide.active {
     opacity: 1;
     visibility: visible;
     position: relative;
 }
-
 
 .oval {
     width: 32px;
@@ -165,4 +162,69 @@ body {
 .oval.active {
     background-color: #f5eae0; 
     border-color: #f5eae0;
+}
+
+@media (max-width: 991.98px) {
+    .custom-card {
+        max-height: none;
+    }
+
+    .right-panel {
+        max-height: none;
+    }
+
+    .custom-carousel {
+        height: 10rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .custom-card {
+        border-radius: 0.75rem;
+        max-height: none;
+    }
+
+    .left-panel {
+        border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .right-panel {
+        border-radius: 0 0 0.75rem 0.75rem;
+        max-height: none;
+    }
+
+    .toggle-container {
+        max-width: 100%;
+    }
+
+    .custom-carousel {
+        height: 8rem;
+    }
+
+    .btn-login {
+        width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .left-panel h2 {
+        font-size: 1.25rem;
+    }
+
+    .left-panel h3 {
+        font-size: 1rem;
+    }
+
+    .custom-input {
+        padding: 8px 12px;
+    }
+
+    .custom-carousel {
+        height: 7rem;
+    }
+
+    .oval {
+        width: 24px;
+        height: 10px;
+    }
 }

@@ -15,7 +15,7 @@ let state = {
 };
 
 let paymentState = {
-    method: 'card'  // 'card' or 'gcash'
+    method: 'card'
 };
 
 const allSlots = [
@@ -23,16 +23,22 @@ const allSlots = [
     '2:00 pm', '3:00 pm', '4:00 pm', '5:00 pm', '6:00 pm'
 ];
 
-function seededRandom(seed) {
-    let s = seed;
-    return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-}
-
-function getBookedSlotsForDate(y, m, d) {
+async function fetchBookedSlots(y, m, d) {
     if (!d) return [];
-    const rng = seededRandom(y * 10000 + m * 100 + d);
-    const count = 2 + Math.floor(rng() * 4);
-    return [...allSlots].sort(() => rng() - 0.5).slice(0, count);
+    const formattedMonth = String(m + 1).padStart(2, '0');
+    const formattedDay = String(d).padStart(2, '0');
+    const dateStr = `${y}-${formattedMonth}-${formattedDay}`;
+
+    try {
+        const res = await fetch(`grooming.php?action=get_booked_slots&date=${dateStr}`);
+        const data = await res.json();
+        if (data.status === 'success') return data.booked;
+        console.error('Failed to fetch booked slots:', data.message);
+        return [];
+    } catch (err) {
+        console.error('Network error fetching booked slots:', err);
+        return [];
+    }
 }
 
 function renderCalendar() {
@@ -84,33 +90,33 @@ function renderCalendar() {
     }
 }
 
-function prevMonth() {
+async function prevMonth() {
     if (state.month === 0) { state.month = 11; state.year--; }
     else state.month--;
     state.day = null;
     state.slot = null;
     renderCalendar();
-    renderSlots();
+    await renderSlots();
     updateSummary();
 }
 
-function nextMonth() {
+async function nextMonth() {
     if (state.month === 11) { state.month = 0; state.year++; }
     else state.month++;
     state.day = null;
     state.slot = null;
     renderCalendar();
-    renderSlots();
+    await renderSlots();
     updateSummary();
 }
 
-function selectDay(d) {
+async function selectDay(d) {
     state.day = d;
     state.slot = null;
     renderCalendar();
     document.getElementById('slots-label').textContent =
         'Available time slots – ' + MONTHS[state.month].slice(0, 3) + ' ' + d;
-    renderSlots();
+    await renderSlots();
     updateSummary();
 }
 
@@ -122,11 +128,11 @@ function selectService(btn) {
     updateSummary();
 }
 
-function renderSlots() {
+async function renderSlots() {
     const container = document.getElementById('slots-container');
     container.innerHTML = '';
 
-    const booked = getBookedSlotsForDate(state.year, state.month, state.day);
+    const booked = await fetchBookedSlots(state.year, state.month, state.day);
     if (state.slot && booked.includes(state.slot)) state.slot = null;
 
     allSlots.forEach(slot => {
@@ -272,7 +278,6 @@ function confirmBooking() {
     const formattedDay = String(state.day).padStart(2, '0');
     const computedDbDate = `${state.year}-${formattedMonth}-${formattedDay}`;
 
-    // Validate payment fields
     if (paymentState.method === 'card') {
         const cn = document.getElementById('card-number').value.replace(/\s/g, '');
         const ce = document.getElementById('card-expiry').value;
@@ -314,7 +319,7 @@ function confirmBooking() {
     sendBookingToDatabase(booking);
 }
 
-function resetBookingForm() {
+async function resetBookingForm() {
     state.day = null;
     state.slot = null;
     state.service = 'Grooming';
@@ -340,7 +345,7 @@ function resetBookingForm() {
     document.getElementById('slots-label').textContent = 'Available time slots';
 
     renderCalendar();
-    renderSlots();
+    await renderSlots();
     updateSummary();
 }
 
@@ -355,7 +360,6 @@ function sendBookingToDatabase(bookingData) {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // Pass resetBookingForm as the callback so reset only fires after user closes modal
                 showBookingModal(bookingData, resetBookingForm);
             } else {
                 alert('Booking failed: ' + (data.message || 'Unknown error. Please try again.'));
@@ -398,8 +402,8 @@ function showBookingModal(b, onDone) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     renderCalendar();
-    renderSlots();
+    await renderSlots();
     updateSummary();
 });

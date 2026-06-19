@@ -3,6 +3,12 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/app_form_controller.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_controller.php';
+
+/**
+ * @var int $listing_count
+ * @var array $listings
+ */
+
 ?>
 
 <!DOCTYPE html>
@@ -23,8 +29,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_con
 
 <body>
     <header style="position: relative; z-index: 100;">
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); 
-        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php');
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php'; ?>
     </header>
 
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -237,7 +243,6 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_con
                 <h1 class="profile-banner__name" id="bannerName">
                     <?= htmlspecialchars($business_name ?: 'Unnamed Business') ?>
                 </h1>
-                <!-- Replace lines 224–229 with: -->
                 <p class="profile-banner__meta">
                     <span id="bannerContact"><?= htmlspecialchars($contact_num) ?></span>
                     &nbsp;·&nbsp;
@@ -338,7 +343,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_con
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/PAWSTER/resources/js/seller   profile.js"></script>
+    <script src="/PAWSTER/resources/js/sellerprofile.js"></script>
     <footer>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/footer.php'); ?>
     </footer>
