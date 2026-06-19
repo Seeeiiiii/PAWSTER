@@ -10,15 +10,62 @@ $current_fullname = trim(($_SESSION['auth_user']['first_name'] ?? '') . ' ' . ($
 $current_fullname = $current_fullname ?: 'Guest User';
 $is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
 
+// ── AJAX: CANCEL APPOINTMENT (handled inline, no separate action file) ──
+// The cancel modal posts here with JSON: { action: 'cancel_appointment', appointmentID, reason }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $rawInput = file_get_contents('php://input');
+  $input    = json_decode($rawInput, true);
+
+  if (is_array($input) && ($input['action'] ?? '') === 'cancel_appointment') {
+    header('Content-Type: application/json');
+
+    if (!$is_logged_in || !$current_userid) {
+      echo json_encode(['success' => false, 'message' => 'You must be logged in to cancel an appointment.']);
+      exit;
+    }
+
+    $apptId = (int)($input['appointmentID'] ?? 0);
+    $reason = trim((string)($input['reason'] ?? ''));
+
+    if (!$apptId || $reason === '') {
+      echo json_encode(['success' => false, 'message' => 'Missing appointment ID or reason.']);
+      exit;
+    }
+
+    $db = new DatabaseConnection();
+
+    // Only cancel if it belongs to the logged-in user and isn't already in a final state
+    $stmt = $db->conn->prepare(
+      "UPDATE tblappointment
+       SET status = 'Cancelled', cancel_reason = ?
+       WHERE appointmentID = ? AND userid = ?
+         AND LOWER(status) NOT IN ('cancelled', 'completed', 'rejected')"
+    );
+    $stmt->bind_param('sii', $reason, $apptId, $current_userid);
+    $stmt->execute();
+
+    if ($stmt->affected_rows > 0) {
+      echo json_encode(['success' => true]);
+    } else {
+      echo json_encode([
+        'success' => false,
+        'message' => 'Could not cancel this appointment. It may not belong to you, or it was already cancelled/completed.'
+      ]);
+    }
+
+    $stmt->close();
+    exit;
+  }
+}
 
 $appointments = [];
 if ($is_logged_in && $current_userid) {
   $db   = new DatabaseConnection();
   $stmt = $db->conn->prepare(
-    "SELECT service_type, select_pet, date, available_time, status
+    "SELECT appointmentID, service_type, select_pet, date, available_time, status
          FROM tblappointment
          WHERE userid = ?
-         ORDER BY date ASC"
+         ORDER BY date DESC"
   );
   $stmt->bind_param("i", $current_userid);
   $stmt->execute();
@@ -103,6 +150,58 @@ function initials(string $name): string
   $parts = array_filter(explode(' ', $name));
   return strtoupper(substr(implode('', array_map(fn($p) => $p[0], $parts)), 0, 2));
 }
+
+function isCancellable(string $status): bool
+{
+  return !in_array(strtolower(trim($status)), ['cancelled', 'completed', 'rejected']);
+}
+
+// Maps a service_type value (as stored in tblappointment) to the same icon
+// used for that service on the booking page (grooming.php).
+function serviceIcon(string $serviceType): string
+{
+  return match (strtolower(trim($serviceType))) {
+    'grooming'      => 'groom icon.png',
+    'vet check-up'  => 'check-up icon.png',
+    'vaccination'   => 'vaccine icon.png',
+    'meet & greet'  => 'heart icon.png',
+    default         => 'appointment.png',
+  };
+}
+
+// Renders one appointment row (used by both preview + full list)
+function renderApptRow(array $appt): string
+{
+  $label       = date('M j, Y', strtotime($appt['date']));
+  $cancellable = isCancellable($appt['status']);
+  $id          = (int)$appt['appointmentID'];
+  $iconFile    = serviceIcon($appt['service_type']);
+
+  ob_start();
+  ?>
+  <div class="appt-row" data-id="<?= $id ?>">
+    <div class="thumb-sq appt-thumb">
+      <img src="/PAWSTER/resources/images/<?= htmlspecialchars($iconFile) ?>"
+        alt="<?= htmlspecialchars($appt['service_type']) ?>">
+    </div>
+    <div class="row-info">
+      <p class="row-name">
+        <?= htmlspecialchars($appt['service_type']) ?> | <?= htmlspecialchars($appt['select_pet']) ?>
+      </p>
+      <p class="row-meta"><?= $label ?> | <?= htmlspecialchars($appt['available_time']) ?></p>
+    </div>
+    <div class="appt-right">
+      <span class="pill <?= pillClass($appt['status']) ?>">
+        <?= htmlspecialchars(ucfirst(strtolower($appt['status']))) ?>
+      </span>
+      <?php if ($cancellable): ?>
+        <button class="pill pill-cancel btn-cancel-appt" data-id="<?= $id ?>">Cancel</button>
+      <?php endif; ?>
+    </div>
+  </div>
+  <?php
+  return ob_get_clean();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -118,6 +217,137 @@ function initials(string $name): string
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
   <link rel="stylesheet" href="resources/css/userprof.css">
+  <style>
+    /* ── Appointment row: status + cancel centered as one column ── */
+    .appt-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .appt-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 92px;
+      margin-left: auto;
+      text-align: center;
+    }
+
+    .appt-right .pill {
+      width: 100%;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    /* Cancel pill — same shape/font as the other status pills,
+       only the color is different (no more font/box mismatch) */
+    .pill-cancel {
+      border: none;
+      cursor: pointer;
+      background: #f8d7da;
+      color: #c0392b;
+    }
+
+    .pill-cancel:hover {
+      background: #f1b0b7;
+    }
+
+    /* Service-type icon inside the appointment row thumbnail */
+    .appt-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .appt-thumb img {
+      width: 60%;
+      height: 60%;
+      object-fit: contain;
+    }
+
+    /* ── TikTok-style cancellation modal ── */
+    #cancelApptModal .modal-content {
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    #cancelApptModal .modal-header {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    #cancelApptModal .modal-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .cancel-prompt {
+      font-size: .85rem;
+      color: #6b6b6b;
+      margin: 0 0 .5rem;
+    }
+
+    .cancel-reasons {
+      border-top: 1px solid #ececec;
+    }
+
+    .reason-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 4px;
+      border-bottom: 1px solid #ececec;
+      margin: 0;
+      cursor: pointer;
+      font-size: .92rem;
+      color: #222;
+    }
+
+    .reason-option:hover {
+      background: #fafafa;
+    }
+
+    .reason-option span {
+      flex: 1;
+    }
+
+    .reason-option input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #c9c9c9;
+      border-radius: 50%;
+      margin: 0 0 0 12px;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .reason-option input[type="radio"]:checked {
+      border-color: #FF5A36;
+    }
+
+    .reason-option input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      background: #FF5A36;
+      border-radius: 50%;
+    }
+
+    .reason-option.selected {
+      background: #fff6f4;
+    }
+
+    #otherReasonText {
+      display: none;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
@@ -164,15 +394,10 @@ function initials(string $name): string
       <!-- ── ORDERS TAB ── -->
       <div class="tab-pane active" id="tab-orders">
 
-        <?php if (!empty($appointments)): ?>
-          <div class="notif-banner">
-            You have <?= count($appointments) ?> appointment<?= count($appointments) !== 1 ? 's' : '' ?> on record.
-          </div>
-        <?php endif; ?>
 
         <div class="two-col">
 
-          <!-- Recent Orders – wire to tblorder when ready -->
+          <!-- Recent Orders -->
           <div class="info-card">
             <div class="icard-head">
               <span class="icard-title">Recent Orders</span>
@@ -212,7 +437,7 @@ function initials(string $name): string
             </div>
           </div>
 
-          <!-- Upcoming Appointments – LIVE -->
+          <!-- Upcoming Appointments – LIVE, cancellable -->
           <div class="info-card">
             <div class="icard-head">
               <span class="icard-title">Upcoming Appointments</span>
@@ -222,21 +447,8 @@ function initials(string $name): string
             <?php if (empty($upcoming_preview)): ?>
               <p class="row-meta" style="padding:.5rem 0;">No upcoming appointments.</p>
               <?php else: foreach ($upcoming_preview as $appt):
-                $label = date('M j, Y', strtotime($appt['date']));
-              ?>
-                <div class="appt-row">
-                  <div class="thumb-sq"></div>
-                  <div class="row-info">
-                    <p class="row-name">
-                      <?= htmlspecialchars($appt['service_type']) ?> | <?= htmlspecialchars($appt['select_pet']) ?>
-                    </p>
-                    <p class="row-meta"><?= $label ?> | <?= htmlspecialchars($appt['available_time']) ?></p>
-                  </div>
-                  <span class="pill <?= pillClass($appt['status']) ?>">
-                    <?= htmlspecialchars(ucfirst(strtolower($appt['status']))) ?>
-                  </span>
-                </div>
-            <?php endforeach;
+                echo renderApptRow($appt);
+              endforeach;
             endif; ?>
           </div>
 
@@ -267,7 +479,7 @@ function initials(string $name): string
 
       </div><!-- /tab-orders -->
 
-      <!-- ── APPOINTMENTS TAB – FULLY LIVE ── -->
+      <!-- ── APPOINTMENTS TAB – FULLY LIVE, cancellable ── -->
       <div class="tab-pane" id="tab-appointments">
         <div class="info-card">
           <div class="icard-head">
@@ -277,21 +489,8 @@ function initials(string $name): string
           <?php if (empty($appointments)): ?>
             <p class="row-meta" style="padding:.5rem 0;">No appointments booked yet.</p>
             <?php else: foreach ($appointments as $appt):
-              $label = date('M j, Y', strtotime($appt['date']));
-            ?>
-              <div class="appt-row">
-                <div class="thumb-sq"></div>
-                <div class="row-info">
-                  <p class="row-name">
-                    <?= htmlspecialchars($appt['service_type']) ?> | <?= htmlspecialchars($appt['select_pet']) ?>
-                  </p>
-                  <p class="row-meta"><?= $label ?> | <?= htmlspecialchars($appt['available_time']) ?></p>
-                </div>
-                <span class="pill <?= pillClass($appt['status']) ?>">
-                  <?= htmlspecialchars(ucfirst(strtolower($appt['status']))) ?>
-                </span>
-              </div>
-          <?php endforeach;
+              echo renderApptRow($appt);
+            endforeach;
           endif; ?>
 
         </div>
@@ -354,9 +553,57 @@ function initials(string $name): string
     </div><!-- /tab-area -->
   </div><!-- /profile-page -->
 
+  <!-- CANCEL APPOINTMENT MODAL — TikTok-style reason picker -->
+  <div class="modal fade" id="cancelApptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cancel Appointment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="cancel-prompt">Please select a reason for cancelling</p>
+
+          <div class="cancel-reasons" id="cancelReasonsList">
+            <label class="reason-option">
+              <span>Schedule conflict</span>
+              <input type="radio" name="cancelReason" value="Schedule conflict">
+            </label>
+            <label class="reason-option">
+              <span>Found another service provider</span>
+              <input type="radio" name="cancelReason" value="Found another service provider">
+            </label>
+            <label class="reason-option">
+              <span>Pet is unwell / can't make it</span>
+              <input type="radio" name="cancelReason" value="Pet is unwell / can't make it">
+            </label>
+            <label class="reason-option">
+              <span>Changed my mind</span>
+              <input type="radio" name="cancelReason" value="Changed my mind">
+            </label>
+            <label class="reason-option">
+              <span>Other</span>
+              <input type="radio" name="cancelReason" value="other">
+            </label>
+          </div>
+
+          <textarea id="otherReasonText" class="form-control" rows="2" placeholder="Tell us more..."></textarea>
+
+          <div class="alert alert-warning mt-3 mb-0" style="font-size:.9rem;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Cancelling this appointment will incur a <strong>10% deduction</strong> on your payment as a cancellation fee. Refund will be sent in <strong>3-5<strong> business days.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+          <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm Cancellation</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Tab switching
     function switchTab(name) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
@@ -370,12 +617,104 @@ function initials(string $name): string
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
-    // "View All →" on the appointments preview card
     document.getElementById('go-appt-tab')
       .addEventListener('click', e => {
         e.preventDefault();
         switchTab('appointments');
       });
+
+    // ── CANCEL APPOINTMENT FLOW ──
+    let cancelTargetId = null;
+    const cancelModalEl   = document.getElementById('cancelApptModal');
+    const cancelModal     = new bootstrap.Modal(cancelModalEl);
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    const otherReasonText  = document.getElementById('otherReasonText');
+    const reasonRadios     = document.querySelectorAll('input[name="cancelReason"]');
+    const reasonOptions    = document.querySelectorAll('.reason-option');
+
+    function resetCancelModal() {
+      reasonRadios.forEach(r => r.checked = false);
+      reasonOptions.forEach(o => o.classList.remove('selected'));
+      otherReasonText.value = '';
+      otherReasonText.style.display = 'none';
+    }
+
+    reasonRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        reasonOptions.forEach(o => o.classList.remove('selected'));
+        radio.closest('.reason-option').classList.add('selected');
+        otherReasonText.style.display = radio.value === 'other' ? 'block' : 'none';
+        if (radio.value === 'other') otherReasonText.focus();
+      });
+    });
+
+    document.querySelectorAll('.btn-cancel-appt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        cancelTargetId = btn.dataset.id;
+        resetCancelModal();
+        cancelModal.show();
+      });
+    });
+
+    function getSelectedReason() {
+      const checked = document.querySelector('input[name="cancelReason"]:checked');
+      if (!checked) return null;
+      if (checked.value === 'other') {
+        const other = otherReasonText.value.trim();
+        return other ? other : null;
+      }
+      return checked.value;
+    }
+
+    confirmCancelBtn.addEventListener('click', async () => {
+      const reason = getSelectedReason();
+      if (!reason) {
+        alert('Please select a reason for cancellation.');
+        return;
+      }
+
+      confirmCancelBtn.disabled = true;
+      confirmCancelBtn.textContent = 'Cancelling...';
+
+      try {
+        const res = await fetch(window.location.href, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'cancel_appointment', appointmentID: cancelTargetId, reason })
+        });
+
+        // Read the raw response first so a non-JSON / 500 error from PHP
+        // doesn't get masked as a generic "Something went wrong".
+        const raw = await res.text();
+        let data;
+        try {
+          data = JSON.parse(raw);
+        } catch (parseErr) {
+          console.error('cancel_appointment.php did not return valid JSON:', raw);
+          alert('The server returned an unexpected response. Check the browser console / PHP error log for details.');
+          return;
+        }
+
+        if (!res.ok) {
+          console.error('cancel_appointment.php returned HTTP', res.status, data);
+          alert(data.message || `Cancellation failed (HTTP ${res.status}).`);
+          return;
+        }
+
+        if (data.success) {
+          cancelModal.hide();
+          location.reload();
+        } else {
+          alert(data.message || 'Cancellation failed. Please try again.');
+        }
+      } catch (err) {
+        console.error('Cancel appointment request failed:', err);
+        alert('Something went wrong while sending the request. Please check your connection and try again.');
+      } finally {
+        confirmCancelBtn.disabled = false;
+        confirmCancelBtn.textContent = 'Confirm Cancellation';
+      }
+    });
   </script>
 </body>
 

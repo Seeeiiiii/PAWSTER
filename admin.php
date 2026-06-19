@@ -106,9 +106,10 @@ $appt_result  = $conn->query($appt_sql);
 $appointments = $appt_result ? $appt_result->fetch_all(MYSQLI_ASSOC) : [];
 
 // Stat counts for appointments
-$appt_total   = count($appointments);
-$appt_pending = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'pending'));
-$appt_approved = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'approved'));
+$appt_total     = count($appointments);
+$appt_pending   = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'pending'));
+$appt_approved  = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'approved'));
+$appt_cancelled = count(array_filter($appointments, fn($r) => strtolower($r['status']) === 'cancelled'));
 
 // Today's appointment count
 $today_sql = "SELECT COUNT(*) AS cnt FROM tblappointment WHERE date = CURDATE()";
@@ -159,8 +160,9 @@ function renderApptRow(array $row): string {
     $status = strtolower($row['status']);
 
     $statusBadge = match($status) {
-        'approved' => '<span class="badge-s badge-green" id="appt-badge-' . $row['appointmentID'] . '">Approved</span>',
+        'approved'  => '<span class="badge-s badge-green" id="appt-badge-' . $row['appointmentID'] . '">Approved</span>',
         'rejected'  => '<span class="badge-s badge-red"   id="appt-badge-' . $row['appointmentID'] . '">Rejected</span>',
+        'cancelled' => '<span class="badge-s badge-gray"  id="appt-badge-' . $row['appointmentID'] . '">Cancelled</span>',
         default     => '<span class="badge-s badge-orange" id="appt-badge-' . $row['appointmentID'] . '">Pending</span>',
     };
 
@@ -171,12 +173,16 @@ function renderApptRow(array $row): string {
     $date    = htmlspecialchars($row['appt_date']);
     $time    = htmlspecialchars($row['available_time']);
 
-    $actions = in_array($status, ['approved', 'rejected'])
-        ? '<span class="done-txt" id="appt-action-' . $apptID . '">Done</span>'
-        : '<div class="act-col" id="appt-action-' . $apptID . '">
+    if (in_array($status, ['approved', 'rejected'])) {
+        $actions = '<span class="done-txt" id="appt-action-' . $apptID . '">Done</span>';
+    } elseif ($status === 'cancelled') {
+        $actions = '<span class="done-txt" id="appt-action-' . $apptID . '">Cancelled by user</span>';
+    } else {
+        $actions = '<div class="act-col" id="appt-action-' . $apptID . '">
              <button class="btn-app" onclick="updateApptStatus(' . $apptID . ', \'Approved\')">Approve</button>
              <button class="btn-rej" onclick="updateApptStatus(' . $apptID . ', \'Rejected\')">Reject</button>
            </div>';
+    }
 
     return "
         <tr id=\"appt-row-{$apptID}\">
@@ -583,7 +589,7 @@ function renderApptRow(array $row): string {
 
     <!-- ── APPOINTMENTS (fully live from tblappointment) ── -->
     <div class="admin-section" id="section-appointments">
-      <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
+      <div class="stat-grid" style="grid-template-columns: repeat(4,1fr);">
         <div class="stat-card">
           <p class="stat-label">Appointments Today</p>
           <p class="stat-num"><?= $appt_today ?></p>
@@ -598,6 +604,11 @@ function renderApptRow(array $row): string {
           <p class="stat-label">Pending</p>
           <p class="stat-num"><?= $appt_pending ?></p>
           <span class="stat-pill pill-red">Awaiting Approval</span>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Cancelled</p>
+          <p class="stat-num"><?= $appt_cancelled ?></p>
+          <span class="stat-pill pill-blue">By Users</span>
         </div>
       </div>
 
@@ -844,6 +855,7 @@ function renderApptRow(array $row): string {
 .pet-lbl { font-family:'Convergence',sans-serif; font-size:.75rem; font-weight:700; color:#9B7050; text-transform:uppercase; letter-spacing:.04em; }
 .pet-inp { background:#FAF0E8; border:1.5px solid #D6C0A5; border-radius:.55rem; padding:.45rem .75rem; font-family:'Convergence',sans-serif; font-size:.83rem; color:#3D1F08; outline:none; width:100%; }
 .pet-inp:focus { border-color:#AB8154; }
+.badge-gray { background:#E8E0D4; color:#8A7560; }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

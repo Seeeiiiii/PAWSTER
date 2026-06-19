@@ -34,12 +34,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
         $time    = $conn->real_escape_string($booking['time']);
         $status  = 'Pending';
 
+        // Amount paid: comes from the selected service's fee on the front end.
+        // Falls back to 150 if the client didn't send one, so older calls don't break.
+        $amount_paid = isset($booking['fee']) ? floatval($booking['fee']) : 150.00;
+
         // SQL Query utilizing dynamic parameters
-        $query = "INSERT INTO tblappointment (userid, service_type, date, select_pet, available_time, status) 
-                  VALUES (?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO tblappointment (userid, service_type, date, select_pet, available_time, status, amount_paid) 
+                  VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($query);
-        $stmt->bind_param("isssss", $userid, $service, $date, $pet, $time, $status);
+        $stmt->bind_param("isssssd", $userid, $service, $date, $pet, $time, $status, $amount_paid);
 
         if ($stmt->execute()) {
             echo json_encode(["status" => "success"]);
@@ -70,9 +74,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
         };
     </script>
     <script src="resources/js/grooming.js"></script>
+
+    <style>
+        /* ── Cancellation / lateness reminder styles ── */
+        .policy-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .policy-modal-box {
+            background: #fff;
+            max-width: 480px;
+            width: 100%;
+            border-radius: 14px;
+            padding: 28px 26px 22px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+            position: relative;
+        }
+
+        .policy-modal-box h4 {
+            margin: 0 0 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .policy-modal-box ul {
+            margin: 0 0 18px;
+            padding-left: 20px;
+        }
+
+        .policy-modal-box li {
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-size: 0.95rem;
+        }
+
+        .policy-modal-close-btn {
+            background: #AB8154;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .policy-modal-close-btn:hover {
+            background: #AB8154;
+        }
+
+        .policy-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #fff7e6;
+            border: 1px solid #f3d9a4;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 0 0 16px;
+            font-size: 0.9rem;
+            color: #6b5320;
+        }
+
+        .policy-banner strong {
+            color: #4a3a13;
+        }
+
+        .policy-banner-icon {
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+    </style>
 </head>
 
 <body>
+
+    <!-- ── Cancellation / lateness policy modal (shown once per session) ── -->
+    <div class="policy-modal-overlay" id="policy-modal-overlay" style="display:none;">
+        <div class="policy-modal-box">
+            <h4>📋 Before you book</h4>
+            <ul>
+                <li><strong>Cancellations</strong> must be made at least <strong>24 hours</strong> before your scheduled appointment time to avoid a cancellation charge.</li>
+                <li>Cancelling with less than 24 hours' notice may forfeit part or all of your service fee.</li>
+                <li>If you arrive <strong>more than 15 minutes late</strong>, your slot may be given to the next client and may need to be rescheduled.</li>
+                <li>No-shows without prior notice may affect your ability to book future appointments.</li>
+            </ul>
+            <button class="policy-modal-close-btn" onclick="closePolicyModal()">Got it, continue booking</button>
+        </div>
+    </div>
 
     <div class="curve">
         <header>
@@ -88,6 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
 
     <div class="booking-section">
         <div class="container py-4">
+
 
             <div class="row g-3 mb-3">
 
@@ -264,6 +363,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- ── Show the policy modal once per browser session ── -->
+    <script>
+        function closePolicyModal() {
+            document.getElementById('policy-modal-overlay').style.display = 'none';
+            sessionStorage.setItem('pawster_policy_seen', '1');
+        }
+
+        (function () {
+            if (!sessionStorage.getItem('pawster_policy_seen')) {
+                document.getElementById('policy-modal-overlay').style.display = 'flex';
+            }
+        })();
+    </script>
 </body>
 
 </html>
