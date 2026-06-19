@@ -49,12 +49,31 @@
         font-size: 1.2rem;
     }
 
+    .links-box a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .links-box a:hover {
+        text-decoration: underline;
+    }
+
     .copyright {
         font-family: 'Cause', cursive;
         color: #F5E6D3;
         font-size: 1.2rem;
     }
 </style>
+
+<?php
+$footer_links = array(
+    "home"  => "/PAWSTER/index.php",
+    "adopt" => "/PAWSTER/adoption.php",
+    "shop"  => "/PAWSTER/shop.php",
+    "about" => "/PAWSTER/aboutus.php"
+);
+?>
+
 <div class="container-fluid footer-box p-4">
     <div class="d-flex justify-content-evenly">
         <div class="pawster-box text-center">
@@ -70,10 +89,10 @@
             </div>
         </div>
         <div class="links-box text-start mt-3">
-            <p>Home</p>
-            <p>Adopt</p>
-            <p>Shop</p>
-            <p>About us</p>
+            <p><a href="<?= $footer_links['home'] ?>">Home</a></p>
+            <p><a href="<?= $footer_links['adopt'] ?>">Adopt</a></p>
+            <p><a href="<?= $footer_links['shop'] ?>">Shop</a></p>
+            <p><a href="<?= $footer_links['about'] ?>">About us</a></p>
 
         </div>
         <div class="info-box text-allign-start mt-3">

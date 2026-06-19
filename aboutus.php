@@ -9,7 +9,9 @@
 
 <body>
     <header>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); 
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar_mode_handler.php';?>
+        
     </header>
 
     <div class="container py-4 px-5 first-container">

@@ -14,7 +14,8 @@
     $db = new DatabaseConnection();
     ?>
     <header>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); 
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';?>
     </header>
 
     <div class="container market-box mt-5 p-5 text-center">

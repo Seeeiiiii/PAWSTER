@@ -1,10 +1,12 @@
 <?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php'; ?>
+<?php include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pawster – Adoption</title>
+<link rel="icon"  href="/PAWSTER/resources/images/logo white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Convergence&display=swap" rel="stylesheet">

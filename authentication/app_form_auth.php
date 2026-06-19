@@ -1,4 +1,6 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) session_start(); // ← move here
+
 include_once __DIR__ . '/../config/app.php';
 include_once __DIR__ . '/../controllers/app_form_controller.php';
 

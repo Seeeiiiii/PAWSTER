@@ -23,7 +23,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_con
 
 <body>
     <header style="position: relative; z-index: 100;">
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); 
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';?>
     </header>
 
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
@@ -337,7 +338,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/sellerprofile_con
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="resources/js/sellerprofile.js"></script>
+    <script src="/PAWSTER/resources/js/seller   profile.js"></script>
     <footer>
         <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/footer.php'); ?>
     </footer>

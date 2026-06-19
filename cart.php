@@ -17,7 +17,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/cart_control.php'
 <body>
 
     <header>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); 
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';?>
     </header>
 
     <main class="page-wrapper">

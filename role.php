@@ -12,7 +12,8 @@ include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php');
 
 <body>
     <header>
-        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); ?>
+        <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php'); 
+        include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';?>
     </header>
 
     <div class="d-flex flex-column align-items-center w-100">

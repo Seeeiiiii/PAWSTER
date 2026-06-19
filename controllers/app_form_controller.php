@@ -23,10 +23,10 @@ class ApplicationFormController
     ): bool {
 
         $stmt1 = $this->conn->prepare(
-            "INSERT INTO tblapplicationform (business_name, contact_num, dti_reg, bir_reg, address, business_permit, valid_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
+            "INSERT INTO tblapplicationform (userid, business_name, contact_num, dti_reg, bir_reg, address, business_permit, valid_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmt1->bind_param("sssssss", $business_name, $contact_num, $dti_reg, $bir_reg, $address, $business_permit, $valid_id);
+        $stmt1->bind_param("isssssss", $userid, $business_name, $contact_num, $dti_reg, $bir_reg, $address, $business_permit, $valid_id);
 
         if (!$stmt1->execute()) {
             return false;
@@ -105,8 +105,8 @@ class ApplicationFormController
         /* Verify ownership */
         $check = $this->conn->prepare(
             "SELECT p.productid FROM tblsellerproduct p
-             JOIN tblsellerstatus s ON s.formid = p.sellerid
-             WHERE p.productid = ? AND s.userid = ? LIMIT 1"
+             JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
+             WHERE p.productid = ? AND sp.userid = ? LIMIT 1"
         );
         $check->bind_param("ii", $productid, $userid);
         $check->execute();

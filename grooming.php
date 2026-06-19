@@ -6,7 +6,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 1. MATCH YOUR NAVBAR: Dynamically read from the multi-dimensional auth arrays
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';
+
 $current_userid   = $_SESSION['auth_user']['userid'] ?? 0;
 $current_fullname = $_SESSION['auth_user']['first_name'] . ' ' . $_SESSION['auth_user']['last_name'] ?? 'Guest User';
 $is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;

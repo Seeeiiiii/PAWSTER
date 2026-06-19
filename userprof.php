@@ -5,6 +5,9 @@ if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
 
+// Must run before any HTML — handles the seller/buyer navbar mode toggle redirect.
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';
+
 $current_userid   = $_SESSION['auth_user']['userid'] ?? 0;
 $current_fullname = trim(($_SESSION['auth_user']['first_name'] ?? '') . ' ' . ($_SESSION['auth_user']['last_name'] ?? ''));
 $current_fullname = $current_fullname ?: 'Guest User';

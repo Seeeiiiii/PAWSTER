@@ -1,7 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
 <?php
 include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/fetchproducts.php');
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';
 
 
 $primary_categories = ['Pet Food', 'Grooming Supplies', 'Pet Accessories', 'Pet Clothes'];
@@ -35,6 +34,8 @@ function shop_url(array $overrides = []): string {
 }
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <?php include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/headlinks.php'); ?>
     <link rel="stylesheet" href="resources/css/shop.css">

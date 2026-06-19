@@ -1,5 +1,6 @@
 <?php
 require_once($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php');
+include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,11 +15,11 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php');
 <body>
     <header>
         <?php
-    
+
         if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
             include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php');
         } else {
-            include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/indexnavbar.php');
+            include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/indexnavbar.php');
         }
         ?>
     </header>
@@ -89,7 +90,7 @@ require_once($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/config/app.php');
                     <h3 class="card-text p-3">Adoption</h3>
                     <a href="/PAWSTER/role.php" class="btn option btn-lg">Click for more details...</a>
                 </div>
-            </div >
+            </div>
             <div class="card-third shadow rounded-3 p-3">
                 <img src="resources/images/card2.jpg" class="card-img-top">
                 <div class="card-body">

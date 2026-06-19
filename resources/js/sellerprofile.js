@@ -21,10 +21,66 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    var editContact = document.getElementById('editContact');
-    if (editContact) {
-        editContact.addEventListener('input', function (e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
+    /* ── Save changes (Edit Profile modal) ── */
+    var saveEditBtn = document.getElementById('saveEdit');
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', function () {
+            var nameInput    = document.getElementById('editName');
+            var contactInput = document.getElementById('editContact');
+            var addressInput = document.getElementById('editAddress');
+
+            var bname  = nameInput.value.trim();
+            var digits = contactInput.value.trim();
+            var addr   = addressInput.value.trim();
+
+            if (!bname || !addr) {
+                alert('Business name and address are required.');
+                return;
+            }
+            if (digits.length !== 10) {
+                alert('Contact number must be exactly 10 digits.');
+                return;
+            }
+
+            var contact = '+63' + digits;
+
+            var originalText = saveEditBtn.textContent;
+            saveEditBtn.disabled = true;
+            saveEditBtn.textContent = 'Saving...';
+
+            var formData = new FormData();
+            formData.append('action', 'update_profile');
+            formData.append('business_name', bname);
+            formData.append('contact_num', contact);
+            formData.append('address', addr);
+
+            fetch(window.location.href, { method: 'POST', body: formData })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    saveEditBtn.disabled = false;
+                    saveEditBtn.textContent = originalText;
+
+                    if (data.success) {
+                        var bannerName    = document.getElementById('bannerName');
+                        var bannerContact = document.getElementById('bannerContact');
+                        var bannerAddress = document.getElementById('bannerAddress');
+
+                        if (bannerName)    bannerName.textContent    = data.business_name;
+                        if (bannerContact) bannerContact.textContent = data.contact_num;
+                        if (bannerAddress) bannerAddress.textContent = data.address;
+
+                        var modalEl = document.getElementById('editModal');
+                        var modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        if (modalInstance) modalInstance.hide();
+                    } else {
+                        alert(data.error || 'Failed to save changes.');
+                    }
+                })
+                .catch(function () {
+                    saveEditBtn.disabled = false;
+                    saveEditBtn.textContent = originalText;
+                    alert('Request failed. Please try again.');
+                });
         });
     }
 

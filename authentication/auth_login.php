@@ -30,7 +30,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $isLoggedIn = $auth->isuserLogin($email, $password);
 
     if ($isLoggedIn) {
-        redirect("Login successful.", "index.php");
+        $role = $_SESSION['auth_user']['role'] ?? 'user';
+        $landing_page = ($role === 'admin') ? 'admin.php' : 'index.php';
+        redirect("Login successful.", $landing_page);
     } else {
         redirect("Invalid email or password.", "login.php");
     }

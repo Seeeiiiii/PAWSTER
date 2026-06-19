@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_l
     }
 
 
-    $r = $conn->prepare("SELECT formid FROM tblsellerstatus WHERE userid = ? ORDER BY created_at DESC LIMIT 1");
+    $r = $conn->prepare("SELECT sellerid FROM tblsellerprofile WHERE userid = ? LIMIT 1");
     $r->bind_param("i", $userid);
     $r->execute();
     $r->bind_result($sellerid);
@@ -71,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
     $check = $conn->prepare(
         "SELECT p.productid FROM tblsellerproduct p
-     JOIN tblsellerstatus s ON s.formid = p.sellerid
-     WHERE p.productid = ? AND s.userid = ? LIMIT 1"
+     JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
+     WHERE p.productid = ? AND sp.userid = ? LIMIT 1"
     );
     $check->bind_param("ii", $productid, $userid);
     $check->execute();
@@ -113,8 +113,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 
     $check = $conn->prepare(
         "SELECT p.productid FROM tblsellerproduct p
-         JOIN tblsellerstatus s ON s.formid = p.sellerid
-         WHERE p.productid = ? AND s.userid = ? LIMIT 1"
+         JOIN tblsellerprofile sp ON sp.sellerid = p.sellerid
+         WHERE p.productid = ? AND sp.userid = ? LIMIT 1"
     );
     $check->bind_param("ii", $productid, $userid);
     $check->execute();
@@ -155,46 +155,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
         exit();
     }
 
-
-    $r = $conn->prepare("SELECT formid FROM tblsellerstatus WHERE userid = ? ORDER BY created_at DESC LIMIT 1");
-    $r->bind_param("i", $userid);
-    $r->execute();
-    $r->bind_result($formid);
-    $r->fetch();
-    $r->close();
-
-    if (!$formid) {
-        echo json_encode(['success' => false, 'error' => 'Seller application not found.']);
+    // Validate required fields
+    if (empty($bname) || empty($contact) || empty($addr)) {
+        echo json_encode(['success' => false, 'error' => 'All fields are required.']);
         exit();
     }
 
- 
-    $check = $conn->prepare("SELECT sellerid FROM tblsellerprofile WHERE sellerid = ? LIMIT 1");
-    $check->bind_param("i", $formid);
+    // Check if a seller profile exists for this user
+    $check = $conn->prepare("SELECT sellerid FROM tblsellerprofile WHERE userid = ? LIMIT 1");
+    $check->bind_param("i", $userid);
     $check->execute();
-    $check->store_result();
-    $exists = $check->num_rows > 0;
+    $check->bind_result($sellerid);
+    $exists = $check->fetch();
     $check->close();
 
-    if ($exists) {
-   
-        $upd = $conn->prepare("UPDATE tblsellerprofile SET businessname = ?, contactnum = ?, address = ? WHERE sellerid = ?");
-        $upd->bind_param("sssi", $bname, $contact, $addr, $formid);
-        $upd->execute();
-        if ($upd->affected_rows === 0 && $upd->errno) {
-            echo json_encode(['success' => false, 'error' => 'Update failed: ' . $upd->error]);
-            exit();
-        }
-    } else {
-
-        $ins = $conn->prepare("INSERT INTO tblsellerprofile (sellerid, businessname, contactnum, address) VALUES (?, ?, ?, ?)");
-        $ins->bind_param("isss", $formid, $bname, $contact, $addr);
-        if (!$ins->execute()) {
-            echo json_encode(['success' => false, 'error' => 'Failed to create seller profile.']);
-            exit();
-        }
+    if (!$exists) {
+        // No profile found – reject the update (should not happen for approved sellers)
+        echo json_encode(['success' => false, 'error' => 'No seller profile found. Please apply first.']);
+        exit();
     }
 
+    // Update the existing profile
+    $upd = $conn->prepare("UPDATE tblsellerprofile SET businessname = ?, contactnum = ?, address = ? WHERE sellerid = ?");
+    $upd->bind_param("sssi", $bname, $contact, $addr, $sellerid);
+    if (!$upd->execute()) {
+        echo json_encode(['success' => false, 'error' => 'Update failed: ' . $upd->error]);
+        exit();
+    }
+
+    // Success response
     echo json_encode([
         'success'       => true,
         'business_name' => $bname,
@@ -212,6 +201,7 @@ $userid = isset($_GET['userid'])
 $is_verified  = false;
 $db_status     = '';
 $formid       = null;
+$sellerid     = null;
 $business_name = '';
 $contact_num   = '';
 $address       = '';
@@ -238,27 +228,26 @@ if ($userid > 0) {
     $is_verified = (strtolower($db_status) === 'verified');
 
 
-    if ($formid) {
-        $stmt2 = $conn->prepare(
-            "SELECT businessname, contactnum, address
-             FROM tblsellerprofile
-             WHERE sellerid = ?
-             LIMIT 1"
-        );
-        $stmt2->bind_param("i", $formid);
-        $stmt2->execute();
-        $stmt2->bind_result($business_name, $contact_num, $address);
-        $stmt2->fetch();
-        $stmt2->close();
+    $stmt2 = $conn->prepare(
+        "SELECT sellerid, businessname, contactnum, address
+         FROM tblsellerprofile
+         WHERE userid = ?
+         LIMIT 1"
+    );
+    $stmt2->bind_param("i", $userid);
+    $stmt2->execute();
+    $stmt2->bind_result($sellerid, $business_name, $contact_num, $address);
+    $stmt2->fetch();
+    $stmt2->close();
 
-
+    if ($sellerid) {
         $stmt3 = $conn->prepare(
             "SELECT productid, brand_name, product_desc, primary_category, price, productimage
      FROM tblsellerproduct
      WHERE sellerid = ? AND listing_status != 'deleted'
      ORDER BY productid ASC"
         );
-        $stmt3->bind_param("i", $formid);
+        $stmt3->bind_param("i", $sellerid);
         $stmt3->execute();
         $res = $stmt3->get_result();
         while ($row = $res->fetch_assoc()) {

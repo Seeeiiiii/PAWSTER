@@ -4,7 +4,7 @@ session_start();
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_DATABASE', 'pawster');
+define('DB_DATABASE', 'pawsterr');
 define('SITE_URL', 'http://localhost/PAWSTER/');
 
 include_once __DIR__ . '/databaseconnection.php';
