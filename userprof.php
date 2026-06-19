@@ -370,7 +370,6 @@ function renderApptRow(array $appt): string
               <?= htmlspecialchars($_SESSION['auth_user']['address'] ?? '') ?>
             </p>
           </div>
-          <button class="btn-edit-prof"><i class="bi bi-pencil-fill"></i> Edit Profile</button>
         </div>
         <div class="prof-tags">
           <span class="ptag ptag-adopter"><i class="bi bi-heart-fill"></i> Adopter</span>

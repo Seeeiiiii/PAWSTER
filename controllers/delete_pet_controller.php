@@ -17,8 +17,17 @@ $stmt = $db->conn->prepare("DELETE FROM tblpets WHERE petid = ?");
 $stmt->bind_param('i', $petid);
 
 if ($stmt->execute()) {
-    echo json_encode(['status' => 'success', 'message' => 'Pet removed.']);
+    if ($stmt->affected_rows > 0) {
+        echo json_encode(['status' => 'success', 'message' => 'Pet removed.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Pet not found.']);
+    }
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Database error.']);
+    // MySQL errno 1451 = FK constraint violation (e.g. pet has adoption requests)
+    if ($db->conn->errno === 1451) {
+        echo json_encode(['status' => 'error', 'message' => 'Can\'t remove this pet — it already has adoption request(s) tied to it.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Database error.']);
+    }
 }
 $stmt->close();

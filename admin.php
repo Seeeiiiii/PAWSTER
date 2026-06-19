@@ -26,6 +26,7 @@ $listings_sql = "
     FROM tblsellerproduct sp
     JOIN tblsellerprofile sp2 ON sp2.sellerid = sp.sellerid
     JOIN users u ON u.userid = sp2.sellerid
+    WHERE sp.listing_status != 'deleted'
     ORDER BY sp.productid DESC
 ";
 $listings_result = $db->conn->query($listings_sql);
@@ -222,12 +223,6 @@ function renderApptRow(array $row): string {
       </a>
       <a href="#" class="snav-link" data-section="listings">
         <i class="bi bi-list-ul"></i><span>Listings</span>
-      </a>
-      <a href="#" class="snav-link" data-section="users">
-        <i class="bi bi-people"></i><span>Users</span>
-      </a>
-      <a href="#" class="snav-link" data-section="settings">
-        <i class="bi bi-gear"></i><span>Settings</span>
       </a>
     </nav>
   </aside>
@@ -710,142 +705,6 @@ function renderApptRow(array $row): string {
       </div>
     </div>
 
-    <!-- ── USERS ── -->
-    <div class="admin-section" id="section-users">
-      <div class="stat-grid" style="grid-template-columns: repeat(3,1fr);">
-        <div class="stat-card">
-          <p class="stat-label">Total Users</p>
-          <p class="stat-num">1,284</p>
-          <span class="stat-pill pill-green">↑ 12% this month</span>
-        </div>
-        <div class="stat-card">
-          <p class="stat-label">Buyers</p>
-          <p class="stat-num">1,102</p>
-          <span class="stat-pill pill-blue">Active</span>
-        </div>
-        <div class="stat-card">
-          <p class="stat-label">Adopters</p>
-          <p class="stat-num">182</p>
-          <span class="stat-pill pill-green">Registered</span>
-        </div>
-      </div>
-
-      <div class="table-section">
-        <div class="section-head">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-people sec-icon"></i>
-            <span class="section-title">All Users</span>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="data-table">
-            <thead>
-              <tr><th>Name</th><th>Email</th><th>Role</th><th>Location</th><th>Joined</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Juan Dela Cruz</td><td>juan.dela.cruz@gmail.com</td><td>Buyer / Adopter</td><td>Calamba, Laguna</td><td>June 2025</td>
-                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
-              </tr>
-              <tr>
-                <td>Maria Santos</td><td>m.santos@gmail.com</td><td>Buyer</td><td>Manila</td><td>Mar 2025</td>
-                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
-              </tr>
-              <tr>
-                <td>Jose Reyes</td><td>jose.reyes@gmail.com</td><td>Adopter</td><td>Biñan, Laguna</td><td>Jan 2026</td>
-                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
-              </tr>
-              <tr>
-                <td>Ana Gomez</td><td>ana.gomez@gmail.com</td><td>Seller</td><td>Sta. Rosa, Laguna</td><td>Apr 2025</td>
-                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
-              </tr>
-              <tr>
-                <td>Ben Torres</td><td>ben.torres@gmail.com</td><td>Buyer / Adopter</td><td>Los Baños, Laguna</td><td>Feb 2026</td>
-                <td><div class="act-col"><button class="btn-rej">Suspend</button></div></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SETTINGS ── -->
-    <div class="admin-section" id="section-settings">
-      <div class="table-section">
-        <div class="section-head">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-gear sec-icon"></i>
-            <span class="section-title">Platform Settings</span>
-          </div>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:0.8rem;">
-
-          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Adoption Auto-Notifications</p>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">Send email updates to adopters on status change</p>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" checked style="width:2.2rem; height:1.15rem; cursor:pointer; background-color:#AB8154; border-color:#AB8154;">
-            </div>
-          </div>
-
-          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Seller Application Alerts</p>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">Notify admin when a new seller applies</p>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" checked style="width:2.2rem; height:1.15rem; cursor:pointer; background-color:#AB8154; border-color:#AB8154;">
-            </div>
-          </div>
-
-          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Listing Review Required</p>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">All new listings require admin approval before going live</p>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" style="width:2.2rem; height:1.15rem; cursor:pointer;">
-            </div>
-          </div>
-
-          <div style="background:#FAF0E8; border-radius:0.7rem; padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.85rem; font-weight:700; color:#3D1F08; margin:0;">Maintenance Mode</p>
-              <p style="font-family:'Convergence',sans-serif; font-size:0.75rem; color:#9B7050; margin:0.15rem 0 0;">Take the platform offline for users temporarily</p>
-            </div>
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" style="width:2.2rem; height:1.15rem; cursor:pointer;">
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="table-section">
-        <div class="section-head">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-person-lock sec-icon"></i>
-            <span class="section-title">Admin Account</span>
-          </div>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:0.75rem;">
-          <div style="display:flex; flex-direction:column; gap:0.3rem;">
-            <label style="font-family:'Convergence',sans-serif; font-size:0.75rem; font-weight:700; color:#9B7050; text-transform:uppercase; letter-spacing:0.04em;">Admin Name</label>
-            <input type="text" value="Admin User" style="background:#FAF0E8; border:1.5px solid #D6C0A5; border-radius:0.55rem; padding:0.5rem 0.75rem; font-family:'Convergence',sans-serif; font-size:0.85rem; color:#3D1F08; outline:none; width:100%; max-width:360px;">
-          </div>
-          <div style="display:flex; flex-direction:column; gap:0.3rem;">
-            <label style="font-family:'Convergence',sans-serif; font-size:0.75rem; font-weight:700; color:#9B7050; text-transform:uppercase; letter-spacing:0.04em;">Email</label>
-            <input type="email" value="admin@pawster.ph" style="background:#FAF0E8; border:1.5px solid #D6C0A5; border-radius:0.55rem; padding:0.5rem 0.75rem; font-family:'Convergence',sans-serif; font-size:0.85rem; color:#3D1F08; outline:none; width:100%; max-width:360px;">
-          </div>
-          <div style="margin-top:0.25rem;">
-            <button style="background:#AB8154; color:#FAF0E8; border:none; border-radius:0.55rem; padding:0.5rem 1.25rem; font-family:'Convergence',sans-serif; font-size:0.83rem; font-weight:700; cursor:pointer;">Save Changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
 </div>
 
@@ -866,8 +725,6 @@ const SECTION_TITLES = {
   adoptions:    'Adoptions',
   appointments: 'Appointments',
   listings:     'Listings',
-  users:        'Users',
-  settings:     'Settings',
 };
 
 function switchSection(name) {

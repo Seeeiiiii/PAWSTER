@@ -137,7 +137,6 @@ foreach ($pets as $p) {
       data-requested="<?= in_array($firstPet['petid'], $userRequests) ? '1' : '0' ?>">
       <?= in_array($firstPet['petid'], $userRequests) ? 'Request Sent ✓' : 'Apply to Adopt ' . htmlspecialchars($firstPet['name']) ?>
     </button>
-    <button class="btn-wish"><i class="bi bi-heart"></i> Save to Wishlist</button>
 
     <!-- Toast notification -->
     <div id="adoptToast" class="adopt-toast" style="display:none;"></div>
@@ -262,7 +261,6 @@ function pickPet(card) {
         style="width:100%;background:${alreadyReq?'#888':'#AB8154'};color:#FAF0E8;border:none;border-radius:.75rem;padding:.65rem;font-family:'Convergence',sans-serif;font-weight:700;font-size:.87rem;cursor:pointer;margin-bottom:.45rem">
         ${alreadyReq ? 'Request Sent ✓' : 'Apply to Adopt ' + d.name}
       </button>
-      <button style="width:100%;background:transparent;color:#AB8154;border:1.5px solid #D6C0A5;border-radius:.75rem;padding:.55rem;font-family:'Convergence',sans-serif;font-weight:600;font-size:.87rem;cursor:pointer"><i class="bi bi-heart"></i> Save to Wishlist</button>
       <div id="mobToast" style="display:none;margin-top:.5rem;padding:.5rem .8rem;border-radius:.5rem;font-size:.8rem;color:#fff;text-align:center;"></div>
     `;
     renderDocs(d.docs, document.getElementById('mobDocs'));
