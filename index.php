@@ -19,7 +19,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handl
         if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
             include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/navbar.php');
         } else {
-            include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/indexnavbar.php');
+            include($_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/includes/indexnavbar.php');
         }
         ?>
     </header>

@@ -28,20 +28,20 @@
     <div class="container fillout p-5 rounded-5 text-start mb-3">
         <h4>Business Details :</h4>
         <div class="row details-row mt-3 mb-2">
-            <div class="col-6">
+            <div class="col-12 col-md-6">
                 <h5>Business Name:</h5>
                 <input type="text" name="business_name" class="form-control mb-3" placeholder="Pawster Inc.">
                 <h5>Contact Number:</h5>
                 <div class="mb-3">
                     <div class="input-group">
-                        <select name="country_code" class="form-select custom-input" style="max-width: 110px;">
+                        <select name="country_code" class="form-select custom-input">
                             <option value="+63">+63 (PH)</option>
                         </select>
                         <input type="tel" name="contact_number" class="form-control custom-input" maxlength="10" placeholder="917-000-0000" required>
                     </div>
                 </div>
             </div>
-            <div class="col-6">
+            <div class="col-12 col-md-6">
                 <h5>DTI registration no. :</h5>
                 <input type="text" name="dti_reg" class="form-control mb-3" placeholder="1234567" maxlength="7" inputmode="numeric" data-numeric>
                 <h5>BIR registration no.:</h5>
@@ -56,14 +56,14 @@
         <hr class="section-divider mt-5">
 
         <h4>Upload Documents :</h4>
-        <div class="d-flex gap-5 mt-3 text-center">
-            <div class="p-3 business-permit flex-fill rounded-5">
+        <div class="d-flex flex-wrap gap-4 gap-md-5 mt-3 text-center upload-docs-row">
+            <div class="p-3 business-permit flex-fill rounded-5 upload-box">
                 <i class="bi bi-file-earmark-plus"></i>
                 <div class="h5 mt-2">Upload photo of business permit</div>
                 <div>This website accepts PNG only , maximum of 5mb</div>
                 <input type="file" name="business_permit" accept="image/png" class="form-control mt-2">
             </div>
-            <div class="p-3 gov-id flex-fill rounded-5">
+            <div class="p-3 gov-id flex-fill rounded-5 upload-box">
                 <i class="bi bi-person-vcard-fill"></i>
                 <div class="h5 mt-2">Upload photo of government ID</div>
                 <div>This website accepts PNG only , maximum of 5mb</div>
@@ -88,15 +88,15 @@
             </div>
         </div>
 
-        <div class="d-flex align-items-between mt-3">
-            <div class="col">
-                <button type="button" class="btn btn-cancel" onclick="window.location.href='index.php'">
+        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mt-3 form-actions-row">
+            <div class="col-12 col-sm-auto">
+                <button type="button" class="btn btn-cancel w-100" onclick="window.location.href='index.php'">
                     <i class="bi bi-arrow-left"></i>
                     Cancel Application
                 </button>
             </div>
-            <div class="col text-end">
-                <button type="submit" name="application_btn" class="btn btn-submit">
+            <div class="col-12 col-sm-auto text-sm-end">
+                <button type="submit" name="application_btn" class="btn btn-submit w-100">
                     Submit Application
                     <i class="bi bi-arrow-right"></i>
                 </button>

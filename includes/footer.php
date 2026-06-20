@@ -39,7 +39,41 @@
         border-radius: 1.2rem;
         min-height: 100px;
         width: 270px;
+        max-width: 100%;
         padding: 0.5rem;
+        box-sizing: border-box;
+    }
+
+    .footer-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 575.98px) {
+        .pawster-box,
+        .links-box,
+        .info-box {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .links-box,
+        .info-box {
+            text-align: center !important;
+        }
+
+        footer span {
+            font-size: 1.4rem;
+        }
+
+        .links-box p,
+        .info-box p,
+        .copyright {
+            font-size: 1rem;
+        }
     }
 
     .links-box p,
@@ -75,7 +109,7 @@ $footer_links = array(
 ?>
 
 <div class="container-fluid footer-box p-4">
-    <div class="d-flex justify-content-evenly">
+    <div class="footer-row">
         <div class="pawster-box text-center">
             <div class="logo-row">
                 <img src="resources/images/Logo.png" alt="Logo" style="height: 4rem;">

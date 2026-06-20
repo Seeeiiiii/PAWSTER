@@ -247,8 +247,8 @@ function renderApptRow(array $row): string {
         </div>
         <div class="stat-card">
           <p class="stat-label">Adoption Requests</p>
-          <p class="stat-num">12</p>
-          <span class="stat-pill pill-blue">Awaiting Approval</span>
+          <p class="stat-num"><?= count($adoption_requests) ?></p>
+          <span class="stat-pill pill-blue"><?= $adopt_pending ?> Awaiting Approval</span>
         </div>
         <!-- Live appointment stats -->
         <div class="stat-card">
@@ -304,21 +304,32 @@ function renderApptRow(array $row): string {
               <tr><th>Adopter</th><th>Pet</th><th>Date</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
+              <?php
+              $adopt_preview = array_slice($adoption_requests, 0, 5);
+              if (empty($adopt_preview)): ?>
+                <tr><td colspan="5" style="text-align:center;color:#9B7050;">No adoption requests yet.</td></tr>
+              <?php else: foreach ($adopt_preview as $ar):
+                $arStatus = strtolower($ar['status']);
+                $badge = match($arStatus) {
+                  'approved' => '<span class="badge-s badge-green">Approved</span>',
+                  'rejected' => '<span class="badge-s badge-red">Rejected</span>',
+                  default    => '<span class="badge-s badge-orange" id="adopt-badge-' . $ar['requestid'] . '">Pending</span>',
+                };
+                $actions = in_array($arStatus, ['approved','rejected'])
+                  ? '<span class="done-txt">Done</span>'
+                  : '<div class="act-col" id="adopt-action-' . $ar['requestid'] . '">
+                       <button class="btn-app" onclick="updateAdoptStatus(' . $ar['requestid'] . ',\'Approved\')">Approve</button>
+                       <button class="btn-rej" onclick="updateAdoptStatus(' . $ar['requestid'] . ',\'Rejected\')">Reject</button>
+                     </div>';
+              ?>
               <tr>
-                <td>Maria Santos</td><td>Dog</td><td>June 19</td>
-                <td><span class="badge-s badge-orange">Pending</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
+                <td><?= htmlspecialchars($ar['adopter_name']) ?></td>
+                <td><?= htmlspecialchars($ar['pet_name']) ?></td>
+                <td><?= date('M j', strtotime($ar['created_at'])) ?></td>
+                <td><?= $badge ?></td>
+                <td><?= $actions ?></td>
               </tr>
-              <tr>
-                <td>Jose Reyes</td><td>Cat</td><td>June 15</td>
-                <td><span class="badge-s badge-blue">Under Review</span></td>
-                <td><div class="act-col"><button class="btn-app">Approve</button><button class="btn-rej">Reject</button></div></td>
-              </tr>
-              <tr>
-                <td>Ana Gomez</td><td>Kitten</td><td>June 16</td>
-                <td><span class="badge-s badge-green">Approved</span></td>
-                <td><span class="done-txt">Done</span></td>
-              </tr>
+              <?php endforeach; endif; ?>
             </tbody>
           </table>
         </div>

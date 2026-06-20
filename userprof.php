@@ -129,7 +129,19 @@ if ($is_logged_in && $current_userid) {
   $ustmt->bind_result($user_contact, $user_address);
   $ustmt->fetch();
   $ustmt->close();
+
+  // Member-since date, pulled straight from the user's account creation timestamp
+  $mstmt = $db->conn->prepare("SELECT created_at FROM users WHERE userid = ? LIMIT 1");
+  $mstmt->bind_param("i", $current_userid);
+  $mstmt->execute();
+  $mstmt->bind_result($user_created_at);
+  $mstmt->fetch();
+  $mstmt->close();
 }
+
+$member_since = !empty($user_created_at) ? date('F Y', strtotime($user_created_at)) : null;
+$is_adopter   = !empty($adoptions);
+$is_buyer     = !empty($orders);
 
 $upcoming = array_values(array_filter(
   $appointments,
@@ -375,9 +387,15 @@ function renderApptRow(array $appt): string
           </div>
         </div>
         <div class="prof-tags">
+          <?php if ($is_adopter): ?>
           <span class="ptag ptag-adopter"><i class="bi bi-heart-fill"></i> Adopter</span>
+          <?php endif; ?>
+          <?php if ($is_buyer): ?>
           <span class="ptag ptag-buyer"><i class="bi bi-bag-fill"></i> Buyer</span>
-          <span class="ptag ptag-member">Member since June 2025</span>
+          <?php endif; ?>
+          <?php if ($member_since): ?>
+          <span class="ptag ptag-member">Member since <?= htmlspecialchars($member_since) ?></span>
+          <?php endif; ?>
         </div>
       </div>
     </div>

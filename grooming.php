@@ -8,7 +8,9 @@ if (session_status() === PHP_SESSION_NONE) {
 include_once $_SERVER['DOCUMENT_ROOT'] . '/PAWSTER/controllers/navbar_mode_handler.php';
 
 $current_userid   = $_SESSION['auth_user']['userid'] ?? 0;
-$current_fullname = $_SESSION['auth_user']['first_name'] . ' ' . $_SESSION['auth_user']['last_name'] ?? 'Guest User';
+$current_fullname = isset($_SESSION['auth_user'])
+    ? $_SESSION['auth_user']['first_name'] . ' ' . $_SESSION['auth_user']['last_name']
+    : 'Guest User';
 $is_logged_in     = isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_appt') {

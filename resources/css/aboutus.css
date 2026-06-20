@@ -169,3 +169,110 @@ h3 {
     justify-content: center;
 }
 
+/* ── RESPONSIVE ── */
+@media (max-width: 991.98px) {
+    .first-container h4,
+    .first-container-contents h4 {
+        font-size: 1.5rem;
+    }
+
+    .our-commitment h4 {
+        font-size: 2rem;
+    }
+
+    .team1-box,
+    .team2-box {
+        height: auto;
+    }
+
+    .sei-box, .ivan-box, .chaste-box, .denzel-box {
+        min-height: 120px;
+        margin-bottom: 1rem;
+    }
+
+    .our-team, .dashboard, .our-commitment, .our-photo {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .first-container {
+        padding: 1.5rem 1rem !important;
+    }
+
+    .first-container h4 {
+        font-size: 1.3rem;
+        text-align: center;
+    }
+
+    .stats1-box, .stats2-box, .stats3-box {
+        min-height: auto;
+        margin-top: 1rem;
+    }
+
+    .stats1-box h4, .stats2-box h4, .stats3-box h4 {
+        font-size: 1.3rem;
+    }
+
+    .aboutus-box p {
+        text-align: center !important;
+    }
+
+    .our-team, .dashboard {
+        padding: 1.5rem !important;
+    }
+
+    .our-team h4, .dashboard h4 {
+        font-size: 1.4rem;
+        text-align: center;
+    }
+
+    .cat-box img {
+        max-width: 60%;
+        margin: 0 auto;
+    }
+
+    .our-commitment {
+        padding: 1.5rem !important;
+    }
+
+    .our-commitment h4 {
+        font-size: 1.6rem;
+        text-align: center;
+    }
+
+    .our-commitment h5 {
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .commitment-box {
+        min-height: auto;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    .our-photo-box img {
+        max-width: 70%;
+    }
+
+    .dashboard-box {
+        min-height: auto;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .card-text, .card-title {
+        font-size: 0.85rem;
+    }
+
+    .stats1-box h4, .stats2-box h4, .stats3-box h4 {
+        font-size: 1.1rem;
+    }
+
+    .stats1-box p, .stats2-box p, .stats3-box p {
+        font-size: 0.8rem;
+    }
+}
+

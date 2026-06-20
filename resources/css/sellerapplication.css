@@ -1,19 +1,39 @@
 .market-logo i {
-    font-size: 4rem;
+    font-size: clamp(2.5rem, 3vw + 1.5rem, 4rem);
     background-color: #AB8154;
     color: #F5E6D3;
-    padding : 1.3rem;
+    padding: clamp(0.8rem, 1.5vw, 1.3rem);
     border-radius: 20%;
 }
 
-.market-box h3, .market-box h6 {
+.market-box {
+    padding: clamp(1.5rem, 4vw, 3rem) !important;
+}
+
+.market-box h3 {
     font-family: 'Convergence';
     color: #AB8154;
+    font-size: clamp(1.2rem, 1.5vw + 0.7rem, 1.75rem);
+}
+
+.market-box h6 {
+    font-family: 'Convergence';
+    color: #AB8154;
+    font-size: clamp(0.85rem, 0.5vw + 0.7rem, 1rem);
 }
 
 .fillout {
     font-family: 'Convergence';
     background-color: #FAF0E8;
+    padding: clamp(1.25rem, 4vw, 3rem) !important;
+}
+
+.fillout h4 {
+    font-size: clamp(1.15rem, 1vw + 0.9rem, 1.5rem);
+}
+
+.fillout h5 {
+    font-size: clamp(0.95rem, 0.5vw + 0.8rem, 1.25rem);
 }
 
 .form-select, .form-control {
@@ -27,47 +47,90 @@
     opacity: 1;
 }
 
+.upload-docs-row {
+    flex-wrap: wrap;
+}
+
 .business-permit, .gov-id {
     background-color: #FAF0E8;
     border: 1px dashed #1d1d1d;
-    height: 200px;
+    min-height: 200px;
     font-family: 'Convergence';
+    flex: 1 1 240px;
 }
 
 .business-permit i, .gov-id i {
-    font-size: 2.5rem;
-    color : #1d1d1d;
+    font-size: clamp(2rem, 2vw + 1.2rem, 2.5rem);
+    color: #1d1d1d;
 }
 
 .form-check-input {
-    width: 1.5em;        
-    height: 1.5em;       
-    border-color: #8B6343;   
+    width: 1.5em;
+    height: 1.5em;
+    border-color: #8B6343;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .form-check-input:checked {
-    background-color: #8B6343; 
-    border-color: #8B6343;   
+    background-color: #8B6343;
+    border-color: #8B6343;
+}
+
+.form-check-label {
+    font-size: clamp(0.85rem, 0.4vw + 0.75rem, 1rem);
+    text-align: left;
 }
 
 .btn-cancel, .btn-submit {
     background-color: #E0CAB3;
     color: #1d1d1d;
     border: none;
+    font-size: clamp(0.9rem, 0.5vw + 0.75rem, 1rem);
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .btn-cancel:hover, .btn-submit:hover {
-    background-color : #C4956A;
+    background-color: #C4956A;
 }
 
 .btn-cancel:active, .btn-submit:active {
     background-color: #C4956A;
     color: #fff;
-    transform: scale(0.97);  
+    transform: scale(0.97);
 }
 
 .form-check {
-    width: 65%;
+    width: 100%;
+    max-width: 560px;
+}
+
+.input-group {
+    flex-wrap: wrap;
+}
+
+.input-group select.custom-input {
+    flex: 1 1 100px;
+}
+
+.input-group input.custom-input {
+    flex: 2 1 160px;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ── RESPONSIVE LAYOUT (structural — sizing handled by clamp() above) ── */
+@media (max-width: 767.98px) {
+    .upload-docs-row {
+        gap: 1rem !important;
+    }
+
+    .business-permit, .gov-id {
+        flex: 1 1 100%;
+        min-height: auto;
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
 }

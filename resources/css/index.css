@@ -1,5 +1,5 @@
 .main-page img {
-    height: 500px;
+    height: clamp(220px, 45vw, 500px);
     object-fit: cover;
 }
 
@@ -8,6 +8,7 @@
     margin-left: 1%;
     font-family: 'Convergence';
     color: #5C3D1E;
+    font-size: clamp(1.1rem, 1.8vw + 0.8rem, 2.5rem);
 }
 
 .h4 {
@@ -15,17 +16,19 @@
     margin-left: 1%;
     font-family: 'Convergence';
     color: #5C3D1E;
+    font-size: clamp(0.85rem, 0.9vw + 0.6rem, 1.5rem);
 }
 
 .descript {
     top: 80%;
     left: 50%;
     transform: translate(-50%, -50%);
+    width: 94%;
 }
 
 .card i {
     color: #5C3D1E;
-    font-size: 3rem;
+    font-size: clamp(1.6rem, 2vw + 1rem, 3rem);
 }
 
 .second-container {
@@ -33,26 +36,27 @@
 }
 
 .dog-image, .dog-text {
-    height: 680px;
+    height: clamp(260px, 45vw, 680px);
 }
 
 .dog-image img {
-    height: 100%; 
-    width: 100%; 
+    height: 100%;
+    width: 100%;
     object-fit: cover;
 }
 
 .p4 {
-    text-align: justify; 
+    text-align: justify;
 }
 
 .text-group {
-    margin-top: 7rem; 
-    font-family: 'Convergence';  
+    margin-top: clamp(1rem, 4vw, 7rem);
+    font-family: 'Convergence';
 }
 
 .h3 {
-    color : #f2bc85;
+    color: #f2bc85;
+    font-size: clamp(1.1rem, 1.5vw + 0.8rem, 2rem);
 }
 
 .third-container {
@@ -64,22 +68,19 @@
 }
 
 .card-third {
-    width : 400px;
-    height: 410px;
+    width: clamp(260px, 30vw, 400px);
+    height: auto;
+    background-color: #FDFAF5;
 }
 
 .card-third img {
-    width : 360px;
-    height: 250px;
+    width: 100%;
+    height: clamp(170px, 18vw, 250px);
     object-fit: cover;
 }
 
 .p5 {
-    font-family : 'Convergence';
-}
-
-.card-third {
-    background-color: #FDFAF5;
+    font-family: 'Convergence';
 }
 
 h3 {
@@ -93,23 +94,27 @@ h3 {
     color: #F5E6D3;
 }
 
-.option:hover{
+.option:hover {
     background-color: #E0CAB3;
 }
 
+body {
+    overflow-x: hidden;
+}
+
+/* ── RESPONSIVE LAYOUT (structural changes only — sizing handled by clamp() above) ── */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .descript .col {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    .descript .row {
+        row-gap: 1rem;
+    }
+}
+
 @media (max-width: 991.98px) {
-    .main-page img {
-        height: 420px;
-    }
-
-    .h1 {
-        font-size: 1.75rem;
-    }
-
-    .h4 {
-        font-size: 1.1rem;
-    }
-
     .dog-image, .dog-text {
         height: auto;
     }
@@ -118,36 +123,22 @@ h3 {
         flex-direction: column;
     }
 
-    .text-group {
-        margin-top: 2rem;
-    }
-
-    .card-third {
-        width: 300px;
-        height: auto;
-    }
-
-    .card-third img {
-        width: 100%;
-        height: 200px;
+    .descript .card {
+        height: 100%;
     }
 }
 
 @media (max-width: 767.98px) {
-    .main-page img {
-        height: 320px;
+    .h1, .h4 {
+        padding: 1.1rem !important;
     }
 
     .h1 {
-        font-size: 1.4rem;
-        top: 35%;
-        padding: 1.25rem !important;
+        top: 32%;
     }
 
     .h4 {
-        font-size: 0.95rem;
-        top: 60%;
-        padding: 1.25rem !important;
+        top: 62%;
     }
 
     .descript {
@@ -163,17 +154,20 @@ h3 {
         gap: 1rem;
     }
 
+    .descript .col {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
     .dog-image {
-        height: 250px;
         order: -1;
+        height: 55vw;
+        max-height: 280px;
     }
 
     .dog-text {
+        height: auto;
         padding: 1.5rem !important;
-    }
-
-    .text-group {
-        margin-top: 1rem;
     }
 
     .third-container .d-flex {
@@ -185,36 +179,5 @@ h3 {
     .card-third {
         width: 100%;
         max-width: 340px;
-    }
-
-    .card-third img {
-        width: 100%;
-        height: 200px;
-    }
-
-    body {
-        overflow-x: hidden;
-    }
-}
-
-@media (max-width: 575.98px) {
-    .main-page img {
-        height: 240px;
-    }
-
-    .h1 {
-        font-size: 1.15rem;
-    }
-
-    .h4 {
-        font-size: 0.85rem;
-    }
-
-    .card i {
-        font-size: 2rem;
-    }
-
-    .card-third img {
-        height: 180px;
     }
 }
